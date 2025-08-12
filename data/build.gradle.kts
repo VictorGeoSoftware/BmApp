@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    // modules
+    implementation(project(":domain"))
     // Ktor client
     api(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)

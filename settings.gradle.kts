@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "BrielApp"
 include(":app")
 include(":data")
+include(":domain")
