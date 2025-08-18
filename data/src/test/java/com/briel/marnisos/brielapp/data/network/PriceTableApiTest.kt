@@ -20,7 +20,7 @@ class PriceTableApiTest {
     @Test
     fun `api should return right response`() = runTest {
         // When
-        val response = priceTableApi.getPrices1()
+        val response = priceTableApi.getPriceTableResults()
         println("victor - response: $response")
 
         // Then
