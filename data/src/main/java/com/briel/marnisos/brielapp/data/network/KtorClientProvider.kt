@@ -45,7 +45,7 @@ object KtorClientProvider {
             }
 
             install(Logging) {
-                level = if (BuildConfig.DEBUG) LogLevel.BODY else LogLevel.NONE
+                level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
             }
 
             install(DefaultRequest) {
