@@ -24,6 +24,6 @@ class PriceTableApiTest {
         println("victor - response: $response")
 
         // Then
-        assertEquals(true, response.success)
+        assertEquals(true, response.isSuccess)
     }
 }

@@ -42,6 +42,7 @@ android {
 dependencies {
     // Modules
     implementation(project(":domain"))
+    implementation(project(":data"))
 
     // App dependencies
     implementation(libs.androidx.core.ktx)
@@ -52,6 +53,10 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // Koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 
     // Testing
     testImplementation(libs.junit)
