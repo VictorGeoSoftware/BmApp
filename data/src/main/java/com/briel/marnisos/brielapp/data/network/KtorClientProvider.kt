@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 
 object KtorClientProvider {
     @Volatile
-    private var _baseUrl: String = "http://0.0.0.0:8081/api/v1" // Emulator -> host machine default
+    private var _baseUrl: String = "http://10.0.2.2:8081/api/v1" // Emulator -> host machine default
 
     fun setBaseUrl(url: String) {
         _baseUrl = url.trimEnd('/')
