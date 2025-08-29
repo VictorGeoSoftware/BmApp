@@ -17,6 +17,7 @@ data class PriceTableResult(
 
 @Serializable
 data class ExtractedTables(
+    @SerialName("filename") val companyName: String,
     @SerialName("termino_de_potencia") val terminoDePotencia: TerminoDePotencia,
     @SerialName("termino_de_energia") val terminoDeEnergia: TerminoDeEnergia
 )

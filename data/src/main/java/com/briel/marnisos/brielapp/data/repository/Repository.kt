@@ -19,9 +19,7 @@ private class RepositoryImpl(
             response.results
         }.map { priceTableResults ->
             priceTableResults.map { priceTableResult ->
-                priceTableResult.extractedTables
-            }.map { extractedTable ->
-                extractedTable.mapToDomain()
+                priceTableResult.extractedTables.mapToDomain()
             }
         }
     }

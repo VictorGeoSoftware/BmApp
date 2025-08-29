@@ -71,7 +71,7 @@ fun PriceTableScreen(
 
         Text(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = priceTables.energyTerm.baseClassicPrice.title,
+            text = priceTables.companyName,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = TableText

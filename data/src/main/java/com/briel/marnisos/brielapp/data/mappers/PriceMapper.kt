@@ -17,6 +17,7 @@ import com.briel.marnisos.brielapp.domain.models.UniqueClassicPrice
 object PriceMapper {
     fun ExtractedTables.mapToDomain(): PriceTables {
         return PriceTables(
+            companyName = this.companyName,
             powerTerm = this.terminoDePotencia.tablaPrecioPotencia.mapToDomain(),
             energyTerm = this.terminoDeEnergia.mapToDomain()
         )

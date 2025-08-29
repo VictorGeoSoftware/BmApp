@@ -1,11 +1,13 @@
 package com.briel.marnisos.brielapp.domain.models
 
 data class PriceTables(
+    val companyName: String,
     val powerTerm: PowerTerm,
     val energyTerm: EnergyTerm,
 ) {
     companion object {
         val empty = PriceTables(
+            companyName = "",
             powerTerm = PowerTerm(
                 name = "",
                 powerFee = emptyList()
