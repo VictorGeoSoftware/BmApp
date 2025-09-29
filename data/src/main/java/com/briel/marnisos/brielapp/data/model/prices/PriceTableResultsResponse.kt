@@ -5,8 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PriceTableResultsResponse(
-    @SerialName("success") val success: Boolean,
-    @SerialName("results") val results: List<PriceTableResult>
+    val success: Boolean,
+    val results: List<PriceTableResult>,
+    val iva: Int,
+    val impuestoElectrico: Double,
 )
 
 @Serializable
