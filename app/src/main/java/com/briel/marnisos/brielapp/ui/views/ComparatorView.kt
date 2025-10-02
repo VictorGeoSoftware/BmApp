@@ -11,6 +11,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +22,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.briel.marnisos.brielapp.ui.theme.BorderColor
+import com.briel.marnisos.brielapp.ui.theme.Corner
+import com.briel.marnisos.brielapp.ui.theme.HeaderYellow
+import com.briel.marnisos.brielapp.ui.theme.HighlightBlue
+import com.briel.marnisos.brielapp.ui.theme.TableGrayLight
+import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * ComparatorView — A Compose-only UI that mirrors the provided mockup.
@@ -28,17 +37,16 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun ComparatorView(
     modifier: Modifier = Modifier,
-    tariffName: String,
-    annualConsumptionTitle: String,
-    powerTermRows: List<Pair<String, String>>, // e.g., listOf("P1" to "5.50 kW", "P2" to "5.50 kW")
-    energyConsumedRows: List<Pair<String, String>>, // e.g., listOf("P1" to "438.00 kWh", ...)
-    extraServices: List<Pair<String, String>>, // e.g., listOf("IMPUESTO ELÉCTRICO" to "5.11%", "IVA" to "21%")
-    totalsTitle: String,
+    comparatorViewModel: ComparatorViewModel = koinViewModel(),
 ) {
-    val headerYellow = Color(0xFFF3D34A)
-    val highlightBlue = Color(0xFFD0E7FF)
-    val borderColor = Color(0xFF222222)
-    val corner = 8.dp
+    val tariffName by comparatorViewModel.tariffName.collectAsState()
+    val annualConsumptionTitle by comparatorViewModel.annualConsumptionTitle.collectAsState()
+    val totalsTitle by comparatorViewModel.totalsTitle.collectAsState()
+    val powerTermRows by comparatorViewModel.powerTermRows.collectAsState()
+    val energyConsumedRows by comparatorViewModel.energyConsumedRows.collectAsState()
+    val extraServices by comparatorViewModel.extraServices.collectAsState()
+
+//    TODO("Fix pre view")
 
     Column(
         modifier
@@ -51,15 +59,15 @@ fun ComparatorView(
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             HeaderBox(
                 text = tariffName,
-                background = headerYellow,
+                background = HeaderYellow,
                 modifier = Modifier.weight(1f),
-                corner = corner
+                corner = Corner
             )
             HeaderBox(
                 text = annualConsumptionTitle,
-                background = headerYellow,
+                background = HeaderYellow,
                 modifier = Modifier.weight(1f),
-                corner = corner
+                corner = Corner
             )
         }
 
@@ -67,39 +75,39 @@ fun ComparatorView(
         LabeledRowsTable(
             label = "TÉRMINO DE\nPOTENCIA",
             rows = powerTermRows,
-            valueHighlight = highlightBlue,
-            borderColor = borderColor,
-            corner = corner
+            valueHighlight = HighlightBlue,
+            borderColor = BorderColor,
+            corner = Corner
         )
 
-        SectionHeader(text = "Coste anual termino potencia", background = headerYellow, corner = corner)
+        SectionHeader(text = "Coste anual termino potencia", background = HeaderYellow, corner = Corner)
 
         // Energy consumed table
         LabeledRowsTable(
             label = "ENERGÍA\nCONSUMIDA",
             rows = energyConsumedRows,
             valueHighlight = null,
-            borderColor = borderColor,
-            corner = corner
+            borderColor = BorderColor,
+            corner = Corner
         )
 
-        SectionHeader(text = "Coste anual termino energía", background = headerYellow, corner = corner)
+        SectionHeader(text = "Coste anual termino energía", background = HeaderYellow, corner = Corner)
 
         // Extra services table (2 columns)
         SimpleTwoColumnTable(
             leftHeader = "SERVICIOS EXTRA",
             rightHeader = "Coste Anual",
             rows = extraServices,
-            borderColor = borderColor,
-            corner = corner
+            borderColor = BorderColor,
+            corner = Corner
         )
 
         // Final total banner
         HeaderBox(
             text = totalsTitle,
-            background = headerYellow,
+            background = HeaderYellow,
             modifier = Modifier.fillMaxWidth(),
-            corner = corner
+            corner = Corner
         )
     }
 }
@@ -114,7 +122,7 @@ private fun HeaderBox(
     Box(
         modifier
             .background(background, RoundedCornerShape(corner))
-            .border(1.dp, Color(0xFF222222), RoundedCornerShape(corner))
+            .border(1.dp, BorderColor, RoundedCornerShape(corner))
             .padding(vertical = 14.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -141,7 +149,7 @@ private fun SectionHeader(
         modifier
             .fillMaxWidth()
             .background(background, RoundedCornerShape(corner))
-            .border(1.dp, Color(0xFF222222), RoundedCornerShape(corner))
+            .border(1.dp, BorderColor, RoundedCornerShape(corner))
             .padding(vertical = 10.dp, horizontal = 12.dp)
     ) {
         Text(
@@ -241,7 +249,7 @@ private fun SimpleTwoColumnTable(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFF8F8F8), shape)
+                .background(TableGrayLight, shape)
                 .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

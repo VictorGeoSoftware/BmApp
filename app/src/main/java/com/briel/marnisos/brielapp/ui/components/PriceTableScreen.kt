@@ -26,7 +26,7 @@ import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
 import com.briel.marnisos.brielapp.ui.theme.TableText
 import com.briel.marnisos.brielapp.ui.views.pricetable.EnergyTermTableCard
 import com.briel.marnisos.brielapp.ui.views.pricetable.PowerTermTableCard
-import com.briel.marnisos.brielapp.ui.views.pricetable.PriceTableViewModel
+import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -45,7 +45,7 @@ fun PriceTableScreenPreview() {
 
 @Composable
 fun PriceTableScreenView(
-    viewModel: PriceTableViewModel = koinViewModel()
+    viewModel: ComparatorViewModel = koinViewModel()
 ) {
     val tables by viewModel.priceTables.collectAsState()
     PriceTableScreen(priceTables = tables)

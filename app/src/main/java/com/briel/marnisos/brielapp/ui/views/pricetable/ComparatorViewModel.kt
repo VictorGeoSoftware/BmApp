@@ -8,13 +8,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class PriceTableViewModel(
+class ComparatorViewModel(
     private val getPriceTablesUseCase: GetPriceTablesUseCase
 ) : ViewModel() {
 
     init {
         fetchPriceTables()
     }
+
+    private val _tariffName = MutableStateFlow(value = "")
+    val tariffName: StateFlow<String> = _tariffName
+
+    private val _annualConsumptionTitle = MutableStateFlow(value = "")
+    val annualConsumptionTitle: StateFlow<String> = _annualConsumptionTitle
+
+    private val _totalsTitle = MutableStateFlow(value = "")
+    val totalsTitle: StateFlow<String> = _totalsTitle
+
+    private val _powerTermRows = MutableStateFlow<List<Pair<String, String>>>(value = emptyList())
+    val powerTermRows: StateFlow<List<Pair<String, String>>> = _powerTermRows
+
+    private val _energyConsumedRows = MutableStateFlow<List<Pair<String, String>>>(value = emptyList())
+    val energyConsumedRows: StateFlow<List<Pair<String, String>>> = _energyConsumedRows
+
+    private val _extraServices = MutableStateFlow<List<Pair<String, String>>>(value = emptyList())
+    val extraServices: StateFlow<List<Pair<String, String>>> = _extraServices
 
     private val _priceTables = MutableStateFlow(value = PriceTables.empty)
     val priceTables: StateFlow<PriceTables> = _priceTables
