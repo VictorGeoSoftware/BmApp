@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.sp
 import com.briel.marnisos.brielapp.domain.models.PriceTablesModel
 import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
 import com.briel.marnisos.brielapp.ui.theme.TableText
+import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.EnergyTermTableCard
 import com.briel.marnisos.brielapp.ui.views.pricetable.PowerTermTableCard
-import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import org.koin.androidx.compose.koinViewModel
 
 
