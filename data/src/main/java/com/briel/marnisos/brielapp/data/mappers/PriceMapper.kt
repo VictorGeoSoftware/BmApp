@@ -11,12 +11,12 @@ import com.briel.marnisos.brielapp.domain.models.BaseClassicPrice
 import com.briel.marnisos.brielapp.domain.models.EnergyTerm
 import com.briel.marnisos.brielapp.domain.models.FeeModel
 import com.briel.marnisos.brielapp.domain.models.PowerTerm
-import com.briel.marnisos.brielapp.domain.models.PriceTables
+import com.briel.marnisos.brielapp.domain.models.PriceTablesModel
 import com.briel.marnisos.brielapp.domain.models.UniqueClassicPrice
 
 object PriceMapper {
-    fun ExtractedTables.mapToDomain(): PriceTables {
-        return PriceTables(
+    fun ExtractedTables.mapToDomain(): PriceTablesModel {
+        return PriceTablesModel(
             companyName = this.companyName,
             powerTerm = this.terminoDePotencia.tablaPrecioPotencia.mapToDomain(),
             energyTerm = this.terminoDeEnergia.mapToDomain()

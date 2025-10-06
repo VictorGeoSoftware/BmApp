@@ -21,12 +21,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.briel.marnisos.brielapp.domain.models.PriceTables
+import com.briel.marnisos.brielapp.domain.models.PriceTablesModel
 import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
 import com.briel.marnisos.brielapp.ui.theme.TableText
+import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.EnergyTermTableCard
 import com.briel.marnisos.brielapp.ui.views.pricetable.PowerTermTableCard
-import com.briel.marnisos.brielapp.ui.views.pricetable.PriceTableViewModel
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -39,25 +39,25 @@ import org.koin.androidx.compose.koinViewModel
 )
 fun PriceTableScreenPreview() {
     BrielAppTheme {
-        PriceTableScreen(priceTables = PriceTables.empty)
+        PriceTableScreen(priceTablesModel = PriceTablesModel.empty)
     }
 }
 
 @Composable
 fun PriceTableScreenView(
-    viewModel: PriceTableViewModel = koinViewModel()
+    viewModel: ComparatorViewModel = koinViewModel()
 ) {
-    val tables by viewModel.priceTables.collectAsState()
-    PriceTableScreen(priceTables = tables)
+    val tables by viewModel.priceTablesModel.collectAsState()
+    PriceTableScreen(priceTablesModel = tables)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PriceTableScreen(
     modifier: Modifier = Modifier,
-    priceTables: PriceTables
+    priceTablesModel: PriceTablesModel
 ) {
-    val powerTermTable = priceTables.powerTerm
+    val powerTermTable = priceTablesModel.powerTerm
 
     Column(
         modifier = modifier
@@ -71,7 +71,7 @@ fun PriceTableScreen(
 
         Text(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = priceTables.companyName,
+            text = priceTablesModel.companyName,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = TableText
@@ -86,7 +86,7 @@ fun PriceTableScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         EnergyTermTableCard(
-            table = priceTables.energyTerm
+            table = priceTablesModel.energyTerm
         )
     }
 }
