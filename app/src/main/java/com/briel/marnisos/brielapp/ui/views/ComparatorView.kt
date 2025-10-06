@@ -35,7 +35,7 @@ import org.koin.androidx.compose.koinViewModel
  * Focused on the View layer; can be fed with a UI model from upper layers later.
  */
 @Composable
-fun ComparatorView(
+fun ComparatorScreen(
     modifier: Modifier = Modifier,
     comparatorViewModel: ComparatorViewModel = koinViewModel(),
 ) {
@@ -44,10 +44,36 @@ fun ComparatorView(
     val totalsTitle by comparatorViewModel.totalsTitle.collectAsState()
     val powerTermRows by comparatorViewModel.powerTermRows.collectAsState()
     val energyConsumedRows by comparatorViewModel.energyConsumedRows.collectAsState()
-    val extraServices by comparatorViewModel.extraServices.collectAsState()
+    val iva by comparatorViewModel.iva.collectAsState()
+    val impuestoElectrico by comparatorViewModel.impuestoElectrico.collectAsState()
 
-//    TODO("Fix pre view")
+    ComparatorView(
+        modifier = modifier,
+        tariffName = tariffName,
+        annualConsumptionTitle = annualConsumptionTitle,
+        totalsTitle = totalsTitle,
+        powerTermRows = powerTermRows,
+        energyConsumedRows = energyConsumedRows,
+        iva = iva,
+        impuestoElectrico = impuestoElectrico,
+    )
+}
 
+/**
+ * ComparatorView — A Compose-only UI that mirrors the provided mockup.
+ * Focused on the View layer; can be fed with a UI model from upper layers later.
+ */
+@Composable
+fun ComparatorView(
+    modifier: Modifier = Modifier,
+    tariffName: String,
+    annualConsumptionTitle: String,
+    totalsTitle: String,
+    powerTermRows: List<Pair<String, String>>,
+    energyConsumedRows: List<Pair<String, String>>,
+    iva: String,
+    impuestoElectrico: String,
+) {
     Column(
         modifier
             .fillMaxSize()
@@ -97,7 +123,8 @@ fun ComparatorView(
         SimpleTwoColumnTable(
             leftHeader = "SERVICIOS EXTRA",
             rightHeader = "Coste Anual",
-            rows = extraServices,
+            iva = iva,
+            impuestoElectrico = impuestoElectrico,
             borderColor = BorderColor,
             corner = Corner
         )
@@ -235,7 +262,8 @@ private fun LabeledRowsTable(
 private fun SimpleTwoColumnTable(
     leftHeader: String,
     rightHeader: String,
-    rows: List<Pair<String, String>>,
+    iva: String,
+    impuestoElectrico: String,
     borderColor: Color = Color.Black,
     corner: Dp = 8.dp
 ) {
@@ -268,19 +296,26 @@ private fun SimpleTwoColumnTable(
 
         Divider(color = borderColor.copy(alpha = 0.8f), thickness = 1.dp)
 
-        rows.forEachIndexed { index, (l, r) ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(l, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                Text(r, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End)
-            }
-            if (index != rows.lastIndex) {
-                Divider(color = borderColor.copy(alpha = 0.6f), thickness = 1.dp)
-            }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("IVA", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+            Text(iva, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End)
+        }
+
+        Divider(color = borderColor.copy(alpha = 0.6f), thickness = 1.dp)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Impuesto eléctrico", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+            Text(impuestoElectrico, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End)
         }
     }
 }
@@ -314,7 +349,8 @@ private fun ComparatorViewPreview() {
                 annualConsumptionTitle = "CONSUMO ANUAL",
                 powerTermRows = sample.powerRows,
                 energyConsumedRows = sample.energyRows,
-                extraServices = sample.extras,
+                iva = "21%",
+                impuestoElectrico = "5.11%",
                 totalsTitle = "COSTE ANUAL FACTURA ELÉCTRICA"
             )
         }

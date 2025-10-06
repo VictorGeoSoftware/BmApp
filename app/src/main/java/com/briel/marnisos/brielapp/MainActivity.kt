@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.briel.marnisos.brielapp.ui.components.PriceTableScreenView
 import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
+import com.briel.marnisos.brielapp.ui.views.ComparatorScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,20 +16,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BrielAppTheme {
-                PriceTableScreenView()
+                ComparatorScreen()
             }
         }
-    }
-}
-
-@Preview(
-    showBackground = true,
-    widthDp = 800,
-    heightDp = 480
-)
-@Composable
-fun PriceTablePreview() {
-    BrielAppTheme {
-        PriceTableScreenView()
     }
 }

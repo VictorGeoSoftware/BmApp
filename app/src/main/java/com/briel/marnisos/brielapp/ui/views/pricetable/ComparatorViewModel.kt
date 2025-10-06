@@ -2,7 +2,7 @@ package com.briel.marnisos.brielapp.ui.views.pricetable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.briel.marnisos.brielapp.domain.models.PriceTables
+import com.briel.marnisos.brielapp.domain.models.PriceTablesModel
 import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ class ComparatorViewModel(
 ) : ViewModel() {
 
     init {
-        fetchPriceTables()
+        fetchPriceProposalTables()
     }
 
     private val _tariffName = MutableStateFlow(value = "")
@@ -31,19 +31,22 @@ class ComparatorViewModel(
     private val _energyConsumedRows = MutableStateFlow<List<Pair<String, String>>>(value = emptyList())
     val energyConsumedRows: StateFlow<List<Pair<String, String>>> = _energyConsumedRows
 
-    private val _extraServices = MutableStateFlow<List<Pair<String, String>>>(value = emptyList())
-    val extraServices: StateFlow<List<Pair<String, String>>> = _extraServices
+    private val _impuestoElectrico = MutableStateFlow(value = "")
+    val impuestoElectrico: StateFlow<String> = _impuestoElectrico
 
-    private val _priceTables = MutableStateFlow(value = PriceTables.empty)
-    val priceTables: StateFlow<PriceTables> = _priceTables
+    private val _iva = MutableStateFlow(value = "")
+    val iva: StateFlow<String> = _iva
 
-    private fun fetchPriceTables() {
+
+    private val _priceTablesModel = MutableStateFlow(value = PriceTablesModel.empty)
+    val priceTablesModel: StateFlow<PriceTablesModel> = _priceTablesModel
+
+    private fun fetchPriceProposalTables() {
         viewModelScope.launch {
             getPriceTablesUseCase()
-                .onSuccess { tables ->
-                    tables.firstOrNull()?.let { table ->
-                        _priceTables.value = table
-                    }
+                .onSuccess { tablesInformation ->
+                    _impuestoElectrico.value = tablesInformation.impuestoElectrico.toString()
+                    _iva.value = tablesInformation.iva.toString()
                 }
                 .onFailure { error ->
                     println("victor - ViewModel- error: $error")
