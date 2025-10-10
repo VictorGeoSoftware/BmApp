@@ -6,6 +6,7 @@ import com.briel.marnisos.brielapp.data.repository.Repository
 import com.briel.marnisos.brielapp.data.repository.buildRepository
 import com.briel.marnisos.brielapp.data.usecases.create
 import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GetUserConsumptionUseCase
 import org.koin.dsl.module
 
 val dataModule = module {
@@ -20,4 +21,5 @@ val dataModule = module {
 
     // Provide use case
     factory<GetPriceTablesUseCase> { GetPriceTablesUseCase.Factory.create(get()) }
+    factory<GetUserConsumptionUseCase> { GetUserConsumptionUseCase.Factory.create(get()) }
 }

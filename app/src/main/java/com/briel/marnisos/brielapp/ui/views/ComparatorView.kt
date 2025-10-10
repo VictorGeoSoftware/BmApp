@@ -16,9 +16,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,7 +51,6 @@ fun ComparatorScreen(
     comparatorViewModel: ComparatorViewModel = koinViewModel(),
 ) {
     val tariffName by comparatorViewModel.tariffName.collectAsState()
-    val annualConsumptionTitle by comparatorViewModel.annualConsumptionTitle.collectAsState()
     val totalsTitle by comparatorViewModel.totalsTitle.collectAsState()
     val powerTermRows by comparatorViewModel.powerTermRows.collectAsState()
     val energyConsumedRows by comparatorViewModel.energyConsumedRows.collectAsState()
@@ -59,7 +60,6 @@ fun ComparatorScreen(
     ComparatorView(
         modifier = modifier,
         tariffName = tariffName,
-        annualConsumptionTitle = annualConsumptionTitle,
         totalsTitle = totalsTitle,
         powerTermRows = powerTermRows,
         energyConsumedRows = energyConsumedRows,
@@ -76,7 +76,6 @@ fun ComparatorScreen(
 fun ComparatorView(
     modifier: Modifier = Modifier,
     tariffName: String,
-    annualConsumptionTitle: String,
     totalsTitle: String,
     powerTermRows: List<Pair<String, String>>,
     energyConsumedRows: List<Pair<String, String>>,
@@ -90,8 +89,10 @@ fun ComparatorView(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Top header row
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             HeaderBox(
                 text = tariffName,
                 background = HeaderYellow,
@@ -99,7 +100,7 @@ fun ComparatorView(
                 corner = Corner
             )
             HeaderBox(
-                text = annualConsumptionTitle,
+                text = "CONSUMO ANUAL",
                 background = HeaderYellow,
                 modifier = Modifier.weight(1f),
                 corner = Corner
@@ -110,7 +111,7 @@ fun ComparatorView(
         LabeledRowsTable(
             label = "TÉRMINO DE\nPOTENCIA",
             rows = powerTermRows,
-            valueHighlight = HighlightBlue,
+            unit = "kW",
             borderColor = BorderColor,
             corner = Corner
         )
@@ -121,7 +122,7 @@ fun ComparatorView(
         LabeledRowsTable(
             label = "ENERGÍA\nCONSUMIDA",
             rows = energyConsumedRows,
-            valueHighlight = null,
+            unit = "kWh",
             borderColor = BorderColor,
             corner = Corner
         )
@@ -199,7 +200,7 @@ private fun SectionHeader(
 private fun LabeledRowsTable(
     label: String,
     rows: List<Pair<String, String>>,
-    valueHighlight: Color? = null,
+    unit: String,
     borderColor: Color = Color.Black,
     corner: Dp = 8.dp
 ) {
@@ -227,40 +228,47 @@ private fun LabeledRowsTable(
             )
         }
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxHeight()
                 .width(1.dp),
             color = borderColor
         )
 
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             rows.forEachIndexed { index, (left, right) ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .then(
-                            if (valueHighlight != null && index == 0) Modifier.background(valueHighlight)
-                            else Modifier
-                        )
                         .padding(horizontal = 8.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = left,
                         modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        textAlign = TextAlign.Center
                     )
+
+                    VerticalDivider(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(1.dp),
+                        color = borderColor
+                    )
+
                     Text(
-                        text = right,
+                        text = "$right $unit",
                         modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.End,
+                        textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
 
                 if (index != rows.lastIndex) {
-                    Divider(color = borderColor.copy(alpha = 0.8f), thickness = 1.dp)
+                    HorizontalDivider(color = borderColor.copy(alpha = 0.8f), thickness = 1.dp)
                 }
             }
         }
@@ -293,13 +301,14 @@ private fun SimpleTwoColumnTable(
             Text(
                 leftHeader,
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                textAlign = TextAlign.Center
             )
             Text(
                 rightHeader,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                textAlign = TextAlign.End
+                textAlign = TextAlign.Center
             )
         }
 
@@ -311,8 +320,18 @@ private fun SimpleTwoColumnTable(
                 .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("IVA", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-            Text(iva, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End)
+            Text(
+                text = "IVA",
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "$iva%",
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
         }
 
         Divider(color = borderColor.copy(alpha = 0.6f), thickness = 1.dp)
@@ -323,8 +342,18 @@ private fun SimpleTwoColumnTable(
                 .padding(horizontal = 8.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Impuesto eléctrico", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-            Text(impuestoElectrico, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End)
+            Text(
+                text = "Impuesto eléctrico",
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "$impuestoElectrico%",
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -333,13 +362,13 @@ private fun SimpleTwoColumnTable(
 data class ComparatorUiSample(
     val tariffName: String = "2.0TD",
     val powerRows: List<Pair<String, String>> = listOf(
-        "P1" to "5.50 kW",
-        "P2" to "5.50 kW",
+        "P1" to "5.50",
+        "P2" to "5.50",
     ),
     val energyRows: List<Pair<String, String>> = listOf(
-        "P1" to "438.00 kWh",
-        "P2" to "407.00 kWh",
-        "P3" to "454.00 kWh",
+        "P1" to "438.00",
+        "P2" to "407.00",
+        "P3" to "454.00",
     ),
     val extras: List<Pair<String, String>> = listOf(
         "IMPUESTO ELÉCTRICO" to "5.11%",
@@ -355,11 +384,10 @@ private fun ComparatorViewPreview() {
             val sample = ComparatorUiSample()
             ComparatorView(
                 tariffName = sample.tariffName,
-                annualConsumptionTitle = "CONSUMO ANUAL",
                 powerTermRows = sample.powerRows,
                 energyConsumedRows = sample.energyRows,
-                iva = "21%",
-                impuestoElectrico = "5.11%",
+                iva = "21",
+                impuestoElectrico = "5.11",
                 totalsTitle = "COSTE ANUAL FACTURA ELÉCTRICA"
             )
         }
