@@ -6,8 +6,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
-import io.ktor.util.Platform
-import kotlinx.serialization.json.Json
 
 class PriceTableApi(
     private val client: HttpClient = KtorClientProvider.client,

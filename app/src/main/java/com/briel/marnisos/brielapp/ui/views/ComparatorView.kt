@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.sp
 import com.briel.marnisos.brielapp.ui.theme.BorderColor
 import com.briel.marnisos.brielapp.ui.theme.Corner
 import com.briel.marnisos.brielapp.ui.theme.HeaderYellow
-import com.briel.marnisos.brielapp.ui.theme.HighlightBlue
 import com.briel.marnisos.brielapp.ui.theme.TableGrayLight
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import org.koin.androidx.compose.koinViewModel
