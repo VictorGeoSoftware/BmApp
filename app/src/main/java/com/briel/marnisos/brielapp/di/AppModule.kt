@@ -6,5 +6,9 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    viewModel { ComparatorViewModel(get()) }
+    viewModel { ComparatorViewModel(
+        getPriceTablesUseCase = get(),
+        getUserConsumptionUseCase = get()
+    )
+    }
 }
