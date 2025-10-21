@@ -16,7 +16,7 @@ val TableBlueLight = Color(0xFF85C1E9)
 val TableBlueDark = Color(0xFF3498DB)
 val TableGray = Color(0xFFF8F9FA)
 val TableGrayDark = Color(0xFFE9ECEF)
-val TableBorder = Color(0xFFDEE2E6)
+val TableBorder = Color(0xFF000000)
 val TableText = Color(0xFF495057)
 val TableTextSecondary = Color(0xFF6C757D)
 
