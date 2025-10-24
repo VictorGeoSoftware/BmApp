@@ -3,6 +3,7 @@ package com.briel.marnisos.brielapp.ui.views.pricetable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.briel.marnisos.brielapp.domain.models.PriceTablesModel
+import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.domain.models.UserConsumptionModel
 import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetUserConsumptionUseCase
@@ -17,14 +18,11 @@ class ComparatorViewModel(
 
     init {
         fetchPriceProposalTables()
-        getUSerConsumptionData()
+        getUserConsumptionData()
     }
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
-
-    private val _totalsTitle = MutableStateFlow(value = "")
-    val totalsTitle: StateFlow<String> = _totalsTitle
 
     private val _powerTermRows = MutableStateFlow<List<Pair<String, String>>>(value = emptyList())
     val powerTermRows: StateFlow<List<Pair<String, String>>> = _powerTermRows
@@ -38,6 +36,9 @@ class ComparatorViewModel(
     private val _iva = MutableStateFlow(value = "")
     val iva: StateFlow<String> = _iva
 
+    private val _proposalPriceModelList = MutableStateFlow<List<ProposalPriceModel>>(value = emptyList())
+    val proposalPriceModel: StateFlow<List<ProposalPriceModel>> = _proposalPriceModelList
+
 
     private val _priceTablesModel = MutableStateFlow(value = PriceTablesModel.empty)
     val priceTablesModel: StateFlow<PriceTablesModel> = _priceTablesModel
@@ -48,6 +49,8 @@ class ComparatorViewModel(
                 .onSuccess { tablesInformation ->
                     _impuestoElectrico.value = tablesInformation.impuestoElectrico.toString()
                     _iva.value = tablesInformation.iva.toString()
+
+
                 }
                 .onFailure { error ->
                     println("victor - ViewModel- error: $error")
@@ -56,7 +59,7 @@ class ComparatorViewModel(
         }
     }
 
-    private fun getUSerConsumptionData() {
+    private fun getUserConsumptionData() {
         viewModelScope.launch {
             getUserConsumptionUseCase()
                 .onSuccess { userConsumption ->
