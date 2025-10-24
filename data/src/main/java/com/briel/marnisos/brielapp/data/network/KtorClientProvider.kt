@@ -1,14 +1,9 @@
 package com.briel.marnisos.brielapp.data.network
 
-import com.briel.marnisos.brielapp.data.BuildConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.ANDROID
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
@@ -31,9 +26,9 @@ object KtorClientProvider {
         HttpClient(OkHttp) {
             engine {
                 config {
-                    connectTimeout(30, TimeUnit.SECONDS)
-                    readTimeout(30, TimeUnit.SECONDS)
-                    writeTimeout(30, TimeUnit.SECONDS)
+                    connectTimeout(5, TimeUnit.MINUTES)
+                    readTimeout(5, TimeUnit.MINUTES)
+                    writeTimeout(5, TimeUnit.MINUTES)
                 }
             }
 
@@ -47,10 +42,11 @@ object KtorClientProvider {
                 )
             }
 
-            install(Logging) {
-                logger = Logger.ANDROID
-                level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
-            }
+            // Logging disabled to reduce overhead
+            // install(Logging) {
+            //     logger = Logger.ANDROID
+            //     level = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
+            // }
 
             install(DefaultRequest) {
                 headers.append(HttpHeaders.Accept, ContentType.Application.Json.toString())

@@ -2,24 +2,19 @@ package com.briel.marnisos.brielapp.ui.views.pricetable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
 import com.briel.marnisos.brielapp.domain.models.PriceTablesModel
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
-import com.briel.marnisos.brielapp.domain.models.UserConsumptionModel
-import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
-import com.briel.marnisos.brielapp.domain.usecases.GetUserConsumptionUseCase
+import com.briel.marnisos.brielapp.domain.usecases.UploadConsumptionReportUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 
 class ComparatorViewModel(
-    private val getPriceTablesUseCase: GetPriceTablesUseCase,
-    private val getUserConsumptionUseCase: GetUserConsumptionUseCase
+    private val uploadConsumptionReportUseCase: UploadConsumptionReportUseCase
 ) : ViewModel() {
 
-    init {
-        fetchPriceProposalTables()
-        getUserConsumptionData()
-    }
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
@@ -43,111 +38,36 @@ class ComparatorViewModel(
     private val _priceTablesModel = MutableStateFlow(value = PriceTablesModel.empty)
     val priceTablesModel: StateFlow<PriceTablesModel> = _priceTablesModel
 
-    private fun fetchPriceProposalTables() {
-        viewModelScope.launch {
-            getPriceTablesUseCase()
-                .onSuccess { tablesInformation ->
-                    _impuestoElectrico.value = tablesInformation.impuestoElectrico.toString()
-                    _iva.value = tablesInformation.iva.toString()
+    private val _consumptionReportModel = MutableStateFlow<ConsumptionReportModel?>(value = null)
+    val consumptionReportModel: StateFlow<ConsumptionReportModel?> = _consumptionReportModel
 
+    private val _isUploadingReport = MutableStateFlow(value = false)
+    val isUploadingReport: StateFlow<Boolean> = _isUploadingReport
 
-                }
-                .onFailure { error ->
-                    println("victor - ViewModel- error: $error")
-                    error.printStackTrace()
-                }
-        }
-    }
-
-    private fun getUserConsumptionData() {
-        viewModelScope.launch {
-            getUserConsumptionUseCase()
-                .onSuccess { userConsumption ->
-                    _tariffName.value = userConsumption.feeType
-                    _powerTermRows.value = createPowerTermRows(userConsumption)
-                    _energyConsumedRows.value = createConsumedEnergyRows(userConsumption)
-
-                }
-                .onFailure { error ->
-                    println("victor - ViewModel- error: $error")
-                    error.printStackTrace()
-                }
-        }
-    }
 
     /**
-     * Creates a list of pairs representing the annual consumption for each phase.
-     *
-     * @param userConsumption The user consumption data.
-     * @return A list of pairs representing the annual consumption for each phase.
-     * It cover the Término de Potencia section.
-     * TODO:: this data need to be converted and mapped in back end. Create task for it.
+     * Uploads a PDF consumption report and processes it through the backend
+     * @param pdfFile The PDF file to upload
      */
-    private fun createConsumedEnergyRows(
-        userConsumption: UserConsumptionModel
-    ): List<Pair<String, String>> {
-        val p1 = if (userConsumption.annualConsumptionP1 > 0.0) {
-            Pair("P1", userConsumption.annualConsumptionP1.toString())
-        } else null
-
-        val p2 = if (userConsumption.annualConsumptionP2 > 0.0) {
-            Pair("P2", userConsumption.annualConsumptionP2.toString())
-        } else null
-
-        val p3 = if (userConsumption.annualConsumptionP3 > 0.0) {
-            Pair("P3", userConsumption.annualConsumptionP3.toString())
-        } else null
-
-        val p4 = if (userConsumption.annualConsumptionP4 > 0.0) {
-            Pair("P4", userConsumption.annualConsumptionP4.toString())
-        } else null
-
-        val p5 = if (userConsumption.annualConsumptionP5 > 0.0) {
-            Pair("P5", userConsumption.annualConsumptionP5.toString())
-        } else null
-
-        val p6 = if (userConsumption.annualConsumptionP6 > 0.0) {
-            Pair("P6", userConsumption.annualConsumptionP6.toString())
-        } else null
-
-        return listOfNotNull(p1, p2, p3, p4, p5, p6)
-    }
-
-    /**
-     * Creates a list of pairs representing the subscribed power for each phase.
-     *
-     * @param userConsumption The user consumption data.
-     * @return A list of pairs representing the subscribed power for each phase.
-     * It cover the Término de Potencia section.
-     * TODO:: this data need to be converted and mapped in back end. Create task for it.
-     */
-    private fun createPowerTermRows(
-        userConsumption: UserConsumptionModel
-    ): List<Pair<String, String>> {
-        val p1 = if (userConsumption.subscribedPowerP1 > 0.0) {
-            Pair("P1", userConsumption.subscribedPowerP1.toString())
-        } else null
-
-        val p2 = if (userConsumption.subscribedPowerP2 > 0.0) {
-            Pair("P2", userConsumption.subscribedPowerP2.toString())
-        } else null
-
-        val p3 = if (userConsumption.subscribedPowerP3 > 0.0) {
-            Pair("P3", userConsumption.subscribedPowerP3.toString())
-        } else null
-
-        val p4 = if (userConsumption.subscribedPowerP4 > 0.0) {
-            Pair("P4", userConsumption.subscribedPowerP4.toString())
-        } else null
-
-        val p5 = if (userConsumption.subscribedPowerP5 > 0.0) {
-            Pair("P5", userConsumption.subscribedPowerP5.toString())
-        } else null
-
-        val p6 = if (userConsumption.subscribedPowerP6 > 0.0) {
-            Pair("P6", userConsumption.subscribedPowerP6.toString())
-        } else null
-
-        return listOfNotNull(p1, p2, p3, p4, p5, p6)
+    fun uploadConsumptionReport(pdfFile: File) {
+        viewModelScope.launch {
+            _isUploadingReport.value = true
+            uploadConsumptionReportUseCase(pdfFile)
+                .onSuccess { report ->
+                    println("victor - received report :: $report")
+                    _consumptionReportModel.value = report
+                    // Update the consumption data with the cleaned data from the report
+                    _tariffName.value = report.consumptionData.feeType
+                    // Update filtered price tables
+                    _impuestoElectrico.value = report.filteredPrices.impuestoElectrico.toString()
+                    _iva.value = report.filteredPrices.iva.toString()
+                    _isUploadingReport.value = false
+                }
+                .onFailure { error ->
+                    println("victor - ViewModel - upload error: $error")
+                    error.printStackTrace()
+                    _isUploadingReport.value = false
+                }
+        }
     }
 }

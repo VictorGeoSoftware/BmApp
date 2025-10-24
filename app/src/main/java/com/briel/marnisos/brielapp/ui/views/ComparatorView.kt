@@ -1,5 +1,11 @@
 package com.briel.marnisos.brielapp.ui.views
 
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
+import android.provider.DocumentsContract
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,11 +29,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.briel.marnisos.brielapp.ui.Utils.uriToFile
+import java.io.File
+import java.io.FileOutputStream
 import com.briel.marnisos.brielapp.ui.components.tables.DynamicTableColumnView
 import com.briel.marnisos.brielapp.ui.components.tables.SideTitleTableView
 import com.briel.marnisos.brielapp.ui.theme.BorderColor
@@ -50,6 +62,9 @@ fun ComparatorScreen(
     val energyConsumedRows by comparatorViewModel.energyConsumedRows.collectAsState()
     val iva by comparatorViewModel.iva.collectAsState()
     val impuestoElectrico by comparatorViewModel.impuestoElectrico.collectAsState()
+    val isUploadingReport by comparatorViewModel.isUploadingReport.collectAsState()
+
+    val context = LocalContext.current
 
     ComparatorView(
         modifier = modifier,
@@ -58,6 +73,11 @@ fun ComparatorScreen(
         energyConsumedRows = energyConsumedRows,
         iva = iva,
         impuestoElectrico = impuestoElectrico,
+        isUploadingReport = isUploadingReport,
+        onPdfSelected = { pdfFile ->
+            comparatorViewModel.uploadConsumptionReport(pdfFile)
+        },
+        context = context
     )
 }
 
@@ -73,6 +93,9 @@ fun ComparatorView(
     energyConsumedRows: List<Pair<String, String>>,
     iva: String,
     impuestoElectrico: String,
+    isUploadingReport: Boolean = false,
+    onPdfSelected: (File) -> Unit = {},
+    context: Context,
 ) {
     Column(
         modifier
@@ -82,6 +105,12 @@ fun ComparatorView(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        SelectFileButton(
+            isUploadingReport = isUploadingReport,
+            onPdfSelected = onPdfSelected,
+            context = context
+        )
+
         ComparatorTitleView(tariffName = tariffName)
 
         // Power term table
@@ -153,6 +182,41 @@ private fun ComparatorTitleView(
 }
 
 @Composable
+fun SelectFileButton(
+    isUploadingReport: Boolean = false,
+    onPdfSelected: (File) -> Unit = {},
+    context: Context,
+) {
+    // PDF file picker launcher
+    val pdfPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            // Convert URI to File
+            val file = uriToFile(context, it)
+            file?.let { pdfFile ->
+                onPdfSelected(pdfFile)
+            }
+        }
+    }
+
+    Button(
+        onClick = {
+            pdfPickerLauncher.launch(arrayOf("application/pdf"))
+        },
+        enabled = !isUploadingReport
+    ) {
+        if (isUploadingReport) {
+            CircularProgressIndicator(
+                modifier = Modifier.padding(end = 8.dp),
+                color = Color.White
+            )
+        }
+        Text(if (isUploadingReport) "Procesando..." else "Selecciona una factura")
+    }
+}
+
+@Composable
 private fun SimpleTwoColumnTable(
     leftHeader: String,
     rightHeader: String,
@@ -198,6 +262,7 @@ data class ComparatorUiSample(
 )
 @Composable
 private fun ComparatorViewPreview() {
+    val context = LocalContext.current
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             val sample = ComparatorUiSample()
@@ -206,7 +271,8 @@ private fun ComparatorViewPreview() {
                 powerTermRows = sample.powerRows,
                 energyConsumedRows = sample.energyRows,
                 iva = "21",
-                impuestoElectrico = "5.11"
+                impuestoElectrico = "5.11",
+                context = context
             )
         }
     }
