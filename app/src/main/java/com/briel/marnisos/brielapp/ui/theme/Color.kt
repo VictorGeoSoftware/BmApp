@@ -21,6 +21,7 @@ val TableText = Color(0xFF495057)
 val TableTextSecondary = Color(0xFF6C757D)
 
 val HeaderYellow = Color(0xFFF3D34A)
+val HeaderWhite = Color(0xFFFFFFFF)
 val HighlightBlue = Color(0xFFD0E7FF)
 val BorderColor = Color(0xFF222222)
 

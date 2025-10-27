@@ -2,13 +2,23 @@ package com.briel.marnisos.brielapp.data.repository
 
 import com.briel.marnisos.brielapp.data.mappers.PriceMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
+import com.briel.marnisos.brielapp.data.utils.ConsumptionReportMapper.mapToDomain
+import com.briel.marnisos.brielapp.data.utils.JobMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.utils.UserConsumptionUtils.mapUserConsumptionResponseToDomain
+import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
+import com.briel.marnisos.brielapp.domain.models.JobStatusModel
+import com.briel.marnisos.brielapp.domain.models.JobSubmissionModel
 import com.briel.marnisos.brielapp.domain.models.PriceTablesInformationModel
 import com.briel.marnisos.brielapp.domain.models.UserConsumptionModel
+import java.io.File
 
 interface Repository {
     suspend fun getPriceTables(): Result<PriceTablesInformationModel>
     suspend fun getUserConsumptionData(): Result<UserConsumptionModel>
+
+    suspend fun submitConsumptionReportJob(pdfFile: File): Result<JobSubmissionModel>
+    suspend fun getJobStatus(jobId: String): Result<JobStatusModel>
+    suspend fun getJobResult(jobId: String): Result<ConsumptionReportModel>
 }
 
 // Provide Repository using injected api
@@ -30,6 +40,24 @@ private class RepositoryImpl(
     override suspend fun getUserConsumptionData(): Result<UserConsumptionModel> {
         return priceTableApi.getUserConsumptionData().map { response ->
             response.mapUserConsumptionResponseToDomain()
+        }
+    }
+
+    override suspend fun submitConsumptionReportJob(pdfFile: File): Result<JobSubmissionModel> {
+        return priceTableApi.submitConsumptionReportJob(pdfFile).map { response ->
+            response.mapToDomain()
+        }
+    }
+
+    override suspend fun getJobStatus(jobId: String): Result<JobStatusModel> {
+        return priceTableApi.getJobStatus(jobId).map { response ->
+            response.mapToDomain()
+        }
+    }
+
+    override suspend fun getJobResult(jobId: String): Result<ConsumptionReportModel> {
+        return priceTableApi.getJobResult(jobId).map { response ->
+            response.mapToDomain()
         }
     }
 }

@@ -46,7 +46,7 @@ fun PowerTermTableCard(
 
             // Table Content
             PriceTable(
-                feeList = table.powerFee
+                feeList = table.powerFeeList
             )
         }
     }

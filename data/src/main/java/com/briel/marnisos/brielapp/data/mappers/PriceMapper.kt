@@ -26,7 +26,7 @@ object PriceMapper {
     private fun TablaPrecioPotencia.mapToDomain(): PowerTerm {
         return PowerTerm(
             name = this.titulo,
-            powerFee = this.tarifas.map { it.mapToDomain() }
+            powerFeeList = this.tarifas.map { it.mapToDomain() }
         )
     }
 
