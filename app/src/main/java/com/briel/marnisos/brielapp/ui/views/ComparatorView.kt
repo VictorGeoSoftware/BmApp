@@ -2,12 +2,9 @@ package com.briel.marnisos.brielapp.ui.views
 
 import android.content.Context
 import android.net.Uri
-import android.os.Environment
-import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,23 +26,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.ui.Utils.uriToFile
-import java.io.File
-import java.io.FileOutputStream
 import com.briel.marnisos.brielapp.ui.components.tables.DynamicTableColumnView
 import com.briel.marnisos.brielapp.ui.components.tables.SideTitleTableView
-import com.briel.marnisos.brielapp.ui.theme.BorderColor
 import com.briel.marnisos.brielapp.ui.theme.Corner
 import com.briel.marnisos.brielapp.ui.theme.HeaderYellow
-import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
 import com.briel.marnisos.brielapp.ui.views.common.SectionHeader
+import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
+import com.briel.marnisos.brielapp.ui.views.pricetable.PriceProposalColumn
 import org.koin.androidx.compose.koinViewModel
+import java.io.File
 
 /**
  * ComparatorView — A Compose-only UI that mirrors the provided mockup.
@@ -63,6 +57,7 @@ fun ComparatorScreen(
     val iva by comparatorViewModel.iva.collectAsState()
     val impuestoElectrico by comparatorViewModel.impuestoElectrico.collectAsState()
     val isUploadingReport by comparatorViewModel.isUploadingReport.collectAsState()
+    val proposalPriceList by comparatorViewModel.proposalPriceModelList.collectAsState()
 
     val context = LocalContext.current
 
@@ -74,6 +69,7 @@ fun ComparatorScreen(
         iva = iva,
         impuestoElectrico = impuestoElectrico,
         isUploadingReport = isUploadingReport,
+        proposalPriceList = proposalPriceList,
         onPdfSelected = { pdfFile ->
             comparatorViewModel.uploadConsumptionReport(pdfFile)
         },
@@ -87,6 +83,51 @@ fun ComparatorScreen(
  */
 @Composable
 fun ComparatorView(
+    modifier: Modifier = Modifier,
+    tariffName: String,
+    powerTermRows: List<Pair<String, String>>,
+    energyConsumedRows: List<Pair<String, String>>,
+    iva: String,
+    impuestoElectrico: String,
+    isUploadingReport: Boolean = false,
+    onPdfSelected: (File) -> Unit = {},
+    context: Context,
+    proposalPriceList: List<ProposalPriceModel>,
+) {
+    Row(
+        modifier = Modifier.fillMaxSize().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        UserConsumptionDataView(
+            modifier = modifier,
+            tariffName = tariffName,
+            powerTermRows = powerTermRows,
+            energyConsumedRows = energyConsumedRows,
+            iva = iva,
+            impuestoElectrico = impuestoElectrico,
+            isUploadingReport = isUploadingReport,
+            onPdfSelected = onPdfSelected,
+            context = context
+        )
+
+        for (proposal in proposalPriceList) {
+            PriceProposalColumn(
+                modifier = Modifier.padding(top = 75.dp),
+                proposalTitle = proposal.proposalTitle,
+                powerTermItems = proposal.powerTermItems,
+                annualPowerTermCost = proposal.annualPowerTermCost,
+                consumedEnergyItems = proposal.consumedEnergyItems,
+                annualEnergyCost = proposal.annualEnergyCost,
+                extraPricingItems = proposal.extraPricingItems,
+                totalAnnualPrice = proposal.totalAnnualPrice,
+                savings = proposal.savings
+            )
+        }
+    }
+}
+
+@Composable
+fun UserConsumptionDataView(
     modifier: Modifier = Modifier,
     tariffName: String,
     powerTermRows: List<Pair<String, String>>,
@@ -272,7 +313,8 @@ private fun ComparatorViewPreview() {
                 energyConsumedRows = sample.energyRows,
                 iva = "21",
                 impuestoElectrico = "5.11",
-                context = context
+                proposalPriceList = emptyList(),
+                context = context,
             )
         }
     }

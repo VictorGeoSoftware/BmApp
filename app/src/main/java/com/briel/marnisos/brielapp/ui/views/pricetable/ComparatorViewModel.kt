@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
 import com.briel.marnisos.brielapp.domain.models.JobStatusType
+import com.briel.marnisos.brielapp.domain.models.PriceTablesInformationModel
 import com.briel.marnisos.brielapp.domain.models.PriceTablesModel
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
@@ -38,8 +39,7 @@ class ComparatorViewModel(
     val iva: StateFlow<String> = _iva
 
     private val _proposalPriceModelList = MutableStateFlow<List<ProposalPriceModel>>(value = emptyList())
-    val proposalPriceModel: StateFlow<List<ProposalPriceModel>> = _proposalPriceModelList
-
+    val proposalPriceModelList: StateFlow<List<ProposalPriceModel>> = _proposalPriceModelList
 
     private val _priceTablesModel = MutableStateFlow(value = PriceTablesModel.empty)
     val priceTablesModel: StateFlow<PriceTablesModel> = _priceTablesModel
@@ -56,6 +56,11 @@ class ComparatorViewModel(
     private val _uploadError = MutableStateFlow<String?>(value = null)
     val uploadError: StateFlow<String?> = _uploadError
 
+    init {
+        viewModelScope.launch {
+            fetchJobResult("a4a4097c-dad6-48d3-83fa-21cbe7e6559b")
+        }
+    }
 
     /**
      * Uploads a PDF consumption report and processes it through the backend using async job processing
@@ -72,7 +77,7 @@ class ComparatorViewModel(
                 .onSuccess { jobSubmission ->
                     println("victor - Job submitted with ID: ${jobSubmission.jobId}")
                     _uploadStatus.value = "Processing report..."
-                    
+
                     // Step 2: Poll for job completion
                     pollJobStatus(jobSubmission.jobId)
                 }
@@ -96,15 +101,15 @@ class ComparatorViewModel(
         delayMillis: Long = 3000L // Poll every 2 seconds
     ) {
         var attempts = 0
-        
+
         while (attempts < maxAttempts) {
             delay(delayMillis)
             attempts++
-            
+
             getJobStatusUseCase(jobId)
                 .onSuccess { jobStatus ->
                     println("victor - Job status: ${jobStatus.status} (attempt $attempts)")
-                    
+
                     when (jobStatus.status) {
                         JobStatusType.COMPLETED -> {
                             _uploadStatus.value = "Fetching results..."
@@ -133,7 +138,7 @@ class ComparatorViewModel(
                     return
                 }
         }
-        
+
         // Timeout reached
         _uploadError.value = "Processing timeout. Please try again."
         _uploadStatus.value = null
@@ -156,7 +161,12 @@ class ComparatorViewModel(
                 _iva.value = report.filteredPrices.iva.toString()
                 _uploadStatus.value = "Complete!"
                 _isUploadingReport.value = false
-                
+
+                _powerTermRows.value = report.consumptionData.annualConsumptionValues()
+                _energyConsumedRows.value = report.consumptionData.subscribedPowerValues()
+
+                _proposalPriceModelList.value = report.filteredPrices.getProposalPriceModelList()
+
                 // Clear status after a short delay
                 viewModelScope.launch {
                     delay(2000)
@@ -168,6 +178,36 @@ class ComparatorViewModel(
                 _uploadError.value = "Failed to fetch results: ${error.message}"
                 _uploadStatus.value = null
                 _isUploadingReport.value = false
+            }
+    }
+
+    private fun PriceTablesInformationModel.getProposalPriceModelList(): List<ProposalPriceModel> {
+        val iva = this.iva
+        val impuestoElectrico = this.impuestoElectrico
+
+        return this.priceTables
+            .take(5).map { proposal ->
+                val title = proposal.energyTerm.baseClassicPrice.title
+                    .replace(
+                        "precio",
+                        "",
+                        ignoreCase = true
+                    ).replace(
+                        "( c€ /kWh)",
+                        "",
+                        ignoreCase = true
+                    )
+
+                ProposalPriceModel(
+                    proposalTitle = title,
+                    powerTermItems = proposal.powerTerm.powerFeeList.first().prices(),
+                    annualPowerTermCost = "Pending",
+                    consumedEnergyItems = proposal.energyTerm.baseClassicPrice.fees.first().prices(),
+                    annualEnergyCost = "Pending",
+                    extraPricingItems = listOf("$iva", "$impuestoElectrico"),
+                    totalAnnualPrice = "Pending",
+                    savings = Pair("Pending", "Pending")
+                )
             }
     }
 

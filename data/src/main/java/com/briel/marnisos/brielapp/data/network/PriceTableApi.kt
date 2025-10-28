@@ -10,9 +10,11 @@ import io.ktor.client.call.body
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import kotlinx.serialization.json.Json
 import java.io.File
 
 class PriceTableApi(
@@ -115,12 +117,16 @@ class PriceTableApi(
             val status = response.status
 
             if (status == HttpStatusCode.OK) {
-                val responseBody = response.body<ConsumptionReportResponse>()
+                val rawJson = response.bodyAsText()
+                val json = Json { ignoreUnknownKeys = true }
+                val responseBody = json.decodeFromString<ConsumptionReportResponse>(rawJson)
                 Result.success(responseBody)
             } else {
                 Result.failure(Exception("Error fetching job result: $status"))
             }
         } catch (e: Exception) {
+            println("DEBUG - Exception parsing JSON: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }

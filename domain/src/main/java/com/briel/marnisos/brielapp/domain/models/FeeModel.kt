@@ -58,5 +58,7 @@ data class FeeModel(
     val p5: Double? = null,
     val p6: Double? = null,
 ) {
-    fun prices(): List<Double?> = listOf(p1, p2, p3, p4, p5, p6)
+    fun prices(): List<String> = listOfNotNull(p1, p2, p3, p4, p5, p6)
+        .filter { it != 0.0 }
+        .map { it.toString() }
 }
