@@ -45,4 +45,34 @@ data class CleanedConsumptionDataModel(
     val feeType: String,
     val fileName: String,
     val processedAt: String
-)
+) {
+    fun annualConsumptionValues(): List<Pair<String, String>> {
+        return listOf(
+            annualConsumptionP1,
+            annualConsumptionP2,
+            annualConsumptionP3,
+            annualConsumptionP4,
+            annualConsumptionP5,
+            annualConsumptionP6
+        ).mapIndexed { index, p ->
+            Pair("p$index", p.toString())
+        }.filter { pair ->
+            pair.second != ZERO
+        }
+    }
+
+    fun subscribedPowerValues(): List<Pair<String, String>> {
+        return listOf(
+            subscribedPowerP1,
+            subscribedPowerP2,
+            subscribedPowerP3,
+            subscribedPowerP4,
+            subscribedPowerP5,
+            subscribedPowerP6
+        ).mapIndexed { index, p ->
+            Pair("p$index", p.toString())
+        }.filter { pair ->
+            pair.second != ZERO
+        }
+    }
+}

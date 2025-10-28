@@ -56,6 +56,11 @@ class ComparatorViewModel(
     private val _uploadError = MutableStateFlow<String?>(value = null)
     val uploadError: StateFlow<String?> = _uploadError
 
+    init {
+        viewModelScope.launch {
+            fetchJobResult("a4a4097c-dad6-48d3-83fa-21cbe7e6559b")
+        }
+    }
 
     /**
      * Uploads a PDF consumption report and processes it through the backend using async job processing
@@ -156,6 +161,9 @@ class ComparatorViewModel(
                 _iva.value = report.filteredPrices.iva.toString()
                 _uploadStatus.value = "Complete!"
                 _isUploadingReport.value = false
+
+                _powerTermRows.value = report.consumptionData.annualConsumptionValues()
+                _energyConsumedRows.value = report.consumptionData.subscribedPowerValues()
                 
                 // Clear status after a short delay
                 viewModelScope.launch {
