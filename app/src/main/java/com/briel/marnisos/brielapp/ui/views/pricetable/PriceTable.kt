@@ -162,14 +162,14 @@ private fun PriceTableRow(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             row.prices().forEach { price ->
-                val price = if (price == null || price == 0.0) {
-                    "—"
-                } else {
+                val price = if (price.isNotEmpty()) {
                     String.format(
                         Locale.getDefault(),
                         "%.6f",
                         price
                     )
+                } else {
+                    "—"
                 }
 
                 Text(
