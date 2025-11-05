@@ -1,6 +1,9 @@
-package com.briel.marnisos.brielapp.domain.models
+package com.briel.marnisos.brielapp.data.model.prices
 
-data class ProposalPriceModel(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ProposalPriceData(
     val proposalTitle: String,
     val powerTermItems: List<Double>,
     val annualPowerTermCost: Double,

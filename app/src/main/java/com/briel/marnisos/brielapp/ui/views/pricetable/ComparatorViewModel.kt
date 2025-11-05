@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
 import com.briel.marnisos.brielapp.domain.models.JobStatusType
-import com.briel.marnisos.brielapp.domain.models.PriceTablesInformationModel
-import com.briel.marnisos.brielapp.domain.models.PriceTablesModel
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
@@ -15,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.math.roundToInt
 
 class ComparatorViewModel(
     private val submitConsumptionReportJobUseCase: SubmitConsumptionReportJobUseCase,
@@ -26,11 +25,11 @@ class ComparatorViewModel(
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
 
-    private val _powerTermRows = MutableStateFlow<List<Pair<String, String>>>(value = emptyList())
-    val powerTermRows: StateFlow<List<Pair<String, String>>> = _powerTermRows
+    private val _powerTermRows = MutableStateFlow<List<Pair<String, Double>>>(value = emptyList())
+    val powerTermRows: StateFlow<List<Pair<String, Double>>> = _powerTermRows
 
-    private val _energyConsumedRows = MutableStateFlow<List<Pair<String, String>>>(value = emptyList())
-    val energyConsumedRows: StateFlow<List<Pair<String, String>>> = _energyConsumedRows
+    private val _energyConsumedRows = MutableStateFlow<List<Pair<String, Int>>>(value = emptyList())
+    val energyConsumedRows: StateFlow<List<Pair<String, Int>>> = _energyConsumedRows
 
     private val _impuestoElectrico = MutableStateFlow(value = "")
     val impuestoElectrico: StateFlow<String> = _impuestoElectrico
@@ -40,12 +39,6 @@ class ComparatorViewModel(
 
     private val _proposalPriceModelList = MutableStateFlow<List<ProposalPriceModel>>(value = emptyList())
     val proposalPriceModelList: StateFlow<List<ProposalPriceModel>> = _proposalPriceModelList
-
-    private val _priceTablesModel = MutableStateFlow(value = PriceTablesModel.empty)
-    val priceTablesModel: StateFlow<PriceTablesModel> = _priceTablesModel
-
-    private val _consumptionReportModel = MutableStateFlow<ConsumptionReportModel?>(value = null)
-    val consumptionReportModel: StateFlow<ConsumptionReportModel?> = _consumptionReportModel
 
     private val _isUploadingReport = MutableStateFlow(value = false)
     val isUploadingReport: StateFlow<Boolean> = _isUploadingReport
@@ -58,7 +51,7 @@ class ComparatorViewModel(
 
     init {
         viewModelScope.launch {
-            fetchJobResult("a4a4097c-dad6-48d3-83fa-21cbe7e6559b")
+            fetchJobResult("5cdab93b-c391-4aa4-8dba-8feb35d13a12")
         }
     }
 
@@ -152,22 +145,22 @@ class ComparatorViewModel(
     private suspend fun fetchJobResult(jobId: String) {
         getJobResultUseCase(jobId)
             .onSuccess { report ->
-                println("victor - received report :: $report")
-                _consumptionReportModel.value = report
                 // Update the consumption data with the cleaned data from the report
                 _tariffName.value = report.consumptionData.feeType
-                // Update filtered price tables
-                _impuestoElectrico.value = report.filteredPrices.impuestoElectrico.toString()
-                _iva.value = report.filteredPrices.iva.toString()
+                // Update IVA and electrical tax from first proposal (all proposals have same values)
+                _impuestoElectrico.value = "5.11 %" // TODO:: return this from back end!
+                _iva.value = "21 %" // TODO:: return this from back end!
                 _uploadStatus.value = "Complete!"
                 _isUploadingReport.value = false
 
-                _powerTermRows.value = report.consumptionData.annualConsumptionValues()
-                _energyConsumedRows.value = report.consumptionData.subscribedPowerValues()
+                _powerTermRows.value = report.consumptionData.subscribedPowerValues()
 
-                _proposalPriceModelList.value = report.filteredPrices.getProposalPriceModelList()
+                _energyConsumedRows.value = report.consumptionData.annualConsumptionValues().map { item ->
+                    Pair(item.first, item.second.toInt())
+                }
 
-                // Clear status after a short delay
+                // Proposals now come directly from backend
+                _proposalPriceModelList.value = report.proposals
                 viewModelScope.launch {
                     delay(2000)
                     _uploadStatus.value = null
@@ -181,35 +174,6 @@ class ComparatorViewModel(
             }
     }
 
-    private fun PriceTablesInformationModel.getProposalPriceModelList(): List<ProposalPriceModel> {
-        val iva = this.iva
-        val impuestoElectrico = this.impuestoElectrico
-
-        return this.priceTables
-            .take(5).map { proposal ->
-                val title = proposal.energyTerm.baseClassicPrice.title
-                    .replace(
-                        "precio",
-                        "",
-                        ignoreCase = true
-                    ).replace(
-                        "( c€ /kWh)",
-                        "",
-                        ignoreCase = true
-                    )
-
-                ProposalPriceModel(
-                    proposalTitle = title,
-                    powerTermItems = proposal.powerTerm.powerFeeList.first().prices(),
-                    annualPowerTermCost = "Pending",
-                    consumedEnergyItems = proposal.energyTerm.baseClassicPrice.fees.first().prices(),
-                    annualEnergyCost = "Pending",
-                    extraPricingItems = listOf("$iva", "$impuestoElectrico"),
-                    totalAnnualPrice = "Pending",
-                    savings = Pair("Pending", "Pending")
-                )
-            }
-    }
 
     /**
      * Clears any upload error messages

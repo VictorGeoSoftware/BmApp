@@ -26,7 +26,7 @@ object PriceMapper {
     private fun TablaPrecioPotencia.mapToDomain(): PowerTerm {
         return PowerTerm(
             name = this.titulo,
-            powerFeeList = this.tarifas.map { it.mapToDomain() }
+            powerFee = this.tarifa.mapToDomain()
         )
     }
 
@@ -48,21 +48,21 @@ object PriceMapper {
             title = this.titulo,
             baseClassicPrice = this.tablaPrecioClasicaBase.mapToDomain(),
             uniqueClassicPrice = this.tablaPrecioClasicaUnica?.mapToDomain()
-                ?: UniqueClassicPrice(title = "", fees = emptyList())
+                ?: UniqueClassicPrice(title = "", fee = FeeModel(feeName = ""))
         )
     }
 
     private fun TablaPrecioClasicaBase.mapToDomain(): BaseClassicPrice {
         return BaseClassicPrice(
             title = this.titulo,
-            fees = this.tarifas.map { it.mapToDomain() }
+            fee = this.tarifa.mapToDomain()
         )
     }
 
     private fun TablaPrecioClasicaUnica.mapToDomain(): UniqueClassicPrice {
         return UniqueClassicPrice(
             title = this.titulo,
-            fees = this.tarifas.map { it.mapToDomain() }
+            fee = this.tarifa.mapToDomain()
         )
     }
 

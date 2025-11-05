@@ -85,8 +85,8 @@ fun ComparatorScreen(
 fun ComparatorView(
     modifier: Modifier = Modifier,
     tariffName: String,
-    powerTermRows: List<Pair<String, String>>,
-    energyConsumedRows: List<Pair<String, String>>,
+    powerTermRows: List<Pair<String, Double>>,
+    energyConsumedRows: List<Pair<String, Int>>,
     iva: String,
     impuestoElectrico: String,
     isUploadingReport: Boolean = false,
@@ -118,9 +118,10 @@ fun ComparatorView(
                 annualPowerTermCost = proposal.annualPowerTermCost,
                 consumedEnergyItems = proposal.consumedEnergyItems,
                 annualEnergyCost = proposal.annualEnergyCost,
-                extraPricingItems = proposal.extraPricingItems,
+                extraPricing = proposal.extraServices,
+                electricTax = proposal.electricalTax,
+                iva = proposal.iva,
                 totalAnnualPrice = proposal.totalAnnualPrice,
-                savings = proposal.savings
             )
         }
     }
@@ -130,8 +131,8 @@ fun ComparatorView(
 fun UserConsumptionDataView(
     modifier: Modifier = Modifier,
     tariffName: String,
-    powerTermRows: List<Pair<String, String>>,
-    energyConsumedRows: List<Pair<String, String>>,
+    powerTermRows: List<Pair<String, Double>>,
+    energyConsumedRows: List<Pair<String, Int>>,
     iva: String,
     impuestoElectrico: String,
     isUploadingReport: Boolean = false,
@@ -158,7 +159,7 @@ fun UserConsumptionDataView(
         SideTitleTableView(
             sideTitle = "TÉRMINO DE\nPOTENCIA",
             leftValues = powerTermRows.map { it.first },
-            rightValues = powerTermRows.map { it.second },
+            rightValues = powerTermRows.map { it.second.toString() },
         )
 
         SectionHeader(
@@ -172,7 +173,7 @@ fun UserConsumptionDataView(
         SideTitleTableView(
             sideTitle = "ENERGÍA\nCONSUMIDA",
             leftValues = energyConsumedRows.map { it.first },
-            rightValues = energyConsumedRows.map { it.second },
+            rightValues = energyConsumedRows.map { it.second.toString() },
         )
 
         SectionHeader(
@@ -282,14 +283,14 @@ private fun SimpleTwoColumnTable(
 // Preview-only helpers and sample
 data class ComparatorUiSample(
     val tariffName: String = "2.0TD",
-    val powerRows: List<Pair<String, String>> = listOf(
-        "P1" to "5.50",
-        "P2" to "5.50",
+    val powerRows: List<Pair<String, Double>> = listOf(
+        "P1" to 5.50,
+        "P2" to 5.50,
     ),
-    val energyRows: List<Pair<String, String>> = listOf(
-        "P1" to "438.00",
-        "P2" to "407.00",
-        "P3" to "454.00",
+    val energyRows: List<Pair<String, Int>> = listOf(
+        "P1" to 438,
+        "P2" to 407,
+        "P3" to 454,
     ),
     val extras: List<Pair<String, String>> = listOf(
         "IMPUESTO ELÉCTRICO" to "5.11%",

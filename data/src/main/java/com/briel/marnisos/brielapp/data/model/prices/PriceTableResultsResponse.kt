@@ -33,7 +33,7 @@ data class TerminoDePotencia(
 @Serializable
 data class TablaPrecioPotencia(
     @SerialName("titulo") val titulo: String,
-    @SerialName("tarifas") val tarifas: List<TarifaPotencia>
+    @SerialName("tarifa") val tarifa: TarifaPotencia
 )
 
 @Serializable
@@ -58,13 +58,13 @@ data class TerminoDeEnergia(
 @Serializable
 data class TablaPrecioClasicaBase(
     @SerialName("titulo") val titulo: String,
-    @SerialName("tarifas") val tarifas: List<TarifaEnergia>
+    @SerialName("tarifa") val tarifa: TarifaEnergia
 )
 
 @Serializable
 data class TablaPrecioClasicaUnica(
     @SerialName("titulo") val titulo: String,
-    @SerialName("tarifas") val tarifas: List<TarifaEnergia>
+    @SerialName("tarifa") val tarifa: TarifaEnergia
 )
 
 @Serializable

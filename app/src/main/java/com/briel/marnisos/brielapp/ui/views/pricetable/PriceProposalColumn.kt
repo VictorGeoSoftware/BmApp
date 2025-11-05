@@ -20,13 +20,14 @@ import com.briel.marnisos.brielapp.ui.views.common.SectionHeader
 fun PriceProposalColumn(
     modifier: Modifier = Modifier,
     proposalTitle: String,
-    powerTermItems: List<String>,
-    annualPowerTermCost: String,
-    consumedEnergyItems: List<String>,
-    annualEnergyCost: String,
-    extraPricingItems: List<String>,
-    totalAnnualPrice: String,
-    savings: Pair<String, String>,
+    powerTermItems: List<Double>,
+    annualPowerTermCost: Double,
+    consumedEnergyItems: List<Double>,
+    annualEnergyCost: Double,
+    electricTax: Double,
+    iva: Double,
+    extraPricing: Double,
+    totalAnnualPrice: Double,
 ) {
     Column(
         modifier = modifier.then(
@@ -40,34 +41,37 @@ fun PriceProposalColumn(
 
         DynamicTableColumnView(
             modifier = Modifier.fillMaxWidth(),
-            values = powerTermItems,
+            values = powerTermItems.map { it.toString() },
         )
 
         TotalSectionPriceView(
-            content = annualPowerTermCost,
+            content = "$annualPowerTermCost€",
         )
 
         DynamicTableColumnView(
             modifier = Modifier.fillMaxWidth(),
-            values = consumedEnergyItems,
+            values = consumedEnergyItems.map { it.toString() },
         )
 
         TotalSectionPriceView(
-            content = annualEnergyCost,
+            content = "$annualEnergyCost€"
         )
 
         DynamicTableColumnView(
             modifier = Modifier.fillMaxWidth(),
-            values = extraPricingItems,
+            values = listOf(extraPricing, electricTax, iva).map { it.toString() },
         )
 
-        TotalSectionPriceView(
-            content = totalAnnualPrice,
+        HeaderBox(
+            modifier = Modifier.fillMaxWidth(),
+            text = "$totalAnnualPrice€",
+            background = HeaderYellow,
+            corner = Corner
         )
 
         SectionHeader(
             modifier = Modifier.fillMaxWidth(),
-            text = "${savings.first} / ${savings.second}",
+            text = "pending/ pending",
             background = HighlightBlue,
             corner = Corner
         )
@@ -99,12 +103,13 @@ private fun ProposalTitleView(content: String) {
 private fun PriceProposalColumnPreview() {
     PriceProposalColumn(
         proposalTitle = "Propuesta 1",
-        powerTermItems = listOf("1", "2", "3"),
-        annualPowerTermCost = "100",
-        consumedEnergyItems = listOf("1", "2", "3"),
-        annualEnergyCost = "100",
-        extraPricingItems = listOf("1", "2", "3"),
-        totalAnnualPrice = "100",
-        savings = Pair("100", "100"),
+        powerTermItems = listOf(1.0, 2.0, 3.0),
+        annualPowerTermCost = 100.0,
+        consumedEnergyItems = listOf(1.0, 2.0, 3.0),
+        annualEnergyCost = 100.0,
+        electricTax = 2.0,
+        iva = 2.0,
+        extraPricing = 2.0,
+        totalAnnualPrice = 100.0,
     )
 }

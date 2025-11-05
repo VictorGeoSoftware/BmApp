@@ -2,9 +2,9 @@ package com.briel.marnisos.brielapp.domain.models
 
 data class ConsumptionReportModel(
     val success: Boolean,
-    val doclingData: DoclingExtractedDataModel,
+    val userData: DoclingExtractedDataModel,
     val consumptionData: CleanedConsumptionDataModel,
-    val filteredPrices: PriceTablesInformationModel
+    val proposals: List<ProposalPriceModel>
 )
 
 data class DoclingExtractedDataModel(
@@ -46,7 +46,7 @@ data class CleanedConsumptionDataModel(
     val fileName: String,
     val processedAt: String
 ) {
-    fun annualConsumptionValues(): List<Pair<String, String>> {
+    fun annualConsumptionValues(): List<Pair<String, Double>> {
         return listOf(
             annualConsumptionP1,
             annualConsumptionP2,
@@ -55,13 +55,14 @@ data class CleanedConsumptionDataModel(
             annualConsumptionP5,
             annualConsumptionP6
         ).mapIndexed { index, p ->
-            Pair("p$index", p.toString())
+            val number = "p${index + 1}".uppercase()
+            Pair(number, p)
         }.filter { pair ->
             pair.second != ZERO
         }
     }
 
-    fun subscribedPowerValues(): List<Pair<String, String>> {
+    fun subscribedPowerValues(): List<Pair<String, Double>> {
         return listOf(
             subscribedPowerP1,
             subscribedPowerP2,
@@ -70,7 +71,8 @@ data class CleanedConsumptionDataModel(
             subscribedPowerP5,
             subscribedPowerP6
         ).mapIndexed { index, p ->
-            Pair("p$index", p.toString())
+            val number = "p${index + 1}".uppercase()
+            Pair(number, p)
         }.filter { pair ->
             pair.second != ZERO
         }
