@@ -10,17 +10,17 @@ data class PriceTablesModel(
             companyName = "",
             powerTerm = PowerTerm(
                 name = "",
-                powerFeeList = emptyList()
+                powerFee = FeeModel(feeName = "")
             ),
             energyTerm = EnergyTerm(
                 title = "",
                 baseClassicPrice = BaseClassicPrice(
                     title = "",
-                    fees = emptyList()
+                    fee = FeeModel(feeName = "")
                 ),
                 uniqueClassicPrice = UniqueClassicPrice(
                     title = "",
-                    fees = emptyList()
+                    fee = FeeModel(feeName = "")
                 )
             )
         )
@@ -35,17 +35,17 @@ data class EnergyTerm(
 
 data class BaseClassicPrice(
     val title: String,
-    val fees: List<FeeModel>,
+    val fee: FeeModel,
 )
 
 data class UniqueClassicPrice(
     val title: String,
-    val fees: List<FeeModel>,
+    val fee: FeeModel,
 )
 
 data class PowerTerm(
     val name: String,
-    val powerFeeList: List<FeeModel>,
+    val powerFee: FeeModel,
 )
 
 data class FeeModel(

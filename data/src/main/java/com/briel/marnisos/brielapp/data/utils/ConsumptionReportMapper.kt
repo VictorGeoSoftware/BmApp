@@ -1,29 +1,27 @@
 package com.briel.marnisos.brielapp.data.utils
 
-import com.briel.marnisos.brielapp.data.mappers.PriceMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.model.prices.CleanedConsumptionData
 import com.briel.marnisos.brielapp.data.model.prices.ConsumptionReportResponse
 import com.briel.marnisos.brielapp.data.model.prices.CustomerDetails
 import com.briel.marnisos.brielapp.data.model.prices.CustomerId
 import com.briel.marnisos.brielapp.data.model.prices.DoclingExtractedData
+import com.briel.marnisos.brielapp.data.model.prices.ProposalPriceData
+import com.briel.marnisos.brielapp.data.utils.FormatUtils.formatEnergyDecimals
+import com.briel.marnisos.brielapp.data.utils.FormatUtils.formatPriceDecimals
 import com.briel.marnisos.brielapp.domain.models.CleanedConsumptionDataModel
 import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
 import com.briel.marnisos.brielapp.domain.models.CustomerDetailsModel
 import com.briel.marnisos.brielapp.domain.models.CustomerIdModel
 import com.briel.marnisos.brielapp.domain.models.DoclingExtractedDataModel
-import com.briel.marnisos.brielapp.domain.models.PriceTablesInformationModel
+import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 
 object ConsumptionReportMapper {
     fun ConsumptionReportResponse.mapToDomain(): ConsumptionReportModel {
         return ConsumptionReportModel(
             success = this.success,
-            doclingData = this.doclingData.mapToDomain(),
+            userData = this.userData.mapToDomain(),
             consumptionData = this.consumptionData.mapToDomain(),
-            filteredPrices = PriceTablesInformationModel(
-                priceTables = this.filteredPrices.results.map { it.extractedTables.mapToDomain() },
-                iva = this.filteredPrices.iva,
-                impuestoElectrico = this.filteredPrices.impuestoElectrico
-            )
+            proposals = this.proposals.map { it.mapToDomain() }
         )
     }
 
@@ -72,6 +70,20 @@ object ConsumptionReportMapper {
             feeType = this.feeType,
             fileName = this.fileName,
             processedAt = this.processedAt
+        )
+    }
+
+    private fun ProposalPriceData.mapToDomain(): ProposalPriceModel {
+        return ProposalPriceModel(
+            proposalTitle = this.proposalTitle,
+            powerTermItems = this.powerTermItems.formatEnergyDecimals(),
+            annualPowerTermCost = this.annualPowerTermCost.formatPriceDecimals(),
+            consumedEnergyItems = this.consumedEnergyItems.formatEnergyDecimals(),
+            annualEnergyCost = this.annualEnergyCost.formatPriceDecimals(),
+            extraServices = this.extraServices,
+            iva = this.iva,
+            electricalTax = this.electricalTax.formatPriceDecimals(),
+            totalAnnualPrice = this.totalAnnualPrice.formatPriceDecimals()
         )
     }
 }

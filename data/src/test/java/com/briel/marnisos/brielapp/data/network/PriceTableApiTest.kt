@@ -14,7 +14,10 @@ class PriceTableApiTest {
     @BeforeEach
     fun setup() {
         mockHttpClient = KtorClientProvider.client
-        priceTableApi = PriceTableApi(client = mockHttpClient)
+        priceTableApi = PriceTableApi(
+            client = mockHttpClient,
+            baseUrl = "http://0.0.0.0:8081/api/v1"
+        )
     }
 
     @Test

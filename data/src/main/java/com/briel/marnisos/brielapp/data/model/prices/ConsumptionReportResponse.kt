@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ConsumptionReportResponse(
     val success: Boolean,
-    val doclingData: DoclingExtractedData,
+    val userData: DoclingExtractedData,
     val consumptionData: CleanedConsumptionData,
-    val filteredPrices: PriceTableResultsResponse
+    val proposals: List<ProposalPriceData>
 )
 
 @Serializable
