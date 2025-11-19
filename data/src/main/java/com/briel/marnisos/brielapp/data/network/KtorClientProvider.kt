@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit
 
 object KtorClientProvider {
     @Volatile
-    private var _baseUrl: String = "http://172.20.10.14:8081/api/v1" // Phone -> mac!
+    private var _baseUrl: String = "http://217.154.181.175:8081/api/v1" // Remote server
+//    private var _baseUrl: String = "http://192.168.0.102:8081/api/v1" // Phone -> mac!
 //    private var _baseUrl: String = "http://10.0.2.2:8081/api/v1" // Emulator -> host machine default
 //    private var _baseUrl: String = "http://0.0.0.0:8081/api/v1" // Unit test
 
