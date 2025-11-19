@@ -15,7 +15,7 @@ data class DoclingExtractedDataModel(
 
 data class CustomerDetailsModel(
     val address: String,
-    val name: String
+    val name: String? = null,
 )
 
 data class CustomerIdModel(
