@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496422828095",
+    "project_id": "bmweb-a0a70",
+    "storage_bucket": "bmweb-a0a70.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496422828095:android:9a4f55aef38cd329d7608a",
+        "android_client_info": {
+          "package_name": "com.briel.marnisos.brielapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0LG-qj140GmdF3A1MrcdNiWeKN_GR4QM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
