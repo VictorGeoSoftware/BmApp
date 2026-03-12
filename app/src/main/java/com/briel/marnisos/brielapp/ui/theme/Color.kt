@@ -10,6 +10,16 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
+val AppPrimary = Color(0xFF1E4ED8)
+val AppOnPrimary = Color(0xFFFFFFFF)
+val AppSecondary = Color(0xFF334155)
+val AppOnSecondary = Color(0xFFFFFFFF)
+val AppBackground = Color(0xFFF8FAFC)
+val AppOnBackground = Color(0xFF0F172A)
+val AppSurface = Color(0xFFFFFFFF)
+val AppOnSurface = Color(0xFF0F172A)
+val AppOutline = Color(0xFF64748B)
+
 // Price Table Theme Colors
 val TableBlue = Color(0xFF5DADE2)
 val TableBlueLight = Color(0xFF85C1E9)

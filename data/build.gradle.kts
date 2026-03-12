@@ -43,6 +43,11 @@ android {
 dependencies {
     // modules
     implementation(project(":domain"))
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
     // Ktor client
     api(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
