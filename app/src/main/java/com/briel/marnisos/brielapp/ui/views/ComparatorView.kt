@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -98,32 +97,36 @@ fun ComparatorView(
     context: Context,
     proposalPriceList: List<ProposalPriceModel>,
 ) {
-    Row(
+    val verticalScrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
+
+    Box(
         modifier = modifier
-            .padding(end = 16.dp)
             .fillMaxSize()
             .statusBarsPadding()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .verticalScroll(verticalScrollState)
     ) {
-        UserConsumptionDataView(
-            modifier = modifier,
-            tariffName = tariffName,
-            powerTermRows = powerTermRows,
-            energyConsumedRows = energyConsumedRows,
-            iva = iva,
-            impuestoElectrico = impuestoElectrico,
-            isUploadingReport = isUploadingReport,
-            onPdfSelected = onPdfSelected,
-            context = context
-        )
-
-        Box(
-            modifier = Modifier.padding(top = 75.dp)
-                .verticalScroll(rememberScrollState())
+        Row(
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .horizontalScroll(horizontalScrollState),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            UserConsumptionDataView(
+                modifier = Modifier,
+                tariffName = tariffName,
+                powerTermRows = powerTermRows,
+                energyConsumedRows = energyConsumedRows,
+                iva = iva,
+                impuestoElectrico = impuestoElectrico,
+                isUploadingReport = isUploadingReport,
+                onPdfSelected = onPdfSelected,
+                context = context
+            )
+
             for (proposal in proposalPriceList) {
                 PriceProposalColumn(
+                    modifier = Modifier.padding(top = 75.dp),
                     proposalTitle = proposal.proposalTitle,
                     powerTermItems = proposal.powerTermItems,
                     annualPowerTermCost = proposal.annualPowerTermCost,
@@ -154,9 +157,7 @@ fun UserConsumptionDataView(
     Column(
         modifier
             .width(400.dp)
-            .fillMaxHeight()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         SelectFileButton(
