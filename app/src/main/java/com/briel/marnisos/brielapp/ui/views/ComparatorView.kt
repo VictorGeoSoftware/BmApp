@@ -129,13 +129,13 @@ fun ComparatorView(
                     modifier = Modifier.padding(top = 75.dp),
                     proposalTitle = proposal.proposalTitle,
                     powerTermItems = proposal.powerTermItems,
-                    annualPowerTermCost = proposal.annualPowerTermCost,
+                    annualPowerTermCost = proposal.annualPowerTermCostFormatted,
                     consumedEnergyItems = proposal.consumedEnergyItems,
-                    annualEnergyCost = proposal.annualEnergyCost,
-                    extraPricing = proposal.extraServices,
-                    electricTax = proposal.electricalTax,
-                    iva = proposal.iva,
-                    totalAnnualPrice = proposal.totalAnnualPrice,
+                    annualEnergyCost = proposal.annualEnergyCostFormatted,
+                    extraPricing = proposal.extraServicesFormatted,
+                    electricTax = proposal.electricalTaxFormatted,
+                    iva = proposal.ivaFormatted,
+                    totalAnnualPrice = proposal.totalAnnualPriceFormatted,
                 )
             }
         }

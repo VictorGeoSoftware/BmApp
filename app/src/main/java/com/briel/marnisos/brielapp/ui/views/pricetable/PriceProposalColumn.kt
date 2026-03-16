@@ -21,13 +21,13 @@ fun PriceProposalColumn(
     modifier: Modifier = Modifier,
     proposalTitle: String,
     powerTermItems: List<Double>,
-    annualPowerTermCost: Double,
+    annualPowerTermCost: String,
     consumedEnergyItems: List<Double>,
-    annualEnergyCost: Double,
-    electricTax: Double,
-    iva: Double,
-    extraPricing: Double,
-    totalAnnualPrice: Double,
+    annualEnergyCost: String,
+    electricTax: String,
+    iva: String,
+    extraPricing: String,
+    totalAnnualPrice: String,
 ) {
     Column(
         modifier = modifier.then(
@@ -59,7 +59,7 @@ fun PriceProposalColumn(
 
         DynamicTableColumnView(
             modifier = Modifier.fillMaxWidth(),
-            values = listOf(extraPricing, electricTax, iva).map { it.toString() },
+            values = listOf("$extraPricing€", "$electricTax€", "$iva€"),
         )
 
         HeaderBox(
@@ -104,12 +104,12 @@ private fun PriceProposalColumnPreview() {
     PriceProposalColumn(
         proposalTitle = "Propuesta 1",
         powerTermItems = listOf(1.0, 2.0, 3.0),
-        annualPowerTermCost = 100.0,
+        annualPowerTermCost = "100.00",
         consumedEnergyItems = listOf(1.0, 2.0, 3.0),
-        annualEnergyCost = 100.0,
-        electricTax = 2.0,
-        iva = 2.0,
-        extraPricing = 2.0,
-        totalAnnualPrice = 100.0,
+        annualEnergyCost = "100.00",
+        electricTax = "2.00",
+        iva = "2.00",
+        extraPricing = "2.00",
+        totalAnnualPrice = "100.00",
     )
 }
