@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -117,19 +118,23 @@ fun ComparatorView(
             context = context
         )
 
-        for (proposal in proposalPriceList) {
-            PriceProposalColumn(
-                modifier = Modifier.padding(top = 75.dp),
-                proposalTitle = proposal.proposalTitle,
-                powerTermItems = proposal.powerTermItems,
-                annualPowerTermCost = proposal.annualPowerTermCost,
-                consumedEnergyItems = proposal.consumedEnergyItems,
-                annualEnergyCost = proposal.annualEnergyCost,
-                extraPricing = proposal.extraServices,
-                electricTax = proposal.electricalTax,
-                iva = proposal.iva,
-                totalAnnualPrice = proposal.totalAnnualPrice,
-            )
+        Box(
+            modifier = Modifier.padding(top = 75.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            for (proposal in proposalPriceList) {
+                PriceProposalColumn(
+                    proposalTitle = proposal.proposalTitle,
+                    powerTermItems = proposal.powerTermItems,
+                    annualPowerTermCost = proposal.annualPowerTermCost,
+                    consumedEnergyItems = proposal.consumedEnergyItems,
+                    annualEnergyCost = proposal.annualEnergyCost,
+                    extraPricing = proposal.extraServices,
+                    electricTax = proposal.electricalTax,
+                    iva = proposal.iva,
+                    totalAnnualPrice = proposal.totalAnnualPrice,
+                )
+            }
         }
     }
 }
