@@ -16,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
@@ -28,20 +27,17 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val inputTextColor = Color(0xFF0F172A)
-    val inputPlaceholderColor = Color(0xFF475569)
-    val inputBorderColor = Color(0xFF64748B)
-    val focusedBorderColor = Color(0xFF1D4ED8)
+    val colorScheme = MaterialTheme.colorScheme
     val inputColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = inputTextColor,
-        unfocusedTextColor = inputTextColor,
-        focusedLabelColor = focusedBorderColor,
-        unfocusedLabelColor = inputPlaceholderColor,
-        focusedPlaceholderColor = inputPlaceholderColor,
-        unfocusedPlaceholderColor = inputPlaceholderColor,
-        focusedBorderColor = focusedBorderColor,
-        unfocusedBorderColor = inputBorderColor,
-        cursorColor = focusedBorderColor
+        focusedTextColor = colorScheme.onSurface,
+        unfocusedTextColor = colorScheme.onSurface,
+        focusedLabelColor = colorScheme.primary,
+        unfocusedLabelColor = colorScheme.onSurfaceVariant,
+        focusedPlaceholderColor = colorScheme.onSurfaceVariant,
+        unfocusedPlaceholderColor = colorScheme.onSurfaceVariant,
+        focusedBorderColor = colorScheme.primary,
+        unfocusedBorderColor = colorScheme.outline,
+        cursorColor = colorScheme.primary
     )
 
     Column(

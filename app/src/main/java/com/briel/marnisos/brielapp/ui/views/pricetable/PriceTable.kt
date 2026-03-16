@@ -11,20 +11,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.briel.marnisos.brielapp.domain.models.FeeModel
-import com.briel.marnisos.brielapp.ui.theme.TableBlue
-import com.briel.marnisos.brielapp.ui.theme.TableBorder
-import com.briel.marnisos.brielapp.ui.theme.TableText
-import com.briel.marnisos.brielapp.ui.theme.TableTextSecondary
+import com.briel.marnisos.brielapp.ui.theme.extendedColors
 import java.util.Locale
 
 @Composable
@@ -45,10 +42,12 @@ fun PriceTable(
 
 @Composable
 private fun PriceTableHeaderRow() {
+    val colors = MaterialTheme.extendedColors
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(TableBlue)
+            .background(colors.tableHeaderBackground)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -61,7 +60,7 @@ private fun PriceTableHeaderRow() {
                 text = "TARIFA",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = colors.tableHeaderContent,
                 textAlign = TextAlign.Center
             )
         }
@@ -75,7 +74,7 @@ private fun PriceTableHeaderRow() {
                 text = "POTENCIA CONTRATADA",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = colors.tableHeaderContent,
                 textAlign = TextAlign.Center
             )
         }
@@ -89,7 +88,7 @@ private fun PriceTableHeaderRow() {
                 text = "PRECIO POTENCIA (€/kWdia)",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = colors.tableHeaderContent,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -102,7 +101,7 @@ private fun PriceTableHeaderRow() {
                         text = period,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = colors.tableHeaderContent,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f)
                     )
@@ -119,12 +118,14 @@ private fun PriceTableHeaderRow() {
 private fun PriceTableRow(
     row: FeeModel
 ) {
+    val colors = MaterialTheme.extendedColors
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 0.5.dp,
-                color = TableBorder
+                color = colors.tableBorder
             )
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -138,7 +139,7 @@ private fun PriceTableRow(
                 text = row.feeName,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = TableText,
+                color = colors.tableText,
                 textAlign = TextAlign.Center
             )
         }
@@ -151,7 +152,7 @@ private fun PriceTableRow(
             Text(
                 text = row.contractedPower ?: "",
                 fontSize = 12.sp,
-                color = TableTextSecondary,
+                color = colors.tableTextSecondary,
                 textAlign = TextAlign.Center
             )
         }
@@ -175,7 +176,7 @@ private fun PriceTableRow(
                 Text(
                     text = price,
                     fontSize = 11.sp,
-                    color = TableText,
+                    color = colors.tableText,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f)
                 )

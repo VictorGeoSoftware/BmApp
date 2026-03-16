@@ -4,15 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.briel.marnisos.brielapp.ui.components.tables.DynamicTableColumnView
 import com.briel.marnisos.brielapp.ui.theme.Corner
-import com.briel.marnisos.brielapp.ui.theme.HeaderWhite
-import com.briel.marnisos.brielapp.ui.theme.HeaderYellow
-import com.briel.marnisos.brielapp.ui.theme.HighlightBlue
+import com.briel.marnisos.brielapp.ui.theme.extendedColors
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
 import com.briel.marnisos.brielapp.ui.views.common.SectionHeader
 
@@ -29,6 +28,8 @@ fun PriceProposalColumn(
     extraPricing: String,
     totalAnnualPrice: String,
 ) {
+    val colors = MaterialTheme.extendedColors
+
     Column(
         modifier = modifier.then(
             Modifier.width(200.dp),
@@ -65,14 +66,14 @@ fun PriceProposalColumn(
         HeaderBox(
             modifier = Modifier.fillMaxWidth(),
             text = "$totalAnnualPrice€",
-            background = HeaderYellow,
+            background = colors.headerHighlight,
             corner = Corner
         )
 
         SectionHeader(
             modifier = Modifier.fillMaxWidth(),
             text = "pending/ pending",
-            background = HighlightBlue,
+            background = colors.sectionHighlight,
             corner = Corner
         )
     }
@@ -80,20 +81,24 @@ fun PriceProposalColumn(
 
 @Composable
 fun TotalSectionPriceView(content: String) {
+    val colors = MaterialTheme.extendedColors
+
     SectionHeader(
         modifier = Modifier.fillMaxWidth(),
         text = content,
-        background = HeaderYellow,
+        background = colors.headerHighlight,
         corner = Corner
     )
 }
 
 @Composable
 private fun ProposalTitleView(content: String) {
+    val colors = MaterialTheme.extendedColors
+
     HeaderBox(
         modifier = Modifier.fillMaxWidth(),
         text = content,
-        background = HeaderWhite,
+        background = colors.headerBackground,
         corner = Corner
     )
 }

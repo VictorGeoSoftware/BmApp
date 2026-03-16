@@ -16,7 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.briel.marnisos.brielapp.ui.theme.BorderColor
+import com.briel.marnisos.brielapp.ui.theme.extendedColors
 
 @Composable
 fun HeaderBox(
@@ -25,10 +25,12 @@ fun HeaderBox(
     modifier: Modifier = Modifier,
     corner: Dp = 8.dp
 ) {
+    val colors = MaterialTheme.extendedColors
+
     Box(
         modifier
             .background(background, RoundedCornerShape(corner))
-            .border(1.dp, BorderColor, RoundedCornerShape(corner))
+            .border(1.dp, colors.sectionBorder, RoundedCornerShape(corner))
             .padding(vertical = 14.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {

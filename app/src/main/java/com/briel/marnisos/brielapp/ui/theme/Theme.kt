@@ -8,8 +8,54 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+
+@Immutable
+data class BrielExtendedColors(
+    val tableHeaderBackground: Color,
+    val tableHeaderContent: Color,
+    val tableBorder: Color,
+    val tableText: Color,
+    val tableTextSecondary: Color,
+    val headerHighlight: Color,
+    val headerBackground: Color,
+    val sectionHighlight: Color,
+    val sectionBorder: Color
+)
+
+private val LightExtendedColors = BrielExtendedColors(
+    tableHeaderBackground = LightTableHeaderBackground,
+    tableHeaderContent = LightTableHeaderContent,
+    tableBorder = LightTableBorder,
+    tableText = LightTableText,
+    tableTextSecondary = LightTableTextSecondary,
+    headerHighlight = LightHeaderHighlight,
+    headerBackground = LightHeaderBackground,
+    sectionHighlight = LightSectionHighlight,
+    sectionBorder = LightSectionBorder
+)
+
+private val DarkExtendedColors = BrielExtendedColors(
+    tableHeaderBackground = DarkTableHeaderBackground,
+    tableHeaderContent = DarkTableHeaderContent,
+    tableBorder = DarkTableBorder,
+    tableText = DarkTableText,
+    tableTextSecondary = DarkTableTextSecondary,
+    headerHighlight = DarkHeaderHighlight,
+    headerBackground = DarkHeaderBackground,
+    sectionHighlight = DarkSectionHighlight,
+    sectionBorder = DarkSectionBorder
+)
+
+private val LocalBrielExtendedColors = staticCompositionLocalOf { LightExtendedColors }
+
+val MaterialTheme.extendedColors: BrielExtendedColors
+    @Composable
+    get() = LocalBrielExtendedColors.current
 
 private val DarkColorScheme = darkColorScheme(
     primary = AppPrimary,
@@ -42,6 +88,8 @@ fun BrielAppTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -52,9 +100,13 @@ fun BrielAppTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalBrielExtendedColors provides extendedColors
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

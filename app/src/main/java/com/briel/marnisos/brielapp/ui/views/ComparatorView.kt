@@ -34,10 +34,8 @@ import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.ui.Utils.uriToFile
 import com.briel.marnisos.brielapp.ui.components.tables.DynamicTableColumnView
 import com.briel.marnisos.brielapp.ui.components.tables.SideTitleTableView
-import com.briel.marnisos.brielapp.ui.theme.AppOnPrimary
-import com.briel.marnisos.brielapp.ui.theme.AppPrimary
 import com.briel.marnisos.brielapp.ui.theme.Corner
-import com.briel.marnisos.brielapp.ui.theme.HeaderYellow
+import com.briel.marnisos.brielapp.ui.theme.extendedColors
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
 import com.briel.marnisos.brielapp.ui.views.common.SectionHeader
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
@@ -154,6 +152,8 @@ fun UserConsumptionDataView(
     onPdfSelected: (File) -> Unit = {},
     context: Context,
 ) {
+    val colors = MaterialTheme.extendedColors
+
     Column(
         modifier
             .width(400.dp)
@@ -178,7 +178,7 @@ fun UserConsumptionDataView(
         SectionHeader(
             modifier = Modifier.fillMaxWidth(),
             text = "Coste anual termino potencia",
-            background = HeaderYellow,
+            background = colors.headerHighlight,
             corner = Corner
         )
 
@@ -192,7 +192,7 @@ fun UserConsumptionDataView(
         SectionHeader(
             modifier = Modifier.fillMaxWidth(),
             text = "Coste anual termino energía",
-            background = HeaderYellow,
+            background = colors.headerHighlight,
             corner = Corner
         )
 
@@ -208,7 +208,7 @@ fun UserConsumptionDataView(
         HeaderBox(
             modifier = Modifier.fillMaxWidth(),
             text = "COSTE ANUAL FACTURA ELÉCTRICA",
-            background = HeaderYellow,
+            background = colors.headerHighlight,
             corner = Corner
         )
     }
@@ -218,19 +218,21 @@ fun UserConsumptionDataView(
 private fun ComparatorTitleView(
     tariffName: String
 ) {
+    val colors = MaterialTheme.extendedColors
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         HeaderBox(
             modifier = Modifier.weight(1.0f),
             text = tariffName,
-            background = HeaderYellow,
+            background = colors.headerHighlight,
             corner = Corner
         )
         HeaderBox(
             modifier = Modifier.weight(1.0f),
             text = "CONSUMO ANUAL",
-            background = HeaderYellow,
+            background = colors.headerHighlight,
             corner = Corner
         )
     }
@@ -242,11 +244,13 @@ fun SelectFileButton(
     onPdfSelected: (File) -> Unit = {},
     context: Context,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     val fileButtonColors = ButtonDefaults.buttonColors(
-        containerColor = AppPrimary,
-        contentColor = AppOnPrimary,
-        disabledContainerColor = AppPrimary.copy(alpha = 0.8f),
-        disabledContentColor = AppOnPrimary
+        containerColor = colorScheme.primary,
+        contentColor = colorScheme.onPrimary,
+        disabledContainerColor = colorScheme.primary.copy(alpha = 0.8f),
+        disabledContentColor = colorScheme.onPrimary
     )
 
     // PDF file picker launcher
@@ -272,7 +276,7 @@ fun SelectFileButton(
         if (isUploadingReport) {
             CircularProgressIndicator(
                 modifier = Modifier.padding(end = 8.dp),
-                color = AppOnPrimary
+                color = colorScheme.onPrimary
             )
         }
         Text(if (isUploadingReport) "Procesando..." else "Selecciona una factura")
