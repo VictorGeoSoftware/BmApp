@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +34,8 @@ import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.ui.Utils.uriToFile
 import com.briel.marnisos.brielapp.ui.components.tables.DynamicTableColumnView
 import com.briel.marnisos.brielapp.ui.components.tables.SideTitleTableView
+import com.briel.marnisos.brielapp.ui.theme.AppOnPrimary
+import com.briel.marnisos.brielapp.ui.theme.AppPrimary
 import com.briel.marnisos.brielapp.ui.theme.Corner
 import com.briel.marnisos.brielapp.ui.theme.HeaderYellow
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
@@ -95,7 +98,11 @@ fun ComparatorView(
     proposalPriceList: List<ProposalPriceModel>,
 ) {
     Row(
-        modifier = Modifier.fillMaxSize().horizontalScroll(rememberScrollState()),
+        modifier = modifier
+            .padding(end = 16.dp)
+            .fillMaxSize()
+            .statusBarsPadding()
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         UserConsumptionDataView(
@@ -229,6 +236,13 @@ fun SelectFileButton(
     onPdfSelected: (File) -> Unit = {},
     context: Context,
 ) {
+    val fileButtonColors = ButtonDefaults.buttonColors(
+        containerColor = AppPrimary,
+        contentColor = AppOnPrimary,
+        disabledContainerColor = AppPrimary.copy(alpha = 0.8f),
+        disabledContentColor = AppOnPrimary
+    )
+
     // PDF file picker launcher
     val pdfPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -246,12 +260,13 @@ fun SelectFileButton(
         onClick = {
             pdfPickerLauncher.launch(arrayOf("application/pdf"))
         },
-        enabled = !isUploadingReport
+        enabled = !isUploadingReport,
+        colors = fileButtonColors
     ) {
         if (isUploadingReport) {
             CircularProgressIndicator(
                 modifier = Modifier.padding(end = 8.dp),
-                color = Color.White
+                color = AppOnPrimary
             )
         }
         Text(if (isUploadingReport) "Procesando..." else "Selecciona una factura")
