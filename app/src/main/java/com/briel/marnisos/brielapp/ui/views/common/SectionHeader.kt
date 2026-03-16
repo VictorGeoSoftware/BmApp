@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.briel.marnisos.brielapp.ui.theme.BorderColor
+import com.briel.marnisos.brielapp.ui.theme.extendedColors
 
 @Composable
 fun SectionHeader(
@@ -23,10 +23,12 @@ fun SectionHeader(
     modifier: Modifier = Modifier,
     corner: Dp = 8.dp
 ) {
+    val colors = MaterialTheme.extendedColors
+
     Row(
         modifier = modifier
             .background(background, RoundedCornerShape(corner))
-            .border(1.dp, BorderColor, RoundedCornerShape(corner))
+            .border(1.dp, colors.sectionBorder, RoundedCornerShape(corner))
             .padding(vertical = 10.dp, horizontal = 12.dp),
         horizontalArrangement = Arrangement.Center,
     ) {
