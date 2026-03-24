@@ -1,9 +1,11 @@
 package com.briel.marnisos.brielapp.data.network
 
+import com.briel.marnisos.brielapp.data.BuildConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
@@ -15,18 +17,7 @@ import java.util.concurrent.TimeUnit
 
 object KtorClientProvider {
     @Volatile
-    private var _baseUrl: String = "http://217.154.181.175:8081/api/v1" // Remote server
-//    private var _baseUrl: String = "http://192.168.0.102:8081/api/v1" // Phone -> mac!
-//    private var _baseUrl: String = "http://10.0.2.2:8081/api/v1" // Emulator -> host machine default
-//    private var _baseUrl: String = "http://0.0.0.0:8081/api/v1" // Unit test
-
-    fun setBaseUrl(url: String) {
-        _baseUrl = url.trimEnd('/')
-    }
-
-    fun setUnitTestUrl() {
-        _baseUrl = "http://0.0.0.0:8081/api/v1"
-    }
+    private var _baseUrl: String = BuildConfig.API_BASE_URL
 
     val baseUrl: String
         get() = _baseUrl
@@ -43,7 +34,7 @@ object KtorClientProvider {
 
             install(Logging) {
                 logger = Logger.SIMPLE
-                level = io.ktor.client.plugins.logging.LogLevel.BODY
+                level = if (BuildConfig.DEBUG) LogLevel.BODY else LogLevel.NONE
             }
 
             install(ContentNegotiation) {
@@ -60,9 +51,5 @@ object KtorClientProvider {
                 headers.append(HttpHeaders.Accept, ContentType.Application.Json.toString())
             }
         }
-    }
-
-    fun close() {
-        runCatching { client.close() }
     }
 }

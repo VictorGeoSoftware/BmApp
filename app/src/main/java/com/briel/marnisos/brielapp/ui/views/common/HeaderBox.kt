@@ -25,7 +25,7 @@ fun HeaderBox(
     modifier: Modifier = Modifier,
     corner: Dp = 8.dp
 ) {
-    val colors = MaterialTheme.extendedColors
+    val colors = extendedColors
 
     Box(
         modifier

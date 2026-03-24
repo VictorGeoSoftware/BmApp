@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,7 +27,7 @@ fun PriceProposalColumn(
     extraPricing: String,
     totalAnnualPrice: String,
 ) {
-    val colors = MaterialTheme.extendedColors
+    val colors = extendedColors
 
     Column(
         modifier = modifier.then(
@@ -81,7 +80,7 @@ fun PriceProposalColumn(
 
 @Composable
 fun TotalSectionPriceView(content: String) {
-    val colors = MaterialTheme.extendedColors
+    val colors = extendedColors
 
     SectionHeader(
         modifier = Modifier.fillMaxWidth(),
@@ -93,7 +92,7 @@ fun TotalSectionPriceView(content: String) {
 
 @Composable
 private fun ProposalTitleView(content: String) {
-    val colors = MaterialTheme.extendedColors
+    val colors = extendedColors
 
     HeaderBox(
         modifier = Modifier.fillMaxWidth(),
