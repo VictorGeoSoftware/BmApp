@@ -1,8 +1,8 @@
 package com.briel.marnisos.brielapp.data.di
 
+import com.briel.marnisos.brielapp.data.network.AuthApi
 import com.briel.marnisos.brielapp.data.network.KtorClientProvider
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
-import com.briel.marnisos.brielapp.data.network.AuthApi
 import com.briel.marnisos.brielapp.data.repository.AuthRepositoryImpl
 import com.briel.marnisos.brielapp.data.repository.Repository
 import com.briel.marnisos.brielapp.data.repository.buildRepository

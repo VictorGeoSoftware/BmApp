@@ -152,7 +152,7 @@ fun UserConsumptionDataView(
     onPdfSelected: (File) -> Unit = {},
     context: Context,
 ) {
-    val colors = MaterialTheme.extendedColors
+    val colors = extendedColors
 
     Column(
         modifier
@@ -218,7 +218,7 @@ fun UserConsumptionDataView(
 private fun ComparatorTitleView(
     tariffName: String
 ) {
-    val colors = MaterialTheme.extendedColors
+    val colors = extendedColors
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp)

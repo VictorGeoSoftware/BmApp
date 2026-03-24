@@ -2,7 +2,6 @@ package com.briel.marnisos.brielapp.ui.views.pricetable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
 import com.briel.marnisos.brielapp.domain.models.JobStatusType
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
@@ -13,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.math.roundToInt
 
 class ComparatorViewModel(
     private val submitConsumptionReportJobUseCase: SubmitConsumptionReportJobUseCase,
@@ -68,15 +66,12 @@ class ComparatorViewModel(
             // Step 1: Submit the job
             submitConsumptionReportJobUseCase(pdfFile)
                 .onSuccess { jobSubmission ->
-                    println("victor - Job submitted with ID: ${jobSubmission.jobId}")
                     _uploadStatus.value = "Processing report..."
 
                     // Step 2: Poll for job completion
                     pollJobStatus(jobSubmission.jobId)
                 }
                 .onFailure { error ->
-                    println("victor - ViewModel - upload error: $error")
-                    error.printStackTrace()
                     _uploadError.value = "Failed to upload PDF: ${error.message}"
                     _uploadStatus.value = null
                     _isUploadingReport.value = false
@@ -101,8 +96,6 @@ class ComparatorViewModel(
 
             getJobStatusUseCase(jobId)
                 .onSuccess { jobStatus ->
-                    println("victor - Job status: ${jobStatus.status} (attempt $attempts)")
-
                     when (jobStatus.status) {
                         JobStatusType.COMPLETED -> {
                             _uploadStatus.value = "Fetching results..."
@@ -124,7 +117,6 @@ class ComparatorViewModel(
                     }
                 }
                 .onFailure { error ->
-                    println("victor - Error polling job status: $error")
                     _uploadError.value = "Failed to check status: ${error.message}"
                     _uploadStatus.value = null
                     _isUploadingReport.value = false
@@ -167,7 +159,6 @@ class ComparatorViewModel(
                 }
             }
             .onFailure { error ->
-                println("victor - Error fetching job result: $error")
                 _uploadError.value = "Failed to fetch results: ${error.message}"
                 _uploadStatus.value = null
                 _isUploadingReport.value = false

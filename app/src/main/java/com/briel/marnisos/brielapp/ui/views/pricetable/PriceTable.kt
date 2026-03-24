@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,7 +41,7 @@ fun PriceTable(
 
 @Composable
 private fun PriceTableHeaderRow() {
-    val colors = MaterialTheme.extendedColors
+    val colors = extendedColors
 
     Row(
         modifier = Modifier
@@ -118,7 +117,7 @@ private fun PriceTableHeaderRow() {
 private fun PriceTableRow(
     row: FeeModel
 ) {
-    val colors = MaterialTheme.extendedColors
+    val colors = extendedColors
 
     Row(
         modifier = Modifier

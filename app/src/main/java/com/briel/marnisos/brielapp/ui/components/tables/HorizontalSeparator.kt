@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,7 +15,7 @@ import com.briel.marnisos.brielapp.ui.theme.extendedColors
 @Composable
 fun HorizontalSeparator(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.extendedColors.tableBorder,
+    color: Color = extendedColors.tableBorder,
     thickness: Dp = 1.dp
 ) {
     Box(

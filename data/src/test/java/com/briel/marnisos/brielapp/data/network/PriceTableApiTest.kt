@@ -24,7 +24,6 @@ class PriceTableApiTest {
     fun `api should return right response for price table results`() = runTest {
         // When
         val response = priceTableApi.getPriceTableResults()
-        println("victor - response: $response")
 
         // Then
         assertEquals(true, response.isSuccess)
@@ -34,7 +33,6 @@ class PriceTableApiTest {
     fun `api should return right response for user consumption report`() = runTest {
         // When
         val response = priceTableApi.getUserConsumptionData()
-        println("victor - response: $response")
 
         // Then
         assertEquals(true, response.isSuccess)
