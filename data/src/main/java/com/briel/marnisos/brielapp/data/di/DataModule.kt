@@ -16,6 +16,7 @@ import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetUserConsumptionUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
+import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SyncAuthenticatedUserDataUseCase
 import com.google.firebase.auth.FirebaseAuth
@@ -44,6 +45,7 @@ val dataModule = module {
     factory<SubmitConsumptionReportJobUseCase> { SubmitConsumptionReportJobUseCase.Factory.create(get()) }
     factory<GetJobStatusUseCase> { GetJobStatusUseCase.Factory.create(get()) }
     factory<GetJobResultUseCase> { GetJobResultUseCase.Factory.create(get()) }
+    factory<RefreshConsumptionReportUseCase> { RefreshConsumptionReportUseCase.Factory.create(get()) }
 
     // Auth use cases
     factory<LoginWithEmailUseCase> { LoginWithEmailUseCase.Factory.create(get()) }

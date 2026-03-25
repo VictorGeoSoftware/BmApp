@@ -19,6 +19,7 @@ interface Repository {
     suspend fun submitConsumptionReportJob(pdfFile: File): Result<JobSubmissionModel>
     suspend fun getJobStatus(jobId: String): Result<JobStatusModel>
     suspend fun getJobResult(jobId: String): Result<ConsumptionReportModel>
+    suspend fun refreshConsumptionReport(jobId: String): Result<ConsumptionReportModel>
 }
 
 // Provide Repository using injected api
@@ -57,6 +58,12 @@ private class RepositoryImpl(
 
     override suspend fun getJobResult(jobId: String): Result<ConsumptionReportModel> {
         return priceTableApi.getJobResult(jobId).map { response ->
+            response.mapToDomain()
+        }
+    }
+
+    override suspend fun refreshConsumptionReport(jobId: String): Result<ConsumptionReportModel> {
+        return priceTableApi.refreshConsumptionReport(jobId).map { response ->
             response.mapToDomain()
         }
     }
