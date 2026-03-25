@@ -13,6 +13,7 @@ ktor = "3.0.3"
 kotlinxSerialization = "1.7.3"
 mockk = "1.13.8"
 coroutinesTest = "1.7.3"
+coroutinesPlayServices = "1.7.3"
 appcompat = "1.6.1"
 material = "1.10.0"
 koin = "4.1.0"
@@ -55,6 +56,8 @@ koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compos
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

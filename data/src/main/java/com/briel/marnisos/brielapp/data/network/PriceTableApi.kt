@@ -10,6 +10,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
+import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -127,6 +128,24 @@ class PriceTableApi(
         } catch (e: Exception) {
             println("DEBUG - Exception parsing JSON: ${e.message}")
             e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+    suspend fun refreshConsumptionReport(jobId: String): Result<ConsumptionReportResponse> {
+        return try {
+            val response = client.post("$baseUrl/consumption-report-refresh/$jobId")
+            val status = response.status
+
+            if (status == HttpStatusCode.OK) {
+                val rawJson = response.bodyAsText()
+                val json = Json { ignoreUnknownKeys = true }
+                val responseBody = json.decodeFromString<ConsumptionReportResponse>(rawJson)
+                Result.success(responseBody)
+            } else {
+                Result.failure(Exception("Error refreshing job result: $status"))
+            }
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

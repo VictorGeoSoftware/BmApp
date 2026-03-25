@@ -6,7 +6,9 @@ import com.briel.marnisos.brielapp.domain.models.JobStatusType
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
+import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
+import com.briel.marnisos.brielapp.notifications.PriceUpdatesEventBus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,9 +18,11 @@ import java.io.File
 class ComparatorViewModel(
     private val submitConsumptionReportJobUseCase: SubmitConsumptionReportJobUseCase,
     private val getJobStatusUseCase: GetJobStatusUseCase,
-    private val getJobResultUseCase: GetJobResultUseCase
+    private val getJobResultUseCase: GetJobResultUseCase,
+    private val refreshConsumptionReportUseCase: RefreshConsumptionReportUseCase
 ) : ViewModel() {
 
+    private var lastCompletedJobId: String? = null
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
@@ -50,6 +54,12 @@ class ComparatorViewModel(
     init {
         viewModelScope.launch {
             fetchJobResult("5cdab93b-c391-4aa4-8dba-8feb35d13a12")
+        }
+
+        viewModelScope.launch {
+            PriceUpdatesEventBus.events.collect {
+                refreshLatestProposalsIfAvailable()
+            }
         }
     }
 
@@ -137,6 +147,7 @@ class ComparatorViewModel(
     private suspend fun fetchJobResult(jobId: String) {
         getJobResultUseCase(jobId)
             .onSuccess { report ->
+                lastCompletedJobId = jobId
                 // Update the consumption data with the cleaned data from the report
                 _tariffName.value = report.consumptionData.feeType
                 // Update IVA and electrical tax from first proposal (all proposals have same values)
@@ -162,6 +173,18 @@ class ComparatorViewModel(
                 _uploadError.value = "Failed to fetch results: ${error.message}"
                 _uploadStatus.value = null
                 _isUploadingReport.value = false
+            }
+    }
+
+    private suspend fun refreshLatestProposalsIfAvailable() {
+        val jobId = lastCompletedJobId ?: return
+
+        refreshConsumptionReportUseCase(jobId)
+            .onSuccess { report ->
+                _proposalPriceModelList.value = report.proposals
+            }
+            .onFailure { error ->
+                _uploadError.value = "Failed to refresh prices: ${error.message}"
             }
     }
 
