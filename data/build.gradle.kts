@@ -11,17 +11,25 @@ android {
     defaultConfig {
         minSdk = 27
         consumerProguardFiles("consumer-rules.pro")
+    }
 
-        buildConfigField("String", "API_BASE_URL", "\"http://217.154.181.175:8081/api/v1\"")
+    flavorDimensions += "environment"
+    productFlavors {
+        create("prod") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"http://217.154.181.175:8081/api/v1\"")
+        }
+        create("local") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"http://192.168.0.102:8081/api/v1\"")
+        }
     }
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://217.154.181.175:8081/api/v1\"")
         }
         release {
             isMinifyEnabled = false
-            buildConfigField("String", "API_BASE_URL", "\"http://217.154.181.175:8081/api/v1\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
