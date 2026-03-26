@@ -28,8 +28,8 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
-      - name: Build debug APK
-        run: ./gradlew :app:assembleDebug
+      - name: Build prod debug APK
+        run: ./gradlew :app:assembleProdDebug
 
       - name: Upload APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -37,5 +37,5 @@ jobs:
           appId: 1:496422828095:android:9a4f55aef38cd329d7608a
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BMWEB_A0A70 }}
           groups: internal-testers
-          file: app/build/outputs/apk/debug/app-debug.apk
+          file: app/build/outputs/apk/prod/debug/app-prod-debug.apk
           releaseNotes: Automated build from GitHub Actions for ${{ github.sha }}
