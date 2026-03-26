@@ -7,7 +7,9 @@ data class ConsumptionReportResponse(
     val success: Boolean,
     val userData: DoclingExtractedData,
     val consumptionData: CleanedConsumptionData,
-    val proposals: List<ProposalPriceData>
+    val proposals: List<ProposalPriceData>,
+    val iva: Double,
+    val impuestoElectrico: Double
 )
 
 @Serializable

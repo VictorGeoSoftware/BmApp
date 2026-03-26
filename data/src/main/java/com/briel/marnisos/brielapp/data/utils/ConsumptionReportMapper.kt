@@ -21,7 +21,9 @@ object ConsumptionReportMapper {
             success = this.success,
             userData = this.userData.mapToDomain(),
             consumptionData = this.consumptionData.mapToDomain(),
-            proposals = this.proposals.map { it.mapToDomain() }
+            proposals = this.proposals.map { it.mapToDomain() },
+            iva = this.iva,
+            impuestoElectrico = this.impuestoElectrico
         )
     }
 

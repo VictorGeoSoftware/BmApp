@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Locale
 
 class ComparatorViewModel(
     private val submitConsumptionReportJobUseCase: SubmitConsumptionReportJobUseCase,
@@ -163,9 +164,8 @@ class ComparatorViewModel(
                 persistLastCompletedJobIdUseCase(jobId)
                 // Update the consumption data with the cleaned data from the report
                 _tariffName.value = report.consumptionData.feeType
-                // Update IVA and electrical tax from first proposal (all proposals have same values)
-                _impuestoElectrico.value = "5.11 %" // TODO:: return this from back end!
-                _iva.value = "21 %" // TODO:: return this from back end!
+                _impuestoElectrico.value = report.impuestoElectrico.toPercentString()
+                _iva.value = report.iva.toPercentString()
                 _uploadStatus.value = "Complete!"
                 _isUploadingReport.value = false
 
@@ -198,6 +198,8 @@ class ComparatorViewModel(
         refreshConsumptionReportUseCase(jobId)
             .onSuccess { report ->
                 _proposalPriceModelList.value = report.proposals
+                _impuestoElectrico.value = report.impuestoElectrico.toPercentString()
+                _iva.value = report.iva.toPercentString()
             }
             .onFailure { error ->
                 if (error.isJobExpiredOrNotFound()) {
@@ -216,6 +218,10 @@ class ComparatorViewModel(
     private fun Throwable.isJobExpiredOrNotFound(): Boolean {
         val message = message.orEmpty()
         return message.contains("404") || message.contains("not found", ignoreCase = true)
+    }
+
+    private fun Double.toPercentString(): String {
+        return String.format(Locale.US, "%.2f %%", this)
     }
 
 
