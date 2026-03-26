@@ -1,5 +1,7 @@
 package com.briel.marnisos.brielapp.data.di
 
+import android.content.Context
+import com.briel.marnisos.brielapp.data.local.LastCompletedJobIdLocalDataSource
 import com.briel.marnisos.brielapp.data.network.AuthApi
 import com.briel.marnisos.brielapp.data.network.KtorClientProvider
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
@@ -8,14 +10,17 @@ import com.briel.marnisos.brielapp.data.repository.Repository
 import com.briel.marnisos.brielapp.data.repository.buildRepository
 import com.briel.marnisos.brielapp.data.usecases.create
 import com.briel.marnisos.brielapp.domain.repository.AuthRepository
+import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetFirebaseIdTokenUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetUserConsumptionUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
+import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SyncAuthenticatedUserDataUseCase
@@ -33,8 +38,11 @@ val dataModule = module {
     // Firebase
     single { FirebaseAuth.getInstance() }
 
+    // Local persistence
+    single { LastCompletedJobIdLocalDataSource(context = get<Context>()) }
+
     // Provide repository
-    single<Repository> { buildRepository(get()) }
+    single<Repository> { buildRepository(get(), get()) }
     single<AuthRepository> { AuthRepositoryImpl(firebaseAuth = get(), authApi = get()) }
 
     // Provide use cases
@@ -46,6 +54,9 @@ val dataModule = module {
     factory<GetJobStatusUseCase> { GetJobStatusUseCase.Factory.create(get()) }
     factory<GetJobResultUseCase> { GetJobResultUseCase.Factory.create(get()) }
     factory<RefreshConsumptionReportUseCase> { RefreshConsumptionReportUseCase.Factory.create(get()) }
+    factory<PersistLastCompletedJobIdUseCase> { PersistLastCompletedJobIdUseCase.Factory.create(get()) }
+    factory<GetLastCompletedJobIdUseCase> { GetLastCompletedJobIdUseCase.Factory.create(get()) }
+    factory<ClearLastCompletedJobIdUseCase> { ClearLastCompletedJobIdUseCase.Factory.create(get()) }
 
     // Auth use cases
     factory<LoginWithEmailUseCase> { LoginWithEmailUseCase.Factory.create(get()) }
