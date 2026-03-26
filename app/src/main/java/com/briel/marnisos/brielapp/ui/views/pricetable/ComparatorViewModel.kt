@@ -12,8 +12,12 @@ import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseC
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
 import com.briel.marnisos.brielapp.notifications.PriceUpdatesEventBus
+import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfDocumentDataFactory
+import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfGenerator
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
@@ -27,7 +31,9 @@ class ComparatorViewModel(
     private val persistLastCompletedJobIdUseCase: PersistLastCompletedJobIdUseCase,
     private val getLastCompletedJobIdUseCase: GetLastCompletedJobIdUseCase,
     private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase,
-    private val proposalCalculationHelper: ProposalCalculationHelper
+    private val proposalCalculationHelper: ProposalCalculationHelper,
+    private val comparatorPdfDocumentDataFactory: ComparatorPdfDocumentDataFactory,
+    private val comparatorPdfGenerator: ComparatorPdfGenerator
 ) : ViewModel() {
 
     private var lastCompletedJobId: String? = null
@@ -66,6 +72,15 @@ class ComparatorViewModel(
 
     private val _uploadError = MutableStateFlow<String?>(value = null)
     val uploadError: StateFlow<String?> = _uploadError
+
+    private val _isGeneratingPdf = MutableStateFlow(value = false)
+    val isGeneratingPdf: StateFlow<Boolean> = _isGeneratingPdf
+
+    private val _pdfExportError = MutableStateFlow<String?>(value = null)
+    val pdfExportError: StateFlow<String?> = _pdfExportError
+
+    private val _generatedPdfFile = MutableSharedFlow<File>(extraBufferCapacity = 1)
+    val generatedPdfFile: SharedFlow<File> = _generatedPdfFile
 
     init {
         viewModelScope.launch {
@@ -294,6 +309,46 @@ class ComparatorViewModel(
     private fun parseAmountInput(input: String): Double {
         if (input.isBlank()) return 0.0
         return input.replace(',', '.').toDoubleOrNull() ?: 0.0
+    }
+
+    fun exportVisibleProposalsAsPdf() {
+        if (_isGeneratingPdf.value) return
+
+        viewModelScope.launch {
+            _isGeneratingPdf.value = true
+            _pdfExportError.value = null
+
+            val documentData = comparatorPdfDocumentDataFactory.create(
+                tariffName = _tariffName.value,
+                powerTermRows = _powerTermRows.value,
+                energyConsumedRows = _energyConsumedRows.value,
+                iva = _iva.value,
+                impuestoElectrico = _impuestoElectrico.value,
+                proposalPriceList = _proposalPriceModelList.value,
+                proposalFixedAmountByTitle = _proposalFixedAmountByTitle.value,
+                proposalVisibilityByTitle = _proposalVisibilityByTitle.value
+            )
+
+            if (documentData.proposals.isEmpty()) {
+                _pdfExportError.value = "No hay propuestas visibles para exportar"
+                _isGeneratingPdf.value = false
+                return@launch
+            }
+
+            comparatorPdfGenerator.generate(documentData)
+                .onSuccess { file ->
+                    _generatedPdfFile.emit(file)
+                }
+                .onFailure { error ->
+                    _pdfExportError.value = "No se pudo generar el PDF: ${error.message}"
+                }
+
+            _isGeneratingPdf.value = false
+        }
+    }
+
+    fun clearPdfExportError() {
+        _pdfExportError.value = null
     }
 
 

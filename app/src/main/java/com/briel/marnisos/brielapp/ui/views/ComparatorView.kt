@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -35,20 +36,24 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import android.widget.Toast
 import com.briel.marnisos.brielapp.BuildConfig
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.ui.Utils.uriToFile
@@ -60,7 +65,9 @@ import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
 import com.briel.marnisos.brielapp.ui.views.common.SectionHeader
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.PriceProposalColumn
+import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
@@ -79,11 +86,27 @@ fun ComparatorScreen(
     val iva by comparatorViewModel.iva.collectAsState()
     val impuestoElectrico by comparatorViewModel.impuestoElectrico.collectAsState()
     val isUploadingReport by comparatorViewModel.isUploadingReport.collectAsState()
+    val isGeneratingPdf by comparatorViewModel.isGeneratingPdf.collectAsState()
+    val pdfExportError by comparatorViewModel.pdfExportError.collectAsState()
     val proposalPriceList by comparatorViewModel.proposalPriceModelList.collectAsState()
     val proposalFixedAmountByTitle by comparatorViewModel.proposalFixedAmountByTitle.collectAsState()
     val proposalVisibilityByTitle by comparatorViewModel.proposalVisibilityByTitle.collectAsState()
 
     val context = LocalContext.current
+    val pdfShareManager = remember { ComparatorPdfShareManager() }
+
+    LaunchedEffect(comparatorViewModel, context, pdfShareManager) {
+        comparatorViewModel.generatedPdfFile.collectLatest { generatedFile ->
+            pdfShareManager.sharePdf(context, generatedFile)
+        }
+    }
+
+    LaunchedEffect(pdfExportError, context) {
+        pdfExportError?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            comparatorViewModel.clearPdfExportError()
+        }
+    }
 
     ComparatorView(
         modifier = modifier,
@@ -93,12 +116,14 @@ fun ComparatorScreen(
         iva = iva,
         impuestoElectrico = impuestoElectrico,
         isUploadingReport = isUploadingReport,
+        isGeneratingPdf = isGeneratingPdf,
         proposalPriceList = proposalPriceList,
         proposalFixedAmountByTitle = proposalFixedAmountByTitle,
         proposalVisibilityByTitle = proposalVisibilityByTitle,
         onPdfSelected = { pdfFile ->
             comparatorViewModel.uploadConsumptionReport(pdfFile)
         },
+        onGeneratePdfClick = comparatorViewModel::exportVisibleProposalsAsPdf,
         onProposalFixedAmountChanged = comparatorViewModel::updateProposalFixedAmount,
         onProposalVisibilityChanged = comparatorViewModel::setProposalVisibility,
         versionLabel = BuildConfig.DEPLOY_VERSION,
@@ -119,7 +144,9 @@ fun ComparatorView(
     iva: String,
     impuestoElectrico: String,
     isUploadingReport: Boolean = false,
+    isGeneratingPdf: Boolean = false,
     onPdfSelected: (File) -> Unit = {},
+    onGeneratePdfClick: () -> Unit = {},
     context: Context,
     proposalPriceList: List<ProposalPriceModel>,
     proposalFixedAmountByTitle: Map<String, String>,
@@ -158,6 +185,9 @@ fun ComparatorView(
         ) {
             TopActionBar(
                 isUploadingReport = isUploadingReport,
+                isGeneratingPdf = isGeneratingPdf,
+                showPrintButton = selectedDestination == ComparatorDestination.PROPOSALS && visibleProposals.isNotEmpty(),
+                onGeneratePdfClick = onGeneratePdfClick,
                 onPdfSelected = onPdfSelected,
                 context = context,
                 onOpenDrawer = {
@@ -248,6 +278,9 @@ private fun DrawerContent(
 @Composable
 private fun TopActionBar(
     isUploadingReport: Boolean,
+    isGeneratingPdf: Boolean,
+    showPrintButton: Boolean,
+    onGeneratePdfClick: () -> Unit,
     onPdfSelected: (File) -> Unit,
     context: Context,
     onOpenDrawer: () -> Unit,
@@ -266,11 +299,43 @@ private fun TopActionBar(
             )
         }
 
-        SelectFileButton(
-            isUploadingReport = isUploadingReport,
-            onPdfSelected = onPdfSelected,
-            context = context,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (showPrintButton) {
+                PrintButton(
+                    isGeneratingPdf = isGeneratingPdf,
+                    onGeneratePdfClick = onGeneratePdfClick
+                )
+            }
+
+            SelectFileButton(
+                isUploadingReport = isUploadingReport,
+                onPdfSelected = onPdfSelected,
+                context = context,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PrintButton(
+    isGeneratingPdf: Boolean,
+    onGeneratePdfClick: () -> Unit,
+) {
+    IconButton(
+        onClick = onGeneratePdfClick,
+        enabled = !isGeneratingPdf
+    ) {
+        if (isGeneratingPdf) {
+            CircularProgressIndicator()
+        } else {
+            Icon(
+                painter = painterResource(id = android.R.drawable.ic_menu_save),
+                contentDescription = "Generar PDF"
+            )
+        }
     }
 }
 
