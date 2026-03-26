@@ -80,6 +80,7 @@ fun ComparatorScreen(
     val impuestoElectrico by comparatorViewModel.impuestoElectrico.collectAsState()
     val isUploadingReport by comparatorViewModel.isUploadingReport.collectAsState()
     val proposalPriceList by comparatorViewModel.proposalPriceModelList.collectAsState()
+    val proposalFixedAmountByTitle by comparatorViewModel.proposalFixedAmountByTitle.collectAsState()
     val proposalVisibilityByTitle by comparatorViewModel.proposalVisibilityByTitle.collectAsState()
 
     val context = LocalContext.current
@@ -93,10 +94,12 @@ fun ComparatorScreen(
         impuestoElectrico = impuestoElectrico,
         isUploadingReport = isUploadingReport,
         proposalPriceList = proposalPriceList,
+        proposalFixedAmountByTitle = proposalFixedAmountByTitle,
         proposalVisibilityByTitle = proposalVisibilityByTitle,
         onPdfSelected = { pdfFile ->
             comparatorViewModel.uploadConsumptionReport(pdfFile)
         },
+        onProposalFixedAmountChanged = comparatorViewModel::updateProposalFixedAmount,
         onProposalVisibilityChanged = comparatorViewModel::setProposalVisibility,
         versionLabel = BuildConfig.DEPLOY_VERSION,
         context = context
@@ -119,7 +122,9 @@ fun ComparatorView(
     onPdfSelected: (File) -> Unit = {},
     context: Context,
     proposalPriceList: List<ProposalPriceModel>,
+    proposalFixedAmountByTitle: Map<String, String>,
     proposalVisibilityByTitle: Map<String, Boolean>,
+    onProposalFixedAmountChanged: (proposalTitle: String, fixedAmountInput: String) -> Unit = { _, _ -> },
     onProposalVisibilityChanged: (proposalTitle: String, isVisible: Boolean) -> Unit = { _, _ -> },
     versionLabel: String,
 ) {
@@ -172,6 +177,8 @@ fun ComparatorView(
                         iva = iva,
                         impuestoElectrico = impuestoElectrico,
                         visibleProposalPriceList = visibleProposals,
+                        proposalFixedAmountByTitle = proposalFixedAmountByTitle,
+                        onProposalFixedAmountChanged = onProposalFixedAmountChanged,
                     )
                 }
 
@@ -276,6 +283,8 @@ private fun ComparatorProposalsView(
     iva: String,
     impuestoElectrico: String,
     visibleProposalPriceList: List<ProposalPriceModel>,
+    proposalFixedAmountByTitle: Map<String, String>,
+    onProposalFixedAmountChanged: (proposalTitle: String, fixedAmountInput: String) -> Unit,
 ) {
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
@@ -306,10 +315,13 @@ private fun ComparatorProposalsView(
                     annualPowerTermCost = proposal.annualPowerTermCostFormatted,
                     consumedEnergyItems = proposal.consumedEnergyItems,
                     annualEnergyCost = proposal.annualEnergyCostFormatted,
-                    extraPricing = proposal.extraServicesFormatted,
                     electricTax = proposal.electricalTaxFormatted,
                     iva = proposal.ivaFormatted,
                     totalAnnualPrice = proposal.totalAnnualPriceFormatted,
+                    fixedAmountInputValue = proposalFixedAmountByTitle[proposal.proposalTitle].orEmpty(),
+                    onFixedAmountInputChange = { newValue ->
+                        onProposalFixedAmountChanged(proposal.proposalTitle, newValue)
+                    },
                 )
             }
         }
@@ -438,9 +450,12 @@ fun UserConsumptionDataView(
         )
 
         // Extra services table (2 columns)
-        SimpleTwoColumnTable(
+        SimpleTwoColumnHeader(
+            modifier = Modifier.height(57.dp),
             leftHeader = "SERVICIOS EXTRA",
             rightHeader = "Coste Anual",
+        )
+        SimpleTwoColumnTable(
             iva = iva,
             impuestoElectrico = impuestoElectrico,
         )
@@ -525,9 +540,28 @@ fun SelectFileButton(
 }
 
 @Composable
-private fun SimpleTwoColumnTable(
+private fun SimpleTwoColumnHeader(
+    modifier: Modifier = Modifier,
     leftHeader: String,
     rightHeader: String,
+) {
+    Row(
+        modifier = modifier.then(Modifier.fillMaxWidth()),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        DynamicTableColumnView(
+            modifier = Modifier.weight(1.0f),
+            values = listOf(leftHeader),
+        )
+        DynamicTableColumnView(
+            modifier = Modifier.weight(1.0f),
+            values = listOf(rightHeader),
+        )
+    }
+}
+
+@Composable
+private fun SimpleTwoColumnTable(
     iva: String,
     impuestoElectrico: String,
 ) {
@@ -537,11 +571,11 @@ private fun SimpleTwoColumnTable(
     ) {
         DynamicTableColumnView(
             modifier = Modifier.weight(1.0f),
-            values = listOf(leftHeader, "IMPUESTO ELÉCTRICO", "IVA"),
+            values = listOf("IMPUESTO ELÉCTRICO", "IVA"),
         )
         DynamicTableColumnView(
             modifier = Modifier.weight(1.0f),
-            values = listOf(rightHeader, impuestoElectrico, iva),
+            values = listOf(impuestoElectrico, iva),
         )
     }
 }
@@ -581,6 +615,7 @@ private fun ComparatorViewPreview() {
                 iva = "21",
                 impuestoElectrico = "5.11",
                 proposalPriceList = emptyList(),
+                proposalFixedAmountByTitle = emptyMap(),
                 proposalVisibilityByTitle = emptyMap(),
                 versionLabel = "v2603_1316",
                 context = context,

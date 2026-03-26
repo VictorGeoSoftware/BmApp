@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.briel.marnisos.brielapp.ui.components.tables.DynamicTableColumnView
+import com.briel.marnisos.brielapp.ui.components.tables.ExtraServicesAndTaxesRow
 import com.briel.marnisos.brielapp.ui.theme.Corner
 import com.briel.marnisos.brielapp.ui.theme.extendedColors
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
@@ -24,8 +25,9 @@ fun PriceProposalColumn(
     annualEnergyCost: String,
     electricTax: String,
     iva: String,
-    extraPricing: String,
     totalAnnualPrice: String,
+    fixedAmountInputValue: String,
+    onFixedAmountInputChange: (String) -> Unit,
 ) {
     val colors = extendedColors
 
@@ -57,9 +59,12 @@ fun PriceProposalColumn(
             content = "$annualEnergyCost€"
         )
 
-        DynamicTableColumnView(
+        ExtraServicesAndTaxesRow(
             modifier = Modifier.fillMaxWidth(),
-            values = listOf("$extraPricing€", "$electricTax€", "$iva€"),
+            iva = iva,
+            electricityTax = electricTax,
+            fixedAmountInputValue = fixedAmountInputValue,
+            onFixedAmountInputChange = onFixedAmountInputChange
         )
 
         HeaderBox(
@@ -113,7 +118,8 @@ private fun PriceProposalColumnPreview() {
         annualEnergyCost = "100.00",
         electricTax = "2.00",
         iva = "2.00",
-        extraPricing = "2.00",
         totalAnnualPrice = "100.00",
+        fixedAmountInputValue = "",
+        onFixedAmountInputChange = {},
     )
 }
