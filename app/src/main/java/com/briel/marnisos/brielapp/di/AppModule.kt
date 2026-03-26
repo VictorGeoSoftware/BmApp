@@ -12,7 +12,10 @@ val appModule = module {
             submitConsumptionReportJobUseCase = get(),
             getJobStatusUseCase = get(),
             getJobResultUseCase = get(),
-            refreshConsumptionReportUseCase = get()
+            refreshConsumptionReportUseCase = get(),
+            persistLastCompletedJobIdUseCase = get(),
+            getLastCompletedJobIdUseCase = get(),
+            clearLastCompletedJobIdUseCase = get()
         )
     }
 

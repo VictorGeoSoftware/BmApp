@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.briel.marnisos.brielapp.domain.models.JobStatusType
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
+import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
+import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
 import com.briel.marnisos.brielapp.notifications.PriceUpdatesEventBus
@@ -19,7 +22,10 @@ class ComparatorViewModel(
     private val submitConsumptionReportJobUseCase: SubmitConsumptionReportJobUseCase,
     private val getJobStatusUseCase: GetJobStatusUseCase,
     private val getJobResultUseCase: GetJobResultUseCase,
-    private val refreshConsumptionReportUseCase: RefreshConsumptionReportUseCase
+    private val refreshConsumptionReportUseCase: RefreshConsumptionReportUseCase,
+    private val persistLastCompletedJobIdUseCase: PersistLastCompletedJobIdUseCase,
+    private val getLastCompletedJobIdUseCase: GetLastCompletedJobIdUseCase,
+    private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase
 ) : ViewModel() {
 
     private var lastCompletedJobId: String? = null
@@ -53,7 +59,7 @@ class ComparatorViewModel(
 
     init {
         viewModelScope.launch {
-            fetchJobResult("5cdab93b-c391-4aa4-8dba-8feb35d13a12")
+            restoreLastCompletedJobIfAvailable()
         }
 
         viewModelScope.launch {
@@ -61,6 +67,12 @@ class ComparatorViewModel(
                 refreshLatestProposalsIfAvailable()
             }
         }
+    }
+
+    private suspend fun restoreLastCompletedJobIfAvailable() {
+        val persistedJobId = getLastCompletedJobIdUseCase() ?: return
+        lastCompletedJobId = persistedJobId
+        fetchJobResult(persistedJobId)
     }
 
     /**
@@ -148,6 +160,7 @@ class ComparatorViewModel(
         getJobResultUseCase(jobId)
             .onSuccess { report ->
                 lastCompletedJobId = jobId
+                persistLastCompletedJobIdUseCase(jobId)
                 // Update the consumption data with the cleaned data from the report
                 _tariffName.value = report.consumptionData.feeType
                 // Update IVA and electrical tax from first proposal (all proposals have same values)
@@ -170,6 +183,9 @@ class ComparatorViewModel(
                 }
             }
             .onFailure { error ->
+                if (error.isJobExpiredOrNotFound()) {
+                    clearPersistedLastCompletedJobId()
+                }
                 _uploadError.value = "Failed to fetch results: ${error.message}"
                 _uploadStatus.value = null
                 _isUploadingReport.value = false
@@ -184,8 +200,22 @@ class ComparatorViewModel(
                 _proposalPriceModelList.value = report.proposals
             }
             .onFailure { error ->
+                if (error.isJobExpiredOrNotFound()) {
+                    clearPersistedLastCompletedJobId()
+                    return
+                }
                 _uploadError.value = "Failed to refresh prices: ${error.message}"
             }
+    }
+
+    private suspend fun clearPersistedLastCompletedJobId() {
+        clearLastCompletedJobIdUseCase()
+        lastCompletedJobId = null
+    }
+
+    private fun Throwable.isJobExpiredOrNotFound(): Boolean {
+        val message = message.orEmpty()
+        return message.contains("404") || message.contains("not found", ignoreCase = true)
     }
 
 

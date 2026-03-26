@@ -1,5 +1,6 @@
 package com.briel.marnisos.brielapp.data.repository
 
+import com.briel.marnisos.brielapp.data.local.LastCompletedJobIdLocalDataSource
 import com.briel.marnisos.brielapp.data.mappers.PriceMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
 import com.briel.marnisos.brielapp.data.utils.ConsumptionReportMapper.mapToDomain
@@ -20,13 +21,24 @@ interface Repository {
     suspend fun getJobStatus(jobId: String): Result<JobStatusModel>
     suspend fun getJobResult(jobId: String): Result<ConsumptionReportModel>
     suspend fun refreshConsumptionReport(jobId: String): Result<ConsumptionReportModel>
+
+    suspend fun persistLastCompletedJobId(jobId: String)
+    suspend fun getLastCompletedJobId(): String?
+    suspend fun clearLastCompletedJobId()
 }
 
 // Provide Repository using injected api
-fun buildRepository(priceTableApi: PriceTableApi): Repository = RepositoryImpl(priceTableApi)
+fun buildRepository(
+    priceTableApi: PriceTableApi,
+    lastCompletedJobIdLocalDataSource: LastCompletedJobIdLocalDataSource
+): Repository = RepositoryImpl(
+    priceTableApi = priceTableApi,
+    lastCompletedJobIdLocalDataSource = lastCompletedJobIdLocalDataSource
+)
 
 private class RepositoryImpl(
-    private val priceTableApi: PriceTableApi
+    private val priceTableApi: PriceTableApi,
+    private val lastCompletedJobIdLocalDataSource: LastCompletedJobIdLocalDataSource
 ) : Repository {
     override suspend fun getPriceTables(): Result<PriceTablesInformationModel> {
         return priceTableApi.getPriceTableResults().map { response ->
@@ -66,5 +78,17 @@ private class RepositoryImpl(
         return priceTableApi.refreshConsumptionReport(jobId).map { response ->
             response.mapToDomain()
         }
+    }
+
+    override suspend fun persistLastCompletedJobId(jobId: String) {
+        lastCompletedJobIdLocalDataSource.persist(jobId)
+    }
+
+    override suspend fun getLastCompletedJobId(): String? {
+        return lastCompletedJobIdLocalDataSource.getValidOrNull()
+    }
+
+    override suspend fun clearLastCompletedJobId() {
+        lastCompletedJobIdLocalDataSource.clear()
     }
 }
