@@ -4,7 +4,9 @@ data class ConsumptionReportModel(
     val success: Boolean,
     val userData: DoclingExtractedDataModel,
     val consumptionData: CleanedConsumptionDataModel,
-    val proposals: List<ProposalPriceModel>
+    val proposals: List<ProposalPriceModel>,
+    val iva: Double,
+    val impuestoElectrico: Double
 )
 
 data class DoclingExtractedDataModel(
