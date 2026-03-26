@@ -5,6 +5,12 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+val generatedDeployVersion = "v" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMM_HHmm"))
+val appDeployVersion = System.getenv("APP_DEPLOY_VERSION")?.takeIf { it.isNotBlank() } ?: generatedDeployVersion
+
 android {
     namespace = "com.briel.marnisos.brielapp"
     compileSdk = 36
@@ -15,6 +21,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
+        buildConfigField("String", "DEPLOY_VERSION", "\"$appDeployVersion\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +55,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

@@ -49,6 +49,9 @@ class ComparatorViewModel(
     private val _proposalPriceModelList = MutableStateFlow<List<ProposalPriceModel>>(value = emptyList())
     val proposalPriceModelList: StateFlow<List<ProposalPriceModel>> = _proposalPriceModelList
 
+    private val _proposalVisibilityByTitle = MutableStateFlow<Map<String, Boolean>>(value = emptyMap())
+    val proposalVisibilityByTitle: StateFlow<Map<String, Boolean>> = _proposalVisibilityByTitle
+
     private val _isUploadingReport = MutableStateFlow(value = false)
     val isUploadingReport: StateFlow<Boolean> = _isUploadingReport
 
@@ -177,6 +180,7 @@ class ComparatorViewModel(
 
                 // Proposals now come directly from backend
                 _proposalPriceModelList.value = report.proposals
+                synchronizeProposalVisibility(report.proposals)
                 viewModelScope.launch {
                     delay(2000)
                     _uploadStatus.value = null
@@ -198,6 +202,7 @@ class ComparatorViewModel(
         refreshConsumptionReportUseCase(jobId)
             .onSuccess { report ->
                 _proposalPriceModelList.value = report.proposals
+                synchronizeProposalVisibility(report.proposals)
                 _impuestoElectrico.value = report.impuestoElectrico.toPercentString()
                 _iva.value = report.iva.toPercentString()
             }
@@ -222,6 +227,22 @@ class ComparatorViewModel(
 
     private fun Double.toPercentString(): String {
         return String.format(Locale.US, "%.2f %%", this)
+    }
+
+    private fun synchronizeProposalVisibility(proposals: List<ProposalPriceModel>) {
+        val currentVisibility = _proposalVisibilityByTitle.value
+        _proposalVisibilityByTitle.value = proposals.associate { proposal ->
+            proposal.proposalTitle to (currentVisibility[proposal.proposalTitle] ?: true)
+        }
+    }
+
+    fun setProposalVisibility(proposalTitle: String, isVisible: Boolean) {
+        val currentVisibility = _proposalVisibilityByTitle.value
+        if (!currentVisibility.containsKey(proposalTitle)) return
+
+        _proposalVisibilityByTitle.value = currentVisibility.toMutableMap().apply {
+            this[proposalTitle] = isVisible
+        }
     }
 
 

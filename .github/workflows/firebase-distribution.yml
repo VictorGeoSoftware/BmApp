@@ -28,6 +28,9 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
+      - name: Generate deploy version label
+        run: echo "APP_DEPLOY_VERSION=v$(date +'%d%m_%H%M')" >> "$GITHUB_ENV"
+
       - name: Build prod debug APK
         run: ./gradlew :app:assembleProdDebug
 
