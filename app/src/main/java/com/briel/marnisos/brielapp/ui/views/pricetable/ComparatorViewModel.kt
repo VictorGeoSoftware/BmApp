@@ -26,10 +26,13 @@ class ComparatorViewModel(
     private val refreshConsumptionReportUseCase: RefreshConsumptionReportUseCase,
     private val persistLastCompletedJobIdUseCase: PersistLastCompletedJobIdUseCase,
     private val getLastCompletedJobIdUseCase: GetLastCompletedJobIdUseCase,
-    private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase
+    private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase,
+    private val proposalCalculationHelper: ProposalCalculationHelper
 ) : ViewModel() {
 
     private var lastCompletedJobId: String? = null
+    private var ivaPercentFromBackend: Double = 0.0
+    private var baseProposalPriceModelList: List<ProposalPriceModel> = emptyList()
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
@@ -48,6 +51,9 @@ class ComparatorViewModel(
 
     private val _proposalPriceModelList = MutableStateFlow<List<ProposalPriceModel>>(value = emptyList())
     val proposalPriceModelList: StateFlow<List<ProposalPriceModel>> = _proposalPriceModelList
+
+    private val _proposalFixedAmountByTitle = MutableStateFlow<Map<String, String>>(value = emptyMap())
+    val proposalFixedAmountByTitle: StateFlow<Map<String, String>> = _proposalFixedAmountByTitle
 
     private val _proposalVisibilityByTitle = MutableStateFlow<Map<String, Boolean>>(value = emptyMap())
     val proposalVisibilityByTitle: StateFlow<Map<String, Boolean>> = _proposalVisibilityByTitle
@@ -179,7 +185,8 @@ class ComparatorViewModel(
                 }
 
                 // Proposals now come directly from backend
-                _proposalPriceModelList.value = report.proposals
+                ivaPercentFromBackend = report.iva
+                setBaseProposals(report.proposals)
                 synchronizeProposalVisibility(report.proposals)
                 viewModelScope.launch {
                     delay(2000)
@@ -201,7 +208,8 @@ class ComparatorViewModel(
 
         refreshConsumptionReportUseCase(jobId)
             .onSuccess { report ->
-                _proposalPriceModelList.value = report.proposals
+                ivaPercentFromBackend = report.iva
+                setBaseProposals(report.proposals)
                 synchronizeProposalVisibility(report.proposals)
                 _impuestoElectrico.value = report.impuestoElectrico.toPercentString()
                 _iva.value = report.iva.toPercentString()
@@ -243,6 +251,49 @@ class ComparatorViewModel(
         _proposalVisibilityByTitle.value = currentVisibility.toMutableMap().apply {
             this[proposalTitle] = isVisible
         }
+    }
+
+    fun updateProposalFixedAmount(proposalTitle: String, fixedAmountInput: String) {
+        val currentInputs = _proposalFixedAmountByTitle.value
+        if (!currentInputs.containsKey(proposalTitle)) return
+
+        _proposalFixedAmountByTitle.value = currentInputs.toMutableMap().apply {
+            this[proposalTitle] = fixedAmountInput
+        }
+
+        recomputeProposalPriceModels()
+    }
+
+    private fun setBaseProposals(proposals: List<ProposalPriceModel>) {
+        baseProposalPriceModelList = proposals
+        synchronizeProposalFixedAmountInputs(proposals)
+        recomputeProposalPriceModels()
+    }
+
+    private fun synchronizeProposalFixedAmountInputs(proposals: List<ProposalPriceModel>) {
+        val currentInputs = _proposalFixedAmountByTitle.value
+        _proposalFixedAmountByTitle.value = proposals.associate { proposal ->
+            proposal.proposalTitle to (currentInputs[proposal.proposalTitle] ?: "")
+        }
+    }
+
+    private fun recomputeProposalPriceModels() {
+        val fixedAmountsByTitle = _proposalFixedAmountByTitle.value
+        _proposalPriceModelList.value = baseProposalPriceModelList.map { proposal ->
+            val inputValue = fixedAmountsByTitle[proposal.proposalTitle].orEmpty()
+            val additionalAmount = parseAmountInput(inputValue)
+
+            proposalCalculationHelper.recalculateProposalWithAdditionalAmount(
+                proposal = proposal,
+                additionalAmount = additionalAmount,
+                ivaPercent = ivaPercentFromBackend
+            )
+        }
+    }
+
+    private fun parseAmountInput(input: String): Double {
+        if (input.isBlank()) return 0.0
+        return input.replace(',', '.').toDoubleOrNull() ?: 0.0
     }
 
 
