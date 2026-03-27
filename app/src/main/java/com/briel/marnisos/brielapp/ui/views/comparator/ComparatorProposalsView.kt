@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -28,6 +27,7 @@ internal fun ComparatorProposalsView(
     iva: String,
     electricTax: String,
     visibleProposalPriceList: List<ProposalPriceModel>,
+    proposalAnnualPriceDeltaByTitle: Map<String, Double>,
     proposalFixedAmountByTitle: Map<String, String>,
     onProposalFixedAmountChanged: (proposalTitle: String, fixedAmountInput: String) -> Unit,
     customerConditionsUiState: CustomerConditionsUiState,
@@ -69,6 +69,7 @@ internal fun ComparatorProposalsView(
                     electricTax = proposal.electricalTaxFormatted,
                     iva = proposal.ivaFormatted,
                     totalAnnualPrice = proposal.totalAnnualPriceFormatted,
+                    annualPriceDifference = proposalAnnualPriceDeltaByTitle[proposal.proposalTitle],
                     fixedAmountInputValue = proposalFixedAmountByTitle[proposal.proposalTitle].orEmpty(),
                     onFixedAmountInputChange = { newValue ->
                         onProposalFixedAmountChanged(proposal.proposalTitle, newValue)
@@ -96,6 +97,7 @@ private fun ComparatorProposalsPreview() {
         iva = "21%",
         electricTax = "5.11%",
         visibleProposalPriceList = sample.proposals,
+        proposalAnnualPriceDeltaByTitle = emptyMap(),
         proposalFixedAmountByTitle = emptyMap(),
         onProposalFixedAmountChanged = { _,_ -> },
         customerConditionsUiState = CustomerConditionsUiState(),

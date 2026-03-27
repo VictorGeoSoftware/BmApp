@@ -1,15 +1,16 @@
 package com.briel.marnisos.brielapp.ui.views
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -25,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_TABLET
 import androidx.compose.ui.tooling.preview.Preview
-import android.widget.Toast
 import com.briel.marnisos.brielapp.BuildConfig
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.ui.models.ComparatorDestination
@@ -38,8 +38,8 @@ import com.briel.marnisos.brielapp.ui.views.currentuserconditions.CurrentUserCon
 import com.briel.marnisos.brielapp.ui.views.drawer.DrawerContent
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
@@ -61,6 +61,7 @@ fun MainView(
     val isGeneratingPdf by comparatorViewModel.isGeneratingPdf.collectAsState()
     val pdfExportError by comparatorViewModel.pdfExportError.collectAsState()
     val proposalPriceList by comparatorViewModel.proposalPriceModelList.collectAsState()
+    val proposalAnnualPriceDeltaByTitle by comparatorViewModel.proposalAnnualPriceDeltaByTitle.collectAsState()
     val proposalFixedAmountByTitle by comparatorViewModel.proposalFixedAmountByTitle.collectAsState()
     val proposalVisibilityByTitle by comparatorViewModel.proposalVisibilityByTitle.collectAsState()
     val customerConditionsUiState by comparatorViewModel.customerConditionsUiState.collectAsState()
@@ -91,6 +92,7 @@ fun MainView(
         isUploadingReport = isUploadingReport,
         isGeneratingPdf = isGeneratingPdf,
         proposalPriceList = proposalPriceList,
+        proposalAnnualPriceDeltaByTitle = proposalAnnualPriceDeltaByTitle,
         proposalFixedAmountByTitle = proposalFixedAmountByTitle,
         proposalVisibilityByTitle = proposalVisibilityByTitle,
         customerConditionsUiState = customerConditionsUiState,
@@ -125,6 +127,7 @@ fun MainStructureView(
     onGeneratePdfClick: () -> Unit = {},
     context: Context,
     proposalPriceList: List<ProposalPriceModel>,
+    proposalAnnualPriceDeltaByTitle: Map<String, Double>,
     proposalFixedAmountByTitle: Map<String, String>,
     proposalVisibilityByTitle: Map<String, Boolean>,
     customerConditionsUiState: CustomerConditionsUiState,
@@ -195,6 +198,7 @@ fun MainStructureView(
                         iva = iva,
                         electricTax = impuestoElectrico,
                         visibleProposalPriceList = visibleProposals,
+                        proposalAnnualPriceDeltaByTitle = proposalAnnualPriceDeltaByTitle,
                         proposalFixedAmountByTitle = proposalFixedAmountByTitle,
                         onProposalFixedAmountChanged = onProposalFixedAmountChanged,
                         customerConditionsUiState = customerConditionsUiState,
@@ -244,6 +248,7 @@ private fun MainStructureViewPreview() {
                 iva = "21",
                 impuestoElectrico = "5.11",
                 proposalPriceList = emptyList(),
+                proposalAnnualPriceDeltaByTitle = emptyMap(),
                 proposalFixedAmountByTitle = emptyMap(),
                 proposalVisibilityByTitle = emptyMap(),
                 customerConditionsUiState = CustomerConditionsUiState(),

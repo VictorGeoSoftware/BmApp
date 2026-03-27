@@ -1,11 +1,19 @@
 package com.briel.marnisos.brielapp.ui.views.pricetable
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.briel.marnisos.brielapp.ui.components.tables.DynamicTableColumnView
@@ -26,6 +34,7 @@ fun PriceProposalColumn(
     electricTax: String,
     iva: String,
     totalAnnualPrice: String,
+    annualPriceDifference: Double?,
     fixedAmountInputValue: String,
     onFixedAmountInputChange: (String) -> Unit,
 ) {
@@ -74,11 +83,41 @@ fun PriceProposalColumn(
             corner = Corner
         )
 
-        SectionHeader(
+        AnnualPriceDifferenceSection(
             modifier = Modifier.fillMaxWidth(),
-            text = "pending/ pending",
-            background = colors.sectionHighlight,
-            corner = Corner
+            annualPriceDifference = annualPriceDifference,
+        )
+    }
+}
+
+@Composable
+private fun AnnualPriceDifferenceSection(
+    annualPriceDifference: Double?,
+    modifier: Modifier = Modifier,
+) {
+    val colors = extendedColors
+    val textColor = when {
+        annualPriceDifference == null -> colors.tableText
+        annualPriceDifference < 0.0 -> Color(0xFFD32F2F)
+        annualPriceDifference > 0.0 -> Color(0xFF1565C0)
+        else -> colors.tableText
+    }
+
+    val sectionText = annualPriceDifference?.let { value ->
+        String.format("%.2f€", value)
+    } ?: "--"
+
+    androidx.compose.foundation.layout.Row(
+        modifier = modifier
+            .background(colors.sectionHighlight, RoundedCornerShape(Corner))
+            .border(1.dp, colors.sectionBorder, RoundedCornerShape(Corner))
+            .padding(vertical = 10.dp, horizontal = 12.dp),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = sectionText,
+            color = textColor,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
         )
     }
 }
@@ -119,6 +158,7 @@ private fun PriceProposalColumnPreview() {
         electricTax = "2.00",
         iva = "2.00",
         totalAnnualPrice = "100.00",
+        annualPriceDifference = -29.51,
         fixedAmountInputValue = "",
         onFixedAmountInputChange = {},
     )

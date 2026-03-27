@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
-import kotlin.collections.forEach
 
 @Composable
 internal fun ProposalVisibilityConfigurationView(

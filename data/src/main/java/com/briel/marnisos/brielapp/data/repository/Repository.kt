@@ -13,8 +13,8 @@ import com.briel.marnisos.brielapp.domain.models.JobStatusModel
 import com.briel.marnisos.brielapp.domain.models.JobSubmissionModel
 import com.briel.marnisos.brielapp.domain.models.PriceTablesInformationModel
 import com.briel.marnisos.brielapp.domain.models.UserConsumptionModel
-import java.io.File
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 interface Repository {
     suspend fun getPriceTables(): Result<PriceTablesInformationModel>

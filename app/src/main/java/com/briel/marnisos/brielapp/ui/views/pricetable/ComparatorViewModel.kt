@@ -48,6 +48,7 @@ class ComparatorViewModel(
     private var impuestoElectricoPercentFromBackend: Double = 0.0
     private var baseProposalPriceModelList: List<ProposalPriceModel> = emptyList()
     private var cachedCurrentUserConditions: CurrentUserConditionsModel? = null
+    private var customerTotalAnnualPriceValue: Double = 0.0
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
@@ -66,6 +67,9 @@ class ComparatorViewModel(
 
     private val _proposalPriceModelList = MutableStateFlow<List<ProposalPriceModel>>(value = emptyList())
     val proposalPriceModelList: StateFlow<List<ProposalPriceModel>> = _proposalPriceModelList
+
+    private val _proposalAnnualPriceDeltaByTitle = MutableStateFlow<Map<String, Double>>(value = emptyMap())
+    val proposalAnnualPriceDeltaByTitle: StateFlow<Map<String, Double>> = _proposalAnnualPriceDeltaByTitle
 
     private val _proposalFixedAmountByTitle = MutableStateFlow<Map<String, String>>(value = emptyMap())
     val proposalFixedAmountByTitle: StateFlow<Map<String, String>> = _proposalFixedAmountByTitle
@@ -155,6 +159,7 @@ class ComparatorViewModel(
 
         baseProposalPriceModelList = emptyList()
         _proposalPriceModelList.value = emptyList()
+        _proposalAnnualPriceDeltaByTitle.value = emptyMap()
         _proposalFixedAmountByTitle.value = emptyMap()
         _proposalVisibilityByTitle.value = emptyMap()
     }
@@ -341,6 +346,22 @@ class ComparatorViewModel(
                 ivaPercent = ivaPercentFromBackend
             )
         }
+
+        recomputeProposalAnnualPriceDeltas()
+    }
+
+    private fun recomputeProposalAnnualPriceDeltas() {
+        if (cachedCurrentUserConditions == null) {
+            _proposalAnnualPriceDeltaByTitle.value = emptyMap()
+            return
+        }
+
+        _proposalAnnualPriceDeltaByTitle.value = _proposalPriceModelList.value.associate { proposal ->
+            proposal.proposalTitle to proposalCalculationHelper.calculateAnnualPriceDelta(
+                customerTotalAnnualPrice = customerTotalAnnualPriceValue,
+                proposalTotalAnnualPrice = proposal.totalAnnualPrice
+            )
+        }
     }
 
     private fun parseAmountInput(input: String): Double {
@@ -353,7 +374,9 @@ class ComparatorViewModel(
         val energyRows = _energyConsumedRows.value
 
         if (powerRows.isEmpty() && energyRows.isEmpty()) {
+            customerTotalAnnualPriceValue = 0.0
             _customerConditionsUiState.value = CustomerConditionsUiState()
+            recomputeProposalAnnualPriceDeltas()
             return
         }
 
@@ -385,6 +408,7 @@ class ComparatorViewModel(
         val ivaAmount = baseCost * (ivaPercentFromBackend / 100.0)
         val electricalTax = baseCost * (impuestoElectricoPercentFromBackend / 100.0)
         val totalAnnualPrice = baseCost + extraServicesValue + ivaAmount + electricalTax
+        customerTotalAnnualPriceValue = totalAnnualPrice
 
         _customerConditionsUiState.value = CustomerConditionsUiState(
             powerTermItems = powerTermItems,
@@ -396,6 +420,8 @@ class ComparatorViewModel(
             iva = ivaAmount.toTwoDecimalsString(),
             totalAnnualPrice = totalAnnualPrice.toTwoDecimalsString(),
         )
+
+        recomputeProposalAnnualPriceDeltas()
     }
 
     private fun String?.parseDecimalInput(): Double {
