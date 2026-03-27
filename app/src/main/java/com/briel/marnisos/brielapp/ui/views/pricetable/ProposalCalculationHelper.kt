@@ -20,6 +20,13 @@ class ProposalCalculationHelper {
         )
     }
 
+    fun calculateAnnualPriceDelta(
+        customerTotalAnnualPrice: Double,
+        proposalTotalAnnualPrice: Double,
+    ): Double {
+        return (customerTotalAnnualPrice - proposalTotalAnnualPrice).roundToTwoDecimals()
+    }
+
     private fun Double.roundToTwoDecimals(): Double {
         return round(this * 100.0) / 100.0
     }
