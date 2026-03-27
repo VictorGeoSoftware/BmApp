@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
-import com.briel.marnisos.brielapp.ui.views.ComparatorScreen
+import com.briel.marnisos.brielapp.ui.views.MainView
 import com.briel.marnisos.brielapp.ui.views.auth.AuthViewModel
 import com.briel.marnisos.brielapp.ui.views.auth.LoginScreen
 import org.koin.androidx.compose.koinViewModel
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     val authState by authViewModel.uiState.collectAsState()
 
                     if (authState.isAuthenticated) {
-                        ComparatorScreen()
+                        MainView()
                     } else {
                         LoginScreen(
                             uiState = authState,
