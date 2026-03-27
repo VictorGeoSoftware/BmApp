@@ -1,5 +1,6 @@
 package com.briel.marnisos.brielapp.data.repository
 
+import com.briel.marnisos.brielapp.data.local.CurrentUserConditionsLocalDataSource
 import com.briel.marnisos.brielapp.data.local.LastCompletedJobIdLocalDataSource
 import com.briel.marnisos.brielapp.data.mappers.PriceMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
@@ -7,11 +8,13 @@ import com.briel.marnisos.brielapp.data.utils.ConsumptionReportMapper.mapToDomai
 import com.briel.marnisos.brielapp.data.utils.JobMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.utils.UserConsumptionUtils.mapUserConsumptionResponseToDomain
 import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
+import com.briel.marnisos.brielapp.domain.models.CurrentUserConditionsModel
 import com.briel.marnisos.brielapp.domain.models.JobStatusModel
 import com.briel.marnisos.brielapp.domain.models.JobSubmissionModel
 import com.briel.marnisos.brielapp.domain.models.PriceTablesInformationModel
 import com.briel.marnisos.brielapp.domain.models.UserConsumptionModel
 import java.io.File
+import kotlinx.coroutines.flow.Flow
 
 interface Repository {
     suspend fun getPriceTables(): Result<PriceTablesInformationModel>
@@ -25,20 +28,27 @@ interface Repository {
     suspend fun persistLastCompletedJobId(jobId: String)
     suspend fun getLastCompletedJobId(): String?
     suspend fun clearLastCompletedJobId()
+
+    fun observeCurrentUserConditions(): Flow<CurrentUserConditionsModel?>
+    suspend fun persistCurrentUserConditions(currentUserConditions: CurrentUserConditionsModel)
+    suspend fun clearCurrentUserConditions()
 }
 
 // Provide Repository using injected api
 fun buildRepository(
     priceTableApi: PriceTableApi,
-    lastCompletedJobIdLocalDataSource: LastCompletedJobIdLocalDataSource
+    lastCompletedJobIdLocalDataSource: LastCompletedJobIdLocalDataSource,
+    currentUserConditionsLocalDataSource: CurrentUserConditionsLocalDataSource
 ): Repository = RepositoryImpl(
     priceTableApi = priceTableApi,
-    lastCompletedJobIdLocalDataSource = lastCompletedJobIdLocalDataSource
+    lastCompletedJobIdLocalDataSource = lastCompletedJobIdLocalDataSource,
+    currentUserConditionsLocalDataSource = currentUserConditionsLocalDataSource
 )
 
 private class RepositoryImpl(
     private val priceTableApi: PriceTableApi,
-    private val lastCompletedJobIdLocalDataSource: LastCompletedJobIdLocalDataSource
+    private val lastCompletedJobIdLocalDataSource: LastCompletedJobIdLocalDataSource,
+    private val currentUserConditionsLocalDataSource: CurrentUserConditionsLocalDataSource
 ) : Repository {
     override suspend fun getPriceTables(): Result<PriceTablesInformationModel> {
         return priceTableApi.getPriceTableResults().map { response ->
@@ -90,5 +100,17 @@ private class RepositoryImpl(
 
     override suspend fun clearLastCompletedJobId() {
         lastCompletedJobIdLocalDataSource.clear()
+    }
+
+    override fun observeCurrentUserConditions(): Flow<CurrentUserConditionsModel?> {
+        return currentUserConditionsLocalDataSource.observe()
+    }
+
+    override suspend fun persistCurrentUserConditions(currentUserConditions: CurrentUserConditionsModel) {
+        currentUserConditionsLocalDataSource.persist(currentUserConditions)
+    }
+
+    override suspend fun clearCurrentUserConditions() {
+        currentUserConditionsLocalDataSource.clearData()
     }
 }

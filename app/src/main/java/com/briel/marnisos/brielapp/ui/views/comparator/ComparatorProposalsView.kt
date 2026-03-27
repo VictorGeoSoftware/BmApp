@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -14,7 +15,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.ui.models.ComparatorUiSample
-import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsView
+import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsColumnView
+import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsUiState
 import com.briel.marnisos.brielapp.ui.views.pricetable.PriceProposalColumn
 
 @Composable
@@ -28,6 +30,7 @@ internal fun ComparatorProposalsView(
     visibleProposalPriceList: List<ProposalPriceModel>,
     proposalFixedAmountByTitle: Map<String, String>,
     onProposalFixedAmountChanged: (proposalTitle: String, fixedAmountInput: String) -> Unit,
+    customerConditionsUiState: CustomerConditionsUiState,
 ) {
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
@@ -51,8 +54,9 @@ internal fun ComparatorProposalsView(
                 impuestoElectrico = electricTax,
             )
 
-            CustomerConditionsView(
-                modifier = modifier
+            CustomerConditionsColumnView(
+                modifier = Modifier,
+                uiState = customerConditionsUiState,
             )
 
             for (proposal in visibleProposalPriceList) {
@@ -93,6 +97,7 @@ private fun ComparatorProposalsPreview() {
         electricTax = "5.11%",
         visibleProposalPriceList = sample.proposals,
         proposalFixedAmountByTitle = emptyMap(),
-        onProposalFixedAmountChanged = { _,_ -> }
+        onProposalFixedAmountChanged = { _,_ -> },
+        customerConditionsUiState = CustomerConditionsUiState(),
     )
 }

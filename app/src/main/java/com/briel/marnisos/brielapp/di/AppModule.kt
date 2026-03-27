@@ -1,6 +1,7 @@
 package com.briel.marnisos.brielapp.di
 
 import com.briel.marnisos.brielapp.ui.views.auth.AuthViewModel
+import com.briel.marnisos.brielapp.ui.views.currentuserconditions.CurrentUserConditionsViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.ProposalCalculationHelper
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.AndroidComparatorPdfGenerator
@@ -26,9 +27,18 @@ val appModule = module {
             persistLastCompletedJobIdUseCase = get(),
             getLastCompletedJobIdUseCase = get(),
             clearLastCompletedJobIdUseCase = get(),
+            clearCurrentUserConditionsUseCase = get(),
+            observeCurrentUserConditionsUseCase = get(),
             proposalCalculationHelper = get(),
             comparatorPdfDocumentDataFactory = get(),
             comparatorPdfGenerator = get()
+        )
+    }
+
+    viewModel {
+        CurrentUserConditionsViewModel(
+            observeCurrentUserConditionsUseCase = get(),
+            persistCurrentUserConditionsUseCase = get(),
         )
     }
 

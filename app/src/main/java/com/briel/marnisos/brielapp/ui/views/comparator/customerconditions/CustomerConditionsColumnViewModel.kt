@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class CustomerConditionsViewModel : ViewModel() {
+class CustomerConditionsColumnViewModel : ViewModel() {
     private val _powerTermItems = MutableStateFlow<List<Double>>(emptyList())
     val powerTermItems: StateFlow<List<Double>> = _powerTermItems
 

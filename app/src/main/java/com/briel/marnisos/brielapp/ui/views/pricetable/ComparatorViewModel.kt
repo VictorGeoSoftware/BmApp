@@ -2,16 +2,20 @@ package com.briel.marnisos.brielapp.ui.views.pricetable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.briel.marnisos.brielapp.domain.models.CurrentUserConditionsModel
 import com.briel.marnisos.brielapp.domain.models.JobStatusType
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
+import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
 import com.briel.marnisos.brielapp.notifications.PriceUpdatesEventBus
+import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsUiState
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfDocumentDataFactory
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfGenerator
 import kotlinx.coroutines.delay
@@ -22,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Locale
+import kotlin.math.round
 
 class ComparatorViewModel(
     private val submitConsumptionReportJobUseCase: SubmitConsumptionReportJobUseCase,
@@ -31,6 +36,8 @@ class ComparatorViewModel(
     private val persistLastCompletedJobIdUseCase: PersistLastCompletedJobIdUseCase,
     private val getLastCompletedJobIdUseCase: GetLastCompletedJobIdUseCase,
     private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase,
+    private val clearCurrentUserConditionsUseCase: ClearCurrentUserConditionsUseCase,
+    private val observeCurrentUserConditionsUseCase: ObserveCurrentUserConditionsUseCase,
     private val proposalCalculationHelper: ProposalCalculationHelper,
     private val comparatorPdfDocumentDataFactory: ComparatorPdfDocumentDataFactory,
     private val comparatorPdfGenerator: ComparatorPdfGenerator
@@ -38,7 +45,9 @@ class ComparatorViewModel(
 
     private var lastCompletedJobId: String? = null
     private var ivaPercentFromBackend: Double = 0.0
+    private var impuestoElectricoPercentFromBackend: Double = 0.0
     private var baseProposalPriceModelList: List<ProposalPriceModel> = emptyList()
+    private var cachedCurrentUserConditions: CurrentUserConditionsModel? = null
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
@@ -63,6 +72,9 @@ class ComparatorViewModel(
 
     private val _proposalVisibilityByTitle = MutableStateFlow<Map<String, Boolean>>(value = emptyMap())
     val proposalVisibilityByTitle: StateFlow<Map<String, Boolean>> = _proposalVisibilityByTitle
+
+    private val _customerConditionsUiState = MutableStateFlow(CustomerConditionsUiState())
+    val customerConditionsUiState: StateFlow<CustomerConditionsUiState> = _customerConditionsUiState
 
     private val _isUploadingReport = MutableStateFlow(value = false)
     val isUploadingReport: StateFlow<Boolean> = _isUploadingReport
@@ -90,6 +102,13 @@ class ComparatorViewModel(
         viewModelScope.launch {
             PriceUpdatesEventBus.events.collect {
                 refreshLatestProposalsIfAvailable()
+            }
+        }
+
+        viewModelScope.launch {
+            observeCurrentUserConditionsUseCase().collect { currentUserConditions ->
+                cachedCurrentUserConditions = currentUserConditions
+                recomputeCustomerConditionsUiState()
             }
         }
     }
@@ -124,6 +143,20 @@ class ComparatorViewModel(
                     _isUploadingReport.value = false
                 }
         }
+    }
+
+    fun resetCurrentUserConditionsAndProposals() {
+        viewModelScope.launch {
+            clearCurrentUserConditionsUseCase()
+        }
+
+        cachedCurrentUserConditions = null
+        _customerConditionsUiState.value = CustomerConditionsUiState()
+
+        baseProposalPriceModelList = emptyList()
+        _proposalPriceModelList.value = emptyList()
+        _proposalFixedAmountByTitle.value = emptyMap()
+        _proposalVisibilityByTitle.value = emptyMap()
     }
 
     /**
@@ -201,8 +234,10 @@ class ComparatorViewModel(
 
                 // Proposals now come directly from backend
                 ivaPercentFromBackend = report.iva
+                impuestoElectricoPercentFromBackend = report.impuestoElectrico
                 setBaseProposals(report.proposals)
                 synchronizeProposalVisibility(report.proposals)
+                recomputeCustomerConditionsUiState()
                 viewModelScope.launch {
                     delay(2000)
                     _uploadStatus.value = null
@@ -224,10 +259,12 @@ class ComparatorViewModel(
         refreshConsumptionReportUseCase(jobId)
             .onSuccess { report ->
                 ivaPercentFromBackend = report.iva
+                impuestoElectricoPercentFromBackend = report.impuestoElectrico
                 setBaseProposals(report.proposals)
                 synchronizeProposalVisibility(report.proposals)
                 _impuestoElectrico.value = report.impuestoElectrico.toPercentString()
                 _iva.value = report.iva.toPercentString()
+                recomputeCustomerConditionsUiState()
             }
             .onFailure { error ->
                 if (error.isJobExpiredOrNotFound()) {
@@ -309,6 +346,66 @@ class ComparatorViewModel(
     private fun parseAmountInput(input: String): Double {
         if (input.isBlank()) return 0.0
         return input.replace(',', '.').toDoubleOrNull() ?: 0.0
+    }
+
+    private fun recomputeCustomerConditionsUiState() {
+        val powerRows = _powerTermRows.value
+        val energyRows = _energyConsumedRows.value
+
+        if (powerRows.isEmpty() && energyRows.isEmpty()) {
+            _customerConditionsUiState.value = CustomerConditionsUiState()
+            return
+        }
+
+        val currentConditions = cachedCurrentUserConditions
+        val powerPriceByPeriod = currentConditions?.powerTermPriceByPeriod.orEmpty()
+        val energyPriceByPeriod = currentConditions?.energyPriceByPeriod.orEmpty()
+        val extraServicesValue = currentConditions?.extraServices.parseDecimalInput()
+
+        val powerTermItems = powerRows.map { row ->
+            powerPriceByPeriod[row.first].parseDecimalInput()
+        }
+        val consumedEnergyItems = energyRows.map { row ->
+            energyPriceByPeriod[row.first].parseDecimalInput()
+        }
+
+        val annualPowerTermCost = powerRows
+            .zip(powerTermItems)
+            .sumOf { (powerData, powerPrice) ->
+                powerData.second * powerPrice * 365.0
+            }
+
+        val annualEnergyCost = energyRows
+            .zip(consumedEnergyItems)
+            .sumOf { (energyData, energyPrice) ->
+                energyData.second * (energyPrice / 100.0)
+            }
+
+        val baseCost = annualPowerTermCost + annualEnergyCost
+        val ivaAmount = baseCost * (ivaPercentFromBackend / 100.0)
+        val electricalTax = baseCost * (impuestoElectricoPercentFromBackend / 100.0)
+        val totalAnnualPrice = baseCost + extraServicesValue + ivaAmount + electricalTax
+
+        _customerConditionsUiState.value = CustomerConditionsUiState(
+            powerTermItems = powerTermItems,
+            annualPowerTermCost = annualPowerTermCost.toTwoDecimalsString(),
+            consumedEnergyItems = consumedEnergyItems,
+            annualEnergyCost = annualEnergyCost.toTwoDecimalsString(),
+            extraServices = extraServicesValue.toTwoDecimalsString(),
+            electricTax = electricalTax.toTwoDecimalsString(),
+            iva = ivaAmount.toTwoDecimalsString(),
+            totalAnnualPrice = totalAnnualPrice.toTwoDecimalsString(),
+        )
+    }
+
+    private fun String?.parseDecimalInput(): Double {
+        if (this.isNullOrBlank()) return 0.0
+        return this.replace(',', '.').toDoubleOrNull() ?: 0.0
+    }
+
+    private fun Double.toTwoDecimalsString(): String {
+        val roundedValue = round(this * 100.0) / 100.0
+        return String.format(Locale.US, "%.2f", roundedValue)
     }
 
     fun exportVisibleProposalsAsPdf() {

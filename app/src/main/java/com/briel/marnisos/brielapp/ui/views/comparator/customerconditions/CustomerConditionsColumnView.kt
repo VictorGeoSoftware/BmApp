@@ -1,51 +1,48 @@
 package com.briel.marnisos.brielapp.ui.views.comparator.customerconditions
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.briel.marnisos.brielapp.ui.components.tables.DynamicTableColumnView
+import com.briel.marnisos.brielapp.ui.components.tables.HorizontalSeparator
 import com.briel.marnisos.brielapp.ui.theme.Corner
 import com.briel.marnisos.brielapp.ui.theme.extendedColors
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
 import com.briel.marnisos.brielapp.ui.views.common.SectionHeader
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CustomerConditionsView(
+fun CustomerConditionsColumnView(
     modifier: Modifier = Modifier,
-    customerConditionsViewModel: CustomerConditionsViewModel = koinViewModel(),
+    uiState: CustomerConditionsUiState,
 ) {
-    val powerTermItems by customerConditionsViewModel.powerTermItems.collectAsState()
-    val annualPowerTermCost by customerConditionsViewModel.annualPowerTermCost.collectAsState()
-    val consumedEnergyItems by customerConditionsViewModel.consumedEnergyItems.collectAsState()
-    val annualEnergyCost by customerConditionsViewModel.annualEnergyCost.collectAsState()
-    val extraServices by customerConditionsViewModel.extraServices.collectAsState()
-    val electricTax by customerConditionsViewModel.electricTax.collectAsState()
-    val iva by customerConditionsViewModel.iva.collectAsState()
-    val totalAnnualPrice by customerConditionsViewModel.totalAnnualPrice.collectAsState()
-
-    CustomerConditionsMainView(
+    CustomerConditionsColumnMainView(
         modifier = modifier,
-        powerTermItems = powerTermItems,
-        annualPowerTermCost = annualPowerTermCost,
-        consumedEnergyItems = consumedEnergyItems,
-        annualEnergyCost = annualEnergyCost,
-        extraServices = extraServices,
-        electricTax = electricTax,
-        iva = iva,
-        totalAnnualPrice = totalAnnualPrice
+        powerTermItems = uiState.powerTermItems,
+        annualPowerTermCost = uiState.annualPowerTermCost,
+        consumedEnergyItems = uiState.consumedEnergyItems,
+        annualEnergyCost = uiState.annualEnergyCost,
+        extraServices = uiState.extraServices,
+        electricTax = uiState.electricTax,
+        iva = uiState.iva,
+        totalAnnualPrice = uiState.totalAnnualPrice
     )
 }
 
 @Composable
-fun CustomerConditionsMainView(
+fun CustomerConditionsColumnMainView(
     modifier: Modifier = Modifier,
     powerTermItems: List<Double>,
     annualPowerTermCost: String,
@@ -62,8 +59,7 @@ fun CustomerConditionsMainView(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        CustomerConditionsTitleView(
-        )
+        CustomerConditionsTitleView()
 
         DynamicTableColumnView(
             modifier = Modifier.fillMaxWidth(),
@@ -83,9 +79,11 @@ fun CustomerConditionsMainView(
             content = "$annualEnergyCost€"
         )
 
-        DynamicTableColumnView(
+        TaxesColumnView(
             modifier = Modifier.fillMaxWidth(),
-            values = listOf(extraServices, electricTax, iva),
+            extraServices = extraServices,
+            electricTax = electricTax,
+            iva = iva
         )
 
         HeaderBox(
@@ -113,7 +111,7 @@ fun TotalSectionPriceView(content: String) {
 private fun CustomerConditionsTitleView() {
     val colors = extendedColors
 
-    SectionHeader(
+    HeaderBox(
         modifier = Modifier.fillMaxWidth(),
         text = "Tarifa actual",
         background = colors.headerHighlight,
@@ -122,9 +120,61 @@ private fun CustomerConditionsTitleView() {
 }
 
 @Composable
+fun TaxesColumnView(
+    modifier: Modifier = Modifier,
+    extraServices: String,
+    electricTax: String,
+    iva: String,
+) {
+    val colors = extendedColors
+
+    Column(
+        modifier = modifier.then(
+            Modifier.border(
+                width = 1.dp,
+                color = colors.tableBorder
+            )
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            modifier = Modifier.height(68.dp).padding(12.dp),
+            text = extraServices,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.tableText,
+            textAlign = TextAlign.Center,
+        )
+
+        HorizontalSeparator()
+
+        Text(
+            modifier = Modifier.padding(12.dp),
+            text = electricTax,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.tableText,
+            textAlign = TextAlign.Center
+        )
+
+        HorizontalSeparator()
+
+        Text(
+            modifier = Modifier.padding(12.dp),
+            text = iva,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.tableText,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
 @Preview(showBackground = true)
-private fun CustomerConditionsMainViewPreview() {
-    CustomerConditionsMainView(
+private fun CustomerConditionsColumnMainViewPreview() {
+    CustomerConditionsColumnMainView(
         powerTermItems = listOf(1.0, 2.0, 3.0),
         annualPowerTermCost = "100.00",
         consumedEnergyItems = listOf(1.0, 2.0, 3.0),

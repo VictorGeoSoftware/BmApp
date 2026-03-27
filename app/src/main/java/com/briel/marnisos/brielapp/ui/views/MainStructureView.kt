@@ -32,7 +32,9 @@ import com.briel.marnisos.brielapp.ui.models.ComparatorDestination
 import com.briel.marnisos.brielapp.ui.models.ComparatorUiSample
 import com.briel.marnisos.brielapp.ui.views.common.TopActionBar
 import com.briel.marnisos.brielapp.ui.views.comparator.ComparatorProposalsView
+import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsUiState
 import com.briel.marnisos.brielapp.ui.views.configuration.ProposalVisibilityConfigurationView
+import com.briel.marnisos.brielapp.ui.views.currentuserconditions.CurrentUserConditionsView
 import com.briel.marnisos.brielapp.ui.views.drawer.DrawerContent
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
@@ -61,6 +63,7 @@ fun MainView(
     val proposalPriceList by comparatorViewModel.proposalPriceModelList.collectAsState()
     val proposalFixedAmountByTitle by comparatorViewModel.proposalFixedAmountByTitle.collectAsState()
     val proposalVisibilityByTitle by comparatorViewModel.proposalVisibilityByTitle.collectAsState()
+    val customerConditionsUiState by comparatorViewModel.customerConditionsUiState.collectAsState()
 
     val context = LocalContext.current
     val pdfShareManager = remember { ComparatorPdfShareManager() }
@@ -90,6 +93,8 @@ fun MainView(
         proposalPriceList = proposalPriceList,
         proposalFixedAmountByTitle = proposalFixedAmountByTitle,
         proposalVisibilityByTitle = proposalVisibilityByTitle,
+        customerConditionsUiState = customerConditionsUiState,
+        onBeforeFetchPriceProposals = comparatorViewModel::resetCurrentUserConditionsAndProposals,
         onPdfSelected = { pdfFile ->
             comparatorViewModel.uploadConsumptionReport(pdfFile)
         },
@@ -115,12 +120,14 @@ fun MainStructureView(
     impuestoElectrico: String,
     isUploadingReport: Boolean = false,
     isGeneratingPdf: Boolean = false,
+    onBeforeFetchPriceProposals: () -> Unit = {},
     onPdfSelected: (File) -> Unit = {},
     onGeneratePdfClick: () -> Unit = {},
     context: Context,
     proposalPriceList: List<ProposalPriceModel>,
     proposalFixedAmountByTitle: Map<String, String>,
     proposalVisibilityByTitle: Map<String, Boolean>,
+    customerConditionsUiState: CustomerConditionsUiState,
     onProposalFixedAmountChanged: (proposalTitle: String, fixedAmountInput: String) -> Unit = { _, _ -> },
     onProposalVisibilityChanged: (proposalTitle: String, isVisible: Boolean) -> Unit = { _, _ -> },
     versionLabel: String,
@@ -131,6 +138,13 @@ fun MainStructureView(
 
     val visibleProposals = proposalPriceList.filter { proposal ->
         proposalVisibilityByTitle[proposal.proposalTitle] ?: true
+    }
+    val hasFetchedProposalData = proposalPriceList.isNotEmpty()
+
+    LaunchedEffect(hasFetchedProposalData, selectedDestination) {
+        if (!hasFetchedProposalData && selectedDestination == ComparatorDestination.CURRENT_USER_CONDITIONS) {
+            selectedDestination = ComparatorDestination.PROPOSALS
+        }
     }
 
     ModalNavigationDrawer(
@@ -143,6 +157,7 @@ fun MainStructureView(
                         selectedDestination = destination
                         scope.launch { drawerState.close() }
                     },
+                    showCurrentUserConditionsOption = hasFetchedProposalData,
                     versionLabel = versionLabel,
                 )
             }
@@ -158,7 +173,10 @@ fun MainStructureView(
                 isGeneratingPdf = isGeneratingPdf,
                 showPrintButton = selectedDestination == ComparatorDestination.PROPOSALS && visibleProposals.isNotEmpty(),
                 onGeneratePdfClick = onGeneratePdfClick,
-                onPdfSelected = onPdfSelected,
+                onPdfSelected = { file ->
+                    onBeforeFetchPriceProposals()
+                    onPdfSelected(file)
+                },
                 context = context,
                 onOpenDrawer = {
                     scope.launch { drawerState.open() }
@@ -179,6 +197,7 @@ fun MainStructureView(
                         visibleProposalPriceList = visibleProposals,
                         proposalFixedAmountByTitle = proposalFixedAmountByTitle,
                         onProposalFixedAmountChanged = onProposalFixedAmountChanged,
+                        customerConditionsUiState = customerConditionsUiState,
                     )
                 }
 
@@ -190,6 +209,16 @@ fun MainStructureView(
                         proposalPriceList = proposalPriceList,
                         proposalVisibilityByTitle = proposalVisibilityByTitle,
                         onProposalVisibilityChanged = onProposalVisibilityChanged,
+                    )
+                }
+
+                ComparatorDestination.CURRENT_USER_CONDITIONS -> {
+                    CurrentUserConditionsView(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        powerPeriods = powerTermRows.map { item -> item.first },
+                        energyPeriods = energyConsumedRows.map { item -> item.first },
                     )
                 }
             }
@@ -217,6 +246,7 @@ private fun MainStructureViewPreview() {
                 proposalPriceList = emptyList(),
                 proposalFixedAmountByTitle = emptyMap(),
                 proposalVisibilityByTitle = emptyMap(),
+                customerConditionsUiState = CustomerConditionsUiState(),
                 versionLabel = "v2603_1316",
                 context = context,
             )
