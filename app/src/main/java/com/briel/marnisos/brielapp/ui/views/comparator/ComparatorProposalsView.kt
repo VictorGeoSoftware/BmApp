@@ -28,6 +28,7 @@ internal fun ComparatorProposalsView(
     electricTax: String,
     visibleProposalPriceList: List<ProposalPriceModel>,
     proposalAnnualPriceDeltaByTitle: Map<String, Double>,
+    proposalAnnualSavingsPercentageByTitle: Map<String, Int>,
     proposalFixedAmountByTitle: Map<String, String>,
     onProposalFixedAmountChanged: (proposalTitle: String, fixedAmountInput: String) -> Unit,
     customerConditionsUiState: CustomerConditionsUiState,
@@ -70,6 +71,7 @@ internal fun ComparatorProposalsView(
                     iva = proposal.ivaFormatted,
                     totalAnnualPrice = proposal.totalAnnualPriceFormatted,
                     annualPriceDifference = proposalAnnualPriceDeltaByTitle[proposal.proposalTitle],
+                    annualSavingsPercentage = proposalAnnualSavingsPercentageByTitle[proposal.proposalTitle],
                     fixedAmountInputValue = proposalFixedAmountByTitle[proposal.proposalTitle].orEmpty(),
                     onFixedAmountInputChange = { newValue ->
                         onProposalFixedAmountChanged(proposal.proposalTitle, newValue)
@@ -98,6 +100,7 @@ private fun ComparatorProposalsPreview() {
         electricTax = "5.11%",
         visibleProposalPriceList = sample.proposals,
         proposalAnnualPriceDeltaByTitle = emptyMap(),
+        proposalAnnualSavingsPercentageByTitle = emptyMap(),
         proposalFixedAmountByTitle = emptyMap(),
         onProposalFixedAmountChanged = { _,_ -> },
         customerConditionsUiState = CustomerConditionsUiState(),
