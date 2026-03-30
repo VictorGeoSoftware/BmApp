@@ -4,9 +4,11 @@ import com.briel.marnisos.brielapp.data.local.CurrentUserConditionsLocalDataSour
 import com.briel.marnisos.brielapp.data.local.LastCompletedJobIdLocalDataSource
 import com.briel.marnisos.brielapp.data.mappers.PriceMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
+import com.briel.marnisos.brielapp.data.utils.ComparatorReportPdfMapper.toData
 import com.briel.marnisos.brielapp.data.utils.ConsumptionReportMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.utils.JobMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.utils.UserConsumptionUtils.mapUserConsumptionResponseToDomain
+import com.briel.marnisos.brielapp.domain.models.ComparatorReportPdfModel
 import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
 import com.briel.marnisos.brielapp.domain.models.CurrentUserConditionsModel
 import com.briel.marnisos.brielapp.domain.models.JobStatusModel
@@ -24,6 +26,7 @@ interface Repository {
     suspend fun getJobStatus(jobId: String): Result<JobStatusModel>
     suspend fun getJobResult(jobId: String): Result<ConsumptionReportModel>
     suspend fun refreshConsumptionReport(jobId: String): Result<ConsumptionReportModel>
+    suspend fun generateComparatorReportPdf(reportModel: ComparatorReportPdfModel): Result<ByteArray>
 
     suspend fun persistLastCompletedJobId(jobId: String)
     suspend fun getLastCompletedJobId(): String?
@@ -88,6 +91,10 @@ private class RepositoryImpl(
         return priceTableApi.refreshConsumptionReport(jobId).map { response ->
             response.mapToDomain()
         }
+    }
+
+    override suspend fun generateComparatorReportPdf(reportModel: ComparatorReportPdfModel): Result<ByteArray> {
+        return priceTableApi.generateComparatorReportPdf(reportModel.toData())
     }
 
     override suspend fun persistLastCompletedJobId(jobId: String) {

@@ -20,6 +20,7 @@ import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetUserConsumptionUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
@@ -59,6 +60,7 @@ val dataModule = module {
     factory<GetJobStatusUseCase> { GetJobStatusUseCase.Factory.create(get()) }
     factory<GetJobResultUseCase> { GetJobResultUseCase.Factory.create(get()) }
     factory<RefreshConsumptionReportUseCase> { RefreshConsumptionReportUseCase.Factory.create(get()) }
+    factory<GenerateComparatorReportPdfUseCase> { GenerateComparatorReportPdfUseCase.Factory.create(get()) }
     factory<PersistLastCompletedJobIdUseCase> { PersistLastCompletedJobIdUseCase.Factory.create(get()) }
     factory<GetLastCompletedJobIdUseCase> { GetLastCompletedJobIdUseCase.Factory.create(get()) }
     factory<ClearLastCompletedJobIdUseCase> { ClearLastCompletedJobIdUseCase.Factory.create(get()) }

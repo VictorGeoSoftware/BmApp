@@ -2,11 +2,17 @@ package com.briel.marnisos.brielapp.ui.views.pricetable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.briel.marnisos.brielapp.domain.models.ComparatorReportColumnModel
+import com.briel.marnisos.brielapp.domain.models.ComparatorReportPdfModel
+import com.briel.marnisos.brielapp.domain.models.ComparatorReportPeriodIntValueModel
+import com.briel.marnisos.brielapp.domain.models.ComparatorReportPeriodValueModel
+import com.briel.marnisos.brielapp.domain.models.ComparatorReportProposalModel
 import com.briel.marnisos.brielapp.domain.models.CurrentUserConditionsModel
 import com.briel.marnisos.brielapp.domain.models.JobStatusType
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
@@ -16,8 +22,7 @@ import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCa
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
 import com.briel.marnisos.brielapp.notifications.PriceUpdatesEventBus
 import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsUiState
-import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfDocumentDataFactory
-import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfGenerator
+import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfFileStore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,9 +43,9 @@ class ComparatorViewModel(
     private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase,
     private val clearCurrentUserConditionsUseCase: ClearCurrentUserConditionsUseCase,
     private val observeCurrentUserConditionsUseCase: ObserveCurrentUserConditionsUseCase,
+    private val generateComparatorReportPdfUseCase: GenerateComparatorReportPdfUseCase,
     private val proposalCalculationHelper: ProposalCalculationHelper,
-    private val comparatorPdfDocumentDataFactory: ComparatorPdfDocumentDataFactory,
-    private val comparatorPdfGenerator: ComparatorPdfGenerator
+    private val comparatorPdfFileStore: ComparatorPdfFileStore
 ) : ViewModel() {
 
     private var lastCompletedJobId: String? = null
@@ -49,6 +54,9 @@ class ComparatorViewModel(
     private var baseProposalPriceModelList: List<ProposalPriceModel> = emptyList()
     private var cachedCurrentUserConditions: CurrentUserConditionsModel? = null
     private var customerTotalAnnualPriceValue: Double = 0.0
+    private var supplyHolderName: String = ""
+    private var supplyAddress: String = ""
+    private var supplyCupsCode: String = ""
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
@@ -161,6 +169,9 @@ class ComparatorViewModel(
         _customerConditionsUiState.value = CustomerConditionsUiState()
 
         baseProposalPriceModelList = emptyList()
+        supplyHolderName = ""
+        supplyAddress = ""
+        supplyCupsCode = ""
         _proposalPriceModelList.value = emptyList()
         _proposalAnnualPriceDeltaByTitle.value = emptyMap()
         _proposalAnnualSavingsPercentageByTitle.value = emptyMap()
@@ -240,6 +251,9 @@ class ComparatorViewModel(
                 _energyConsumedRows.value = report.consumptionData.annualConsumptionValues().map { item ->
                     Pair(item.first, item.second.toInt())
                 }
+                supplyHolderName = report.userData.customerDetails.name.orEmpty()
+                supplyAddress = report.userData.customerDetails.address
+                supplyCupsCode = report.userData.cupsCode.ifBlank { report.consumptionData.cups }
 
                 // Proposals now come directly from backend
                 ivaPercentFromBackend = report.iva
@@ -457,26 +471,22 @@ class ComparatorViewModel(
             _isGeneratingPdf.value = true
             _pdfExportError.value = null
 
-            val documentData = comparatorPdfDocumentDataFactory.create(
-                tariffName = _tariffName.value,
-                powerTermRows = _powerTermRows.value,
-                energyConsumedRows = _energyConsumedRows.value,
-                iva = _iva.value,
-                impuestoElectrico = _impuestoElectrico.value,
-                proposalPriceList = _proposalPriceModelList.value,
-                proposalFixedAmountByTitle = _proposalFixedAmountByTitle.value,
-                proposalVisibilityByTitle = _proposalVisibilityByTitle.value
-            )
-
-            if (documentData.proposals.isEmpty()) {
+            val reportModel = buildComparatorReportModel()
+            if (reportModel.proposals.isEmpty()) {
                 _pdfExportError.value = "No hay propuestas visibles para exportar"
                 _isGeneratingPdf.value = false
                 return@launch
             }
 
-            comparatorPdfGenerator.generate(documentData)
-                .onSuccess { file ->
-                    _generatedPdfFile.emit(file)
+            generateComparatorReportPdfUseCase(reportModel)
+                .onSuccess { pdfBytes ->
+                    comparatorPdfFileStore.store(pdfBytes)
+                        .onSuccess { file ->
+                            _generatedPdfFile.emit(file)
+                        }
+                        .onFailure { error ->
+                            _pdfExportError.value = "No se pudo preparar el archivo PDF: ${error.message}"
+                        }
                 }
                 .onFailure { error ->
                     _pdfExportError.value = "No se pudo generar el PDF: ${error.message}"
@@ -484,6 +494,57 @@ class ComparatorViewModel(
 
             _isGeneratingPdf.value = false
         }
+    }
+
+    private fun buildComparatorReportModel(): ComparatorReportPdfModel {
+        val visibleProposals = _proposalPriceModelList.value.filter { proposal ->
+            _proposalVisibilityByTitle.value[proposal.proposalTitle] ?: true
+        }
+
+        val powerRows = _powerTermRows.value
+        val energyRows = _energyConsumedRows.value
+        val customerColumnUiState = _customerConditionsUiState.value
+
+        return ComparatorReportPdfModel(
+            supplyHolder = supplyHolderName.ifBlank { "--" },
+            supplyAddress = supplyAddress.ifBlank { "--" },
+            cups = supplyCupsCode.ifBlank { "--" },
+            tariffName = _tariffName.value,
+            powerTermRows = powerRows.map { row ->
+                ComparatorReportPeriodValueModel(period = row.first, value = row.second)
+            },
+            energyConsumedRows = energyRows.map { row ->
+                ComparatorReportPeriodIntValueModel(period = row.first, value = row.second)
+            },
+            iva = _iva.value,
+            impuestoElectrico = _impuestoElectrico.value,
+            customerConditions = ComparatorReportColumnModel(
+                title = "CONDICIONES ACTUALES",
+                powerTermItems = customerColumnUiState.powerTermItems,
+                annualPowerTermCost = customerColumnUiState.annualPowerTermCost,
+                consumedEnergyItems = customerColumnUiState.consumedEnergyItems,
+                annualEnergyCost = customerColumnUiState.annualEnergyCost,
+                extraServices = customerColumnUiState.extraServices,
+                electricalTax = customerColumnUiState.electricTax,
+                iva = customerColumnUiState.iva,
+                totalAnnualPrice = customerColumnUiState.totalAnnualPrice
+            ),
+            proposals = visibleProposals.map { proposal ->
+                ComparatorReportProposalModel(
+                    title = proposal.proposalTitle,
+                    powerTermItems = proposal.powerTermItems,
+                    annualPowerTermCost = proposal.annualPowerTermCostFormatted,
+                    consumedEnergyItems = proposal.consumedEnergyItems,
+                    annualEnergyCost = proposal.annualEnergyCostFormatted,
+                    extraServices = _proposalFixedAmountByTitle.value[proposal.proposalTitle].orEmpty().ifBlank { "0.00" },
+                    electricalTax = proposal.electricalTaxFormatted,
+                    iva = proposal.ivaFormatted,
+                    totalAnnualPrice = proposal.totalAnnualPriceFormatted,
+                    annualPriceDifference = _proposalAnnualPriceDeltaByTitle.value[proposal.proposalTitle]?.toTwoDecimalsString(),
+                    annualSavingsPercentage = _proposalAnnualSavingsPercentageByTitle.value[proposal.proposalTitle]
+                )
+            }
+        )
     }
 
     fun clearPdfExportError() {
