@@ -137,18 +137,12 @@ fun MainStructureView(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    var selectedDestination by rememberSaveable { mutableStateOf(ComparatorDestination.PROPOSALS) }
+    var selectedDestination by rememberSaveable { mutableStateOf(ComparatorDestination.CURRENT_USER_CONDITIONS) }
 
     val visibleProposals = proposalPriceList.filter { proposal ->
         proposalVisibilityByTitle[proposal.proposalTitle] ?: true
     }
     val hasFetchedProposalData = proposalPriceList.isNotEmpty()
-
-    LaunchedEffect(hasFetchedProposalData, selectedDestination) {
-        if (!hasFetchedProposalData && selectedDestination == ComparatorDestination.CURRENT_USER_CONDITIONS) {
-            selectedDestination = ComparatorDestination.PROPOSALS
-        }
-    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -160,7 +154,6 @@ fun MainStructureView(
                         selectedDestination = destination
                         scope.launch { drawerState.close() }
                     },
-                    showCurrentUserConditionsOption = hasFetchedProposalData,
                     versionLabel = versionLabel,
                 )
             }
@@ -223,6 +216,7 @@ fun MainStructureView(
                             .weight(1f),
                         powerPeriods = powerTermRows.map { item -> item.first },
                         energyPeriods = energyConsumedRows.map { item -> item.first },
+                        hasFetchedProposalData = hasFetchedProposalData,
                     )
                 }
             }

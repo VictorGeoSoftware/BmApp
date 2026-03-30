@@ -4,6 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,10 +20,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.briel.marnisos.brielapp.R
 import com.briel.marnisos.brielapp.ui.theme.Corner
 import com.briel.marnisos.brielapp.ui.theme.extendedColors
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
@@ -34,6 +38,7 @@ fun CurrentUserConditionsView(
     modifier: Modifier = Modifier,
     powerPeriods: List<String>,
     energyPeriods: List<String>,
+    hasFetchedProposalData: Boolean,
     currentUserConditionsViewModel: CurrentUserConditionsViewModel = koinViewModel(),
 ) {
     val uiState by currentUserConditionsViewModel.uiState.collectAsState()
@@ -47,6 +52,7 @@ fun CurrentUserConditionsView(
 
     CurrentUserConditionsMainView(
         modifier = modifier,
+        hasFetchedProposalData = hasFetchedProposalData,
         uiState = uiState,
         onPowerTermValueChanged = currentUserConditionsViewModel::onPowerTermValueChanged,
         onEnergyValueChanged = currentUserConditionsViewModel::onEnergyValueChanged,
@@ -57,12 +63,29 @@ fun CurrentUserConditionsView(
 @Composable
 private fun CurrentUserConditionsMainView(
     modifier: Modifier,
+    hasFetchedProposalData: Boolean,
     uiState: CurrentUserConditionsFormState,
     onPowerTermValueChanged: (period: String, value: String) -> Unit,
     onEnergyValueChanged: (period: String, value: String) -> Unit,
     onExtraServicesChanged: (value: String) -> Unit,
 ) {
     val colors = extendedColors
+
+    if (!hasFetchedProposalData) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.current_user_conditions_empty_state_message),
+                color = colors.tableText,
+                textAlign = TextAlign.Center
+            )
+        }
+        return
+    }
+
     val scrollState = rememberScrollState()
 
     Column(
@@ -98,23 +121,43 @@ private fun CurrentUserConditionsMainView(
             corner = Corner,
         )
 
-        OutlinedTextField(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .border(width = 1.dp, color = colors.tableBorder),
-            value = uiState.extraServices,
-            onValueChange = onExtraServicesChanged,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            placeholder = { Text("0.00000000") },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = colors.tableText,
-                unfocusedTextColor = colors.tableText,
-                focusedBorderColor = colors.tableBorder,
-                unfocusedBorderColor = colors.tableBorder,
-                cursorColor = colors.tableText,
-            ),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .weight(1f),
+                text = stringResource(R.string.annual_amount),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.tableText,
+            )
+
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .weight(2f),
+                value = uiState.extraServices,
+                onValueChange = onExtraServicesChanged,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                placeholder = { Text("0.00€") },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = colors.tableText,
+                    unfocusedTextColor = colors.tableText,
+                    focusedBorderColor = colors.tableBorder,
+                    unfocusedBorderColor = colors.tableBorder,
+                    cursorColor = colors.tableText,
+                ),
+            )
+        }
+
+        Spacer(Modifier.padding(bottom = 16.dp))
     }
 }
 
