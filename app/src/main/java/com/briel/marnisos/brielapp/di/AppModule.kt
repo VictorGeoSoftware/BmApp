@@ -4,9 +4,7 @@ import com.briel.marnisos.brielapp.ui.views.auth.AuthViewModel
 import com.briel.marnisos.brielapp.ui.views.currentuserconditions.CurrentUserConditionsViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.ProposalCalculationHelper
-import com.briel.marnisos.brielapp.ui.views.pricetable.export.AndroidComparatorPdfGenerator
-import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfDocumentDataFactory
-import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfGenerator
+import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfFileStore
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
 import org.koin.core.module.dsl.viewModel
 
@@ -14,8 +12,7 @@ import org.koin.dsl.module
 
 val appModule = module {
     single { ProposalCalculationHelper() }
-    single { ComparatorPdfDocumentDataFactory() }
-    single<ComparatorPdfGenerator> { AndroidComparatorPdfGenerator(context = get()) }
+    single { ComparatorPdfFileStore(context = get()) }
     single { ComparatorPdfShareManager() }
 
     viewModel {
@@ -29,9 +26,9 @@ val appModule = module {
             clearLastCompletedJobIdUseCase = get(),
             clearCurrentUserConditionsUseCase = get(),
             observeCurrentUserConditionsUseCase = get(),
+            generateComparatorReportPdfUseCase = get(),
             proposalCalculationHelper = get(),
-            comparatorPdfDocumentDataFactory = get(),
-            comparatorPdfGenerator = get()
+            comparatorPdfFileStore = get()
         )
     }
 

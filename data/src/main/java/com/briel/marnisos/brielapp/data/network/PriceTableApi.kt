@@ -1,13 +1,16 @@
 package com.briel.marnisos.brielapp.data.network
 
 import com.briel.marnisos.brielapp.data.model.prices.ConsumptionReportResponse
+import com.briel.marnisos.brielapp.data.model.prices.ComparatorReportPdfRequest
 import com.briel.marnisos.brielapp.data.model.prices.JobStatusResponse
 import com.briel.marnisos.brielapp.data.model.prices.JobSubmissionResponse
 import com.briel.marnisos.brielapp.data.model.prices.PriceTableResultsResponse
 import com.briel.marnisos.brielapp.data.model.prices.UserConsumptionResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.accept
 import io.ktor.client.request.forms.formData
+import io.ktor.client.request.setBody
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -15,6 +18,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.ContentType
 import kotlinx.serialization.json.Json
 import java.io.File
 
@@ -144,6 +148,24 @@ class PriceTableApi(
                 Result.success(responseBody)
             } else {
                 Result.failure(Exception("Error refreshing job result: $status"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun generateComparatorReportPdf(request: ComparatorReportPdfRequest): Result<ByteArray> {
+        return try {
+            val response = client.post("$baseUrl/reports/comparator-pdf") {
+                headers.append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                accept(ContentType.Application.Pdf)
+                setBody(request)
+            }
+
+            if (response.status == HttpStatusCode.OK) {
+                Result.success(response.body())
+            } else {
+                Result.failure(Exception("Error generating comparator PDF: ${response.status}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
