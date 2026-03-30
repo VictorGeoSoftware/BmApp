@@ -19,7 +19,6 @@ import com.briel.marnisos.brielapp.ui.models.ComparatorDestination
 internal fun DrawerContent(
     selectedDestination: ComparatorDestination,
     onDestinationSelected: (ComparatorDestination) -> Unit,
-    showCurrentUserConditionsOption: Boolean,
     versionLabel: String,
 ) {
     Column(
@@ -36,6 +35,12 @@ internal fun DrawerContent(
         )
 
         NavigationDrawerItem(
+            label = { Text("Condiciones actuales") },
+            selected = selectedDestination == ComparatorDestination.CURRENT_USER_CONDITIONS,
+            onClick = { onDestinationSelected(ComparatorDestination.CURRENT_USER_CONDITIONS) }
+        )
+
+        NavigationDrawerItem(
             label = { Text("Propuestas") },
             selected = selectedDestination == ComparatorDestination.PROPOSALS,
             onClick = { onDestinationSelected(ComparatorDestination.PROPOSALS) }
@@ -46,14 +51,6 @@ internal fun DrawerContent(
             selected = selectedDestination == ComparatorDestination.CONFIGURATION,
             onClick = { onDestinationSelected(ComparatorDestination.CONFIGURATION) }
         )
-
-        if (showCurrentUserConditionsOption) {
-            NavigationDrawerItem(
-                label = { Text("Condiciones actuales") },
-                selected = selectedDestination == ComparatorDestination.CURRENT_USER_CONDITIONS,
-                onClick = { onDestinationSelected(ComparatorDestination.CURRENT_USER_CONDITIONS) }
-            )
-        }
 
         Spacer(modifier = Modifier.weight(1f))
 

@@ -21,7 +21,7 @@ android {
         }
         create("local") {
             dimension = "environment"
-            buildConfigField("String", "API_BASE_URL", "\"http://192.168.0.102:8081/api/v1\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8081/api/v1\"")
         }
     }
 
