@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -35,6 +36,7 @@ fun PriceProposalColumn(
     iva: String,
     totalAnnualPrice: String,
     annualPriceDifference: Double?,
+    annualSavingsPercentage: Int?,
     fixedAmountInputValue: String,
     onFixedAmountInputChange: (String) -> Unit,
 ) {
@@ -86,6 +88,7 @@ fun PriceProposalColumn(
         AnnualPriceDifferenceSection(
             modifier = Modifier.fillMaxWidth(),
             annualPriceDifference = annualPriceDifference,
+            annualSavingsPercentage = annualSavingsPercentage,
         )
     }
 }
@@ -93,21 +96,24 @@ fun PriceProposalColumn(
 @Composable
 private fun AnnualPriceDifferenceSection(
     annualPriceDifference: Double?,
+    annualSavingsPercentage: Int?,
     modifier: Modifier = Modifier,
 ) {
     val colors = extendedColors
     val textColor = when {
         annualPriceDifference == null -> colors.tableText
         annualPriceDifference < 0.0 -> Color(0xFFD32F2F)
-        annualPriceDifference > 0.0 -> Color(0xFF1565C0)
+        annualPriceDifference > 0.0 -> Color(0xFFFFFFFF)
         else -> colors.tableText
     }
 
     val sectionText = annualPriceDifference?.let { value ->
-        String.format("%.2f€", value)
+        val annualDifferenceText = String.format(java.util.Locale.US, "%.2f€", value)
+        val annualSavingsText = annualSavingsPercentage?.let { " (${it}%)" }.orEmpty()
+        annualDifferenceText + annualSavingsText
     } ?: "--"
 
-    androidx.compose.foundation.layout.Row(
+    Row(
         modifier = modifier
             .background(colors.sectionHighlight, RoundedCornerShape(Corner))
             .border(1.dp, colors.sectionBorder, RoundedCornerShape(Corner))
@@ -159,6 +165,7 @@ private fun PriceProposalColumnPreview() {
         iva = "2.00",
         totalAnnualPrice = "100.00",
         annualPriceDifference = -29.51,
+        annualSavingsPercentage = -10,
         fixedAmountInputValue = "",
         onFixedAmountInputChange = {},
     )

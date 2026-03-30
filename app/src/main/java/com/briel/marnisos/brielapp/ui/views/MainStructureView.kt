@@ -62,6 +62,7 @@ fun MainView(
     val pdfExportError by comparatorViewModel.pdfExportError.collectAsState()
     val proposalPriceList by comparatorViewModel.proposalPriceModelList.collectAsState()
     val proposalAnnualPriceDeltaByTitle by comparatorViewModel.proposalAnnualPriceDeltaByTitle.collectAsState()
+    val proposalAnnualSavingsPercentageByTitle by comparatorViewModel.proposalAnnualSavingsPercentageByTitle.collectAsState()
     val proposalFixedAmountByTitle by comparatorViewModel.proposalFixedAmountByTitle.collectAsState()
     val proposalVisibilityByTitle by comparatorViewModel.proposalVisibilityByTitle.collectAsState()
     val customerConditionsUiState by comparatorViewModel.customerConditionsUiState.collectAsState()
@@ -93,6 +94,7 @@ fun MainView(
         isGeneratingPdf = isGeneratingPdf,
         proposalPriceList = proposalPriceList,
         proposalAnnualPriceDeltaByTitle = proposalAnnualPriceDeltaByTitle,
+        proposalAnnualSavingsPercentageByTitle = proposalAnnualSavingsPercentageByTitle,
         proposalFixedAmountByTitle = proposalFixedAmountByTitle,
         proposalVisibilityByTitle = proposalVisibilityByTitle,
         customerConditionsUiState = customerConditionsUiState,
@@ -128,6 +130,7 @@ fun MainStructureView(
     context: Context,
     proposalPriceList: List<ProposalPriceModel>,
     proposalAnnualPriceDeltaByTitle: Map<String, Double>,
+    proposalAnnualSavingsPercentageByTitle: Map<String, Int>,
     proposalFixedAmountByTitle: Map<String, String>,
     proposalVisibilityByTitle: Map<String, Boolean>,
     customerConditionsUiState: CustomerConditionsUiState,
@@ -192,6 +195,7 @@ fun MainStructureView(
                         electricTax = impuestoElectrico,
                         visibleProposalPriceList = visibleProposals,
                         proposalAnnualPriceDeltaByTitle = proposalAnnualPriceDeltaByTitle,
+                        proposalAnnualSavingsPercentageByTitle = proposalAnnualSavingsPercentageByTitle,
                         proposalFixedAmountByTitle = proposalFixedAmountByTitle,
                         onProposalFixedAmountChanged = onProposalFixedAmountChanged,
                         customerConditionsUiState = customerConditionsUiState,
@@ -243,6 +247,7 @@ private fun MainStructureViewPreview() {
                 impuestoElectrico = "5.11",
                 proposalPriceList = emptyList(),
                 proposalAnnualPriceDeltaByTitle = emptyMap(),
+                proposalAnnualSavingsPercentageByTitle = emptyMap(),
                 proposalFixedAmountByTitle = emptyMap(),
                 proposalVisibilityByTitle = emptyMap(),
                 customerConditionsUiState = CustomerConditionsUiState(),

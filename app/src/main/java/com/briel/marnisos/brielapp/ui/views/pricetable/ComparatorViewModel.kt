@@ -71,6 +71,9 @@ class ComparatorViewModel(
     private val _proposalAnnualPriceDeltaByTitle = MutableStateFlow<Map<String, Double>>(value = emptyMap())
     val proposalAnnualPriceDeltaByTitle: StateFlow<Map<String, Double>> = _proposalAnnualPriceDeltaByTitle
 
+    private val _proposalAnnualSavingsPercentageByTitle = MutableStateFlow<Map<String, Int>>(value = emptyMap())
+    val proposalAnnualSavingsPercentageByTitle: StateFlow<Map<String, Int>> = _proposalAnnualSavingsPercentageByTitle
+
     private val _proposalFixedAmountByTitle = MutableStateFlow<Map<String, String>>(value = emptyMap())
     val proposalFixedAmountByTitle: StateFlow<Map<String, String>> = _proposalFixedAmountByTitle
 
@@ -160,6 +163,7 @@ class ComparatorViewModel(
         baseProposalPriceModelList = emptyList()
         _proposalPriceModelList.value = emptyList()
         _proposalAnnualPriceDeltaByTitle.value = emptyMap()
+        _proposalAnnualSavingsPercentageByTitle.value = emptyMap()
         _proposalFixedAmountByTitle.value = emptyMap()
         _proposalVisibilityByTitle.value = emptyMap()
     }
@@ -353,15 +357,27 @@ class ComparatorViewModel(
     private fun recomputeProposalAnnualPriceDeltas() {
         if (cachedCurrentUserConditions == null) {
             _proposalAnnualPriceDeltaByTitle.value = emptyMap()
+            _proposalAnnualSavingsPercentageByTitle.value = emptyMap()
             return
         }
 
-        _proposalAnnualPriceDeltaByTitle.value = _proposalPriceModelList.value.associate { proposal ->
-            proposal.proposalTitle to proposalCalculationHelper.calculateAnnualPriceDelta(
+        val annualPriceDeltasByTitle = mutableMapOf<String, Double>()
+        val annualSavingsPercentagesByTitle = mutableMapOf<String, Int>()
+
+        _proposalPriceModelList.value.forEach { proposal ->
+            annualPriceDeltasByTitle[proposal.proposalTitle] = proposalCalculationHelper.calculateAnnualPriceDelta(
+                customerTotalAnnualPrice = customerTotalAnnualPriceValue,
+                proposalTotalAnnualPrice = proposal.totalAnnualPrice
+            )
+
+            annualSavingsPercentagesByTitle[proposal.proposalTitle] = proposalCalculationHelper.calculateAnnualSavingsPercentage(
                 customerTotalAnnualPrice = customerTotalAnnualPriceValue,
                 proposalTotalAnnualPrice = proposal.totalAnnualPrice
             )
         }
+
+        _proposalAnnualPriceDeltaByTitle.value = annualPriceDeltasByTitle
+        _proposalAnnualSavingsPercentageByTitle.value = annualSavingsPercentagesByTitle
     }
 
     private fun parseAmountInput(input: String): Double {
@@ -401,7 +417,7 @@ class ComparatorViewModel(
         val annualEnergyCost = energyRows
             .zip(consumedEnergyItems)
             .sumOf { (energyData, energyPrice) ->
-                energyData.second * (energyPrice / 100.0)
+                energyData.second * energyPrice
             }
 
         val baseCost = annualPowerTermCost + annualEnergyCost
