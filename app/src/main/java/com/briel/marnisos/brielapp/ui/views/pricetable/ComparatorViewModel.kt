@@ -54,9 +54,17 @@ class ComparatorViewModel(
     private var baseProposalPriceModelList: List<ProposalPriceModel> = emptyList()
     private var cachedCurrentUserConditions: CurrentUserConditionsModel? = null
     private var customerTotalAnnualPriceValue: Double = 0.0
-    private var supplyHolderName: String = ""
-    private var supplyAddress: String = ""
     private var supplyCupsCode: String = ""
+    private var isSupplyHolderOverriddenByUser: Boolean = false
+    private var isSupplyAddressOverriddenByUser: Boolean = false
+    private var lastBackendSupplyHolder: String = ""
+    private var lastBackendSupplyAddress: String = ""
+
+    private val _supplyHolder = MutableStateFlow(value = "")
+    val supplyHolder: StateFlow<String> = _supplyHolder
+
+    private val _supplyAddress = MutableStateFlow(value = "")
+    val supplyAddress: StateFlow<String> = _supplyAddress
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
@@ -169,8 +177,12 @@ class ComparatorViewModel(
         _customerConditionsUiState.value = CustomerConditionsUiState()
 
         baseProposalPriceModelList = emptyList()
-        supplyHolderName = ""
-        supplyAddress = ""
+        _supplyHolder.value = ""
+        _supplyAddress.value = ""
+        isSupplyHolderOverriddenByUser = false
+        isSupplyAddressOverriddenByUser = false
+        lastBackendSupplyHolder = ""
+        lastBackendSupplyAddress = ""
         supplyCupsCode = ""
         _proposalPriceModelList.value = emptyList()
         _proposalAnnualPriceDeltaByTitle.value = emptyMap()
@@ -251,8 +263,24 @@ class ComparatorViewModel(
                 _energyConsumedRows.value = report.consumptionData.annualConsumptionValues().map { item ->
                     Pair(item.first, item.second.toInt())
                 }
-                supplyHolderName = report.userData.customerDetails.name.orEmpty()
-                supplyAddress = report.userData.customerDetails.address
+                val backendSupplyHolder = ""
+                val backendSupplyAddress = ""
+                val shouldApplyBackendSupplyHolder = !isSupplyHolderOverriddenByUser && (
+                    _supplyHolder.value.isBlank() || _supplyHolder.value == lastBackendSupplyHolder
+                )
+                val shouldApplyBackendSupplyAddress = !isSupplyAddressOverriddenByUser && (
+                    _supplyAddress.value.isBlank() || _supplyAddress.value == lastBackendSupplyAddress
+                )
+
+                if (shouldApplyBackendSupplyHolder) {
+                    _supplyHolder.value = backendSupplyHolder
+                }
+                if (shouldApplyBackendSupplyAddress) {
+                    _supplyAddress.value = backendSupplyAddress
+                }
+
+                lastBackendSupplyHolder = backendSupplyHolder
+                lastBackendSupplyAddress = backendSupplyAddress
                 supplyCupsCode = report.userData.cupsCode.ifBlank { report.consumptionData.cups }
 
                 // Proposals now come directly from backend
@@ -506,8 +534,8 @@ class ComparatorViewModel(
         val customerColumnUiState = _customerConditionsUiState.value
 
         return ComparatorReportPdfModel(
-            supplyHolder = supplyHolderName.ifBlank { "--" },
-            supplyAddress = supplyAddress.ifBlank { "--" },
+            supplyHolder = _supplyHolder.value.ifBlank { "--" },
+            supplyAddress = _supplyAddress.value.ifBlank { "--" },
             cups = supplyCupsCode.ifBlank { "--" },
             tariffName = _tariffName.value,
             powerTermRows = powerRows.map { row ->
@@ -549,6 +577,16 @@ class ComparatorViewModel(
 
     fun clearPdfExportError() {
         _pdfExportError.value = null
+    }
+
+    fun updateSupplyHolder(value: String) {
+        isSupplyHolderOverriddenByUser = true
+        _supplyHolder.value = value
+    }
+
+    fun updateSupplyAddress(value: String) {
+        isSupplyAddressOverriddenByUser = true
+        _supplyAddress.value = value
     }
 
 

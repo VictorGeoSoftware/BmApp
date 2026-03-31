@@ -66,6 +66,8 @@ fun MainView(
     val proposalFixedAmountByTitle by comparatorViewModel.proposalFixedAmountByTitle.collectAsState()
     val proposalVisibilityByTitle by comparatorViewModel.proposalVisibilityByTitle.collectAsState()
     val customerConditionsUiState by comparatorViewModel.customerConditionsUiState.collectAsState()
+    val supplyHolder by comparatorViewModel.supplyHolder.collectAsState()
+    val supplyAddress by comparatorViewModel.supplyAddress.collectAsState()
 
     val context = LocalContext.current
     val pdfShareManager = remember { ComparatorPdfShareManager() }
@@ -98,6 +100,8 @@ fun MainView(
         proposalFixedAmountByTitle = proposalFixedAmountByTitle,
         proposalVisibilityByTitle = proposalVisibilityByTitle,
         customerConditionsUiState = customerConditionsUiState,
+        supplyHolder = supplyHolder,
+        supplyAddress = supplyAddress,
         onBeforeFetchPriceProposals = comparatorViewModel::resetCurrentUserConditionsAndProposals,
         onPdfSelected = { pdfFile ->
             comparatorViewModel.uploadConsumptionReport(pdfFile)
@@ -105,6 +109,8 @@ fun MainView(
         onGeneratePdfClick = comparatorViewModel::exportVisibleProposalsAsPdf,
         onProposalFixedAmountChanged = comparatorViewModel::updateProposalFixedAmount,
         onProposalVisibilityChanged = comparatorViewModel::setProposalVisibility,
+        onSupplyHolderChanged = comparatorViewModel::updateSupplyHolder,
+        onSupplyAddressChanged = comparatorViewModel::updateSupplyAddress,
         versionLabel = BuildConfig.DEPLOY_VERSION,
         context = context
     )
@@ -134,8 +140,12 @@ fun MainStructureView(
     proposalFixedAmountByTitle: Map<String, String>,
     proposalVisibilityByTitle: Map<String, Boolean>,
     customerConditionsUiState: CustomerConditionsUiState,
+    supplyHolder: String = "",
+    supplyAddress: String = "",
     onProposalFixedAmountChanged: (proposalTitle: String, fixedAmountInput: String) -> Unit = { _, _ -> },
     onProposalVisibilityChanged: (proposalTitle: String, isVisible: Boolean) -> Unit = { _, _ -> },
+    onSupplyHolderChanged: (String) -> Unit = {},
+    onSupplyAddressChanged: (String) -> Unit = {},
     versionLabel: String,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -221,6 +231,10 @@ fun MainStructureView(
                         powerPeriods = powerTermRows.map { item -> item.first },
                         energyPeriods = energyConsumedRows.map { item -> item.first },
                         hasFetchedProposalData = hasFetchedProposalData,
+                        supplyHolder = supplyHolder,
+                        supplyAddress = supplyAddress,
+                        onSupplyHolderChanged = onSupplyHolderChanged,
+                        onSupplyAddressChanged = onSupplyAddressChanged,
                     )
                 }
             }

@@ -39,6 +39,10 @@ fun CurrentUserConditionsView(
     powerPeriods: List<String>,
     energyPeriods: List<String>,
     hasFetchedProposalData: Boolean,
+    supplyHolder: String,
+    supplyAddress: String,
+    onSupplyHolderChanged: (String) -> Unit,
+    onSupplyAddressChanged: (String) -> Unit,
     currentUserConditionsViewModel: CurrentUserConditionsViewModel = koinViewModel(),
 ) {
     val uiState by currentUserConditionsViewModel.uiState.collectAsState()
@@ -54,6 +58,10 @@ fun CurrentUserConditionsView(
         modifier = modifier,
         hasFetchedProposalData = hasFetchedProposalData,
         uiState = uiState,
+        supplyHolder = supplyHolder,
+        supplyAddress = supplyAddress,
+        onSupplyHolderChanged = onSupplyHolderChanged,
+        onSupplyAddressChanged = onSupplyAddressChanged,
         onPowerTermValueChanged = currentUserConditionsViewModel::onPowerTermValueChanged,
         onEnergyValueChanged = currentUserConditionsViewModel::onEnergyValueChanged,
         onExtraServicesChanged = currentUserConditionsViewModel::onExtraServicesChanged,
@@ -65,6 +73,10 @@ private fun CurrentUserConditionsMainView(
     modifier: Modifier,
     hasFetchedProposalData: Boolean,
     uiState: CurrentUserConditionsFormState,
+    supplyHolder: String,
+    supplyAddress: String,
+    onSupplyHolderChanged: (String) -> Unit,
+    onSupplyAddressChanged: (String) -> Unit,
     onPowerTermValueChanged: (period: String, value: String) -> Unit,
     onEnergyValueChanged: (period: String, value: String) -> Unit,
     onExtraServicesChanged: (value: String) -> Unit,
@@ -97,26 +109,49 @@ private fun CurrentUserConditionsMainView(
     ) {
         HeaderBox(
             modifier = Modifier.fillMaxWidth(),
-            text = "Condiciones actuales",
+            text = stringResource(R.string.current_user_conditions_title),
             background = colors.headerHighlight,
             corner = Corner,
         )
 
         EditableRowsSection(
-            title = "TÉRMINO DE POTENCIA",
+            title = stringResource(R.string.current_user_conditions_customer_data_title),
+            rows = emptyList(),
+            onValueChanged = { _, _ -> },
+            keyboardType = KeyboardType.Text,
+            placeholderText = stringResource(R.string.current_user_conditions_customer_data_placeholder),
+            customContent = {
+                CustomerDataInputRow(
+                    label = stringResource(R.string.current_user_conditions_supply_holder_label),
+                    value = supplyHolder,
+                    onValueChanged = onSupplyHolderChanged,
+                    placeholderText = stringResource(R.string.current_user_conditions_customer_data_placeholder),
+                )
+
+                CustomerDataInputRow(
+                    label = stringResource(R.string.current_user_conditions_supply_address_label),
+                    value = supplyAddress,
+                    onValueChanged = onSupplyAddressChanged,
+                    placeholderText = stringResource(R.string.current_user_conditions_customer_data_placeholder),
+                )
+            }
+        )
+
+        EditableRowsSection(
+            title = stringResource(R.string.current_user_conditions_power_term_title),
             rows = uiState.powerTermRows,
             onValueChanged = onPowerTermValueChanged,
         )
 
         EditableRowsSection(
-            title = "ENERGÍA CONSUMIDA",
+            title = stringResource(R.string.current_user_conditions_energy_consumed_title),
             rows = uiState.energyConsumedRows,
             onValueChanged = onEnergyValueChanged,
         )
 
         SectionHeader(
             modifier = Modifier.fillMaxWidth(),
-            text = "SERVICIOS EXTRA",
+            text = stringResource(R.string.current_user_conditions_extra_services_title),
             background = colors.headerHighlight,
             corner = Corner,
         )
@@ -166,6 +201,9 @@ private fun EditableRowsSection(
     title: String,
     rows: List<Pair<String, String>>,
     onValueChanged: (period: String, value: String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Decimal,
+    placeholderText: String = "0.00000000",
+    customContent: @Composable (() -> Unit)? = null,
 ) {
     val colors = extendedColors
 
@@ -181,6 +219,11 @@ private fun EditableRowsSection(
             .fillMaxWidth()
             .border(width = 1.dp, color = colors.tableBorder),
     ) {
+        customContent?.let {
+            it()
+            return@Column
+        }
+
         for ((period, value) in rows) {
             Row(
                 modifier = Modifier
@@ -202,8 +245,8 @@ private fun EditableRowsSection(
                     value = value,
                     onValueChange = { onValueChanged(period, it) },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    placeholder = { Text("0.00000000") },
+                    keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                    placeholder = { Text(placeholderText) },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = colors.tableText,
                         unfocusedTextColor = colors.tableText,
@@ -214,5 +257,47 @@ private fun EditableRowsSection(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun CustomerDataInputRow(
+    label: String,
+    value: String,
+    onValueChanged: (String) -> Unit,
+    placeholderText: String,
+) {
+    val colors = extendedColors
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = label,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.tableText,
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.weight(2f),
+            value = value,
+            onValueChange = onValueChanged,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            placeholder = { Text(placeholderText) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = colors.tableText,
+                unfocusedTextColor = colors.tableText,
+                focusedBorderColor = colors.tableBorder,
+                unfocusedBorderColor = colors.tableBorder,
+                cursorColor = colors.tableText,
+            ),
+        )
     }
 }
