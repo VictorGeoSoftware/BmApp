@@ -57,6 +57,8 @@ class ComparatorViewModel(
     private var supplyCupsCode: String = ""
     private var isSupplyHolderOverriddenByUser: Boolean = false
     private var isSupplyAddressOverriddenByUser: Boolean = false
+    private var lastBackendSupplyHolder: String = ""
+    private var lastBackendSupplyAddress: String = ""
 
     private val _supplyHolder = MutableStateFlow(value = "")
     val supplyHolder: StateFlow<String> = _supplyHolder
@@ -179,6 +181,8 @@ class ComparatorViewModel(
         _supplyAddress.value = ""
         isSupplyHolderOverriddenByUser = false
         isSupplyAddressOverriddenByUser = false
+        lastBackendSupplyHolder = ""
+        lastBackendSupplyAddress = ""
         supplyCupsCode = ""
         _proposalPriceModelList.value = emptyList()
         _proposalAnnualPriceDeltaByTitle.value = emptyMap()
@@ -259,12 +263,24 @@ class ComparatorViewModel(
                 _energyConsumedRows.value = report.consumptionData.annualConsumptionValues().map { item ->
                     Pair(item.first, item.second.toInt())
                 }
-                if (!isSupplyHolderOverriddenByUser) {
-                    _supplyHolder.value = report.userData.customerDetails.name.orEmpty()
+                val backendSupplyHolder = ""
+                val backendSupplyAddress = ""
+                val shouldApplyBackendSupplyHolder = !isSupplyHolderOverriddenByUser && (
+                    _supplyHolder.value.isBlank() || _supplyHolder.value == lastBackendSupplyHolder
+                )
+                val shouldApplyBackendSupplyAddress = !isSupplyAddressOverriddenByUser && (
+                    _supplyAddress.value.isBlank() || _supplyAddress.value == lastBackendSupplyAddress
+                )
+
+                if (shouldApplyBackendSupplyHolder) {
+                    _supplyHolder.value = backendSupplyHolder
                 }
-                if (!isSupplyAddressOverriddenByUser) {
-                    _supplyAddress.value = report.userData.customerDetails.address
+                if (shouldApplyBackendSupplyAddress) {
+                    _supplyAddress.value = backendSupplyAddress
                 }
+
+                lastBackendSupplyHolder = backendSupplyHolder
+                lastBackendSupplyAddress = backendSupplyAddress
                 supplyCupsCode = report.userData.cupsCode.ifBlank { report.consumptionData.cups }
 
                 // Proposals now come directly from backend
