@@ -24,9 +24,12 @@ import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUs
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
+import com.briel.marnisos.brielapp.domain.usecases.IncrementProposalResponseCounterUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SetUserOfflineUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SetUserOnlineUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SyncAuthenticatedUserDataUseCase
 import com.google.firebase.auth.FirebaseAuth
@@ -64,6 +67,9 @@ val dataModule = module {
     factory<PersistLastCompletedJobIdUseCase> { PersistLastCompletedJobIdUseCase.Factory.create(get()) }
     factory<GetLastCompletedJobIdUseCase> { GetLastCompletedJobIdUseCase.Factory.create(get()) }
     factory<ClearLastCompletedJobIdUseCase> { ClearLastCompletedJobIdUseCase.Factory.create(get()) }
+    factory<SetUserOnlineUseCase> { SetUserOnlineUseCase.Factory.create(get()) }
+    factory<SetUserOfflineUseCase> { SetUserOfflineUseCase.Factory.create(get()) }
+    factory<IncrementProposalResponseCounterUseCase> { IncrementProposalResponseCounterUseCase.Factory.create(get()) }
     factory<ClearCurrentUserConditionsUseCase> { ClearCurrentUserConditionsUseCase.Factory.create(get()) }
     factory<ObserveCurrentUserConditionsUseCase> { ObserveCurrentUserConditionsUseCase.Factory.create(get()) }
     factory<PersistCurrentUserConditionsUseCase> { PersistCurrentUserConditionsUseCase.Factory.create(get()) }

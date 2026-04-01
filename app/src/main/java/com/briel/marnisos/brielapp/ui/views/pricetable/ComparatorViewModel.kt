@@ -16,9 +16,11 @@ import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUs
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
+import com.briel.marnisos.brielapp.domain.usecases.IncrementProposalResponseCounterUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
 import com.briel.marnisos.brielapp.notifications.PriceUpdatesEventBus
 import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsUiState
@@ -43,6 +45,8 @@ class ComparatorViewModel(
     private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase,
     private val clearCurrentUserConditionsUseCase: ClearCurrentUserConditionsUseCase,
     private val observeCurrentUserConditionsUseCase: ObserveCurrentUserConditionsUseCase,
+    private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase,
+    private val incrementProposalResponseCounterUseCase: IncrementProposalResponseCounterUseCase,
     private val generateComparatorReportPdfUseCase: GenerateComparatorReportPdfUseCase,
     private val proposalCalculationHelper: ProposalCalculationHelper,
     private val comparatorPdfFileStore: ComparatorPdfFileStore
@@ -289,6 +293,7 @@ class ComparatorViewModel(
                 setBaseProposals(report.proposals)
                 synchronizeProposalVisibility(report.proposals)
                 recomputeCustomerConditionsUiState()
+                trackProposalResponseReceived()
                 viewModelScope.launch {
                     delay(2000)
                     _uploadStatus.value = null
@@ -316,6 +321,7 @@ class ComparatorViewModel(
                 _impuestoElectrico.value = report.impuestoElectrico.toPercentString()
                 _iva.value = report.iva.toPercentString()
                 recomputeCustomerConditionsUiState()
+                trackProposalResponseReceived()
             }
             .onFailure { error ->
                 if (error.isJobExpiredOrNotFound()) {
@@ -334,6 +340,20 @@ class ComparatorViewModel(
     private fun Throwable.isJobExpiredOrNotFound(): Boolean {
         val message = message.orEmpty()
         return message.contains("404") || message.contains("not found", ignoreCase = true)
+    }
+
+    private fun trackProposalResponseReceived() {
+        val authUser = getCurrentAuthUserUseCase() ?: return
+        val email = authUser.email?.trim().orEmpty()
+        if (email.isBlank()) return
+
+        val name = authUser.displayName
+            ?.takeIf { it.isNotBlank() }
+            ?: email.substringBefore('@')
+
+        viewModelScope.launch {
+            incrementProposalResponseCounterUseCase(name = name, email = email)
+        }
     }
 
     private fun Double.toPercentString(): String {

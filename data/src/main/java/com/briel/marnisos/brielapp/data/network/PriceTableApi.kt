@@ -6,6 +6,7 @@ import com.briel.marnisos.brielapp.data.model.prices.JobStatusResponse
 import com.briel.marnisos.brielapp.data.model.prices.JobSubmissionResponse
 import com.briel.marnisos.brielapp.data.model.prices.PriceTableResultsResponse
 import com.briel.marnisos.brielapp.data.model.prices.UserConsumptionResponse
+import com.briel.marnisos.brielapp.data.model.auth.UserActivityEventDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -18,6 +19,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
 import io.ktor.http.ContentType
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -167,6 +169,50 @@ class PriceTableApi(
             } else {
                 Result.failure(Exception("Error generating comparator PDF: ${response.status}"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun setUserOnline(name: String, email: String): Result<Unit> {
+        return sendUserActivityEvent(
+            endpoint = "user-activity/online",
+            payload = UserActivityEventDto(name = name, email = email)
+        )
+    }
+
+    suspend fun setUserOffline(name: String, email: String): Result<Unit> {
+        return sendUserActivityEvent(
+            endpoint = "user-activity/offline",
+            payload = UserActivityEventDto(name = name, email = email)
+        )
+    }
+
+    suspend fun incrementProposalResponseCounter(name: String, email: String): Result<Unit> {
+        return sendUserActivityEvent(
+            endpoint = "user-activity/proposals-response",
+            payload = UserActivityEventDto(name = name, email = email)
+        )
+    }
+
+    private suspend fun sendUserActivityEvent(
+        endpoint: String,
+        payload: UserActivityEventDto
+    ): Result<Unit> {
+        return try {
+            val response = client.post("$baseUrl/$endpoint") {
+                headers.append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(payload)
+            }
+
+            if (!response.status.isSuccess()) {
+                val responseBody = response.bodyAsText()
+                return Result.failure(
+                    IllegalStateException(responseBody.ifBlank { "Failed to send user activity event" })
+                )
+            }
+
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
