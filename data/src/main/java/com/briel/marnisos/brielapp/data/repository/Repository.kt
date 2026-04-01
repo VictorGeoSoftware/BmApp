@@ -32,6 +32,10 @@ interface Repository {
     suspend fun getLastCompletedJobId(): String?
     suspend fun clearLastCompletedJobId()
 
+    suspend fun setUserOnline(name: String, email: String): Result<Unit>
+    suspend fun setUserOffline(name: String, email: String): Result<Unit>
+    suspend fun incrementProposalResponseCounter(name: String, email: String): Result<Unit>
+
     fun observeCurrentUserConditions(): Flow<CurrentUserConditionsModel?>
     suspend fun persistCurrentUserConditions(currentUserConditions: CurrentUserConditionsModel)
     suspend fun clearCurrentUserConditions()
@@ -107,6 +111,18 @@ private class RepositoryImpl(
 
     override suspend fun clearLastCompletedJobId() {
         lastCompletedJobIdLocalDataSource.clear()
+    }
+
+    override suspend fun setUserOnline(name: String, email: String): Result<Unit> {
+        return priceTableApi.setUserOnline(name = name, email = email)
+    }
+
+    override suspend fun setUserOffline(name: String, email: String): Result<Unit> {
+        return priceTableApi.setUserOffline(name = name, email = email)
+    }
+
+    override suspend fun incrementProposalResponseCounter(name: String, email: String): Result<Unit> {
+        return priceTableApi.incrementProposalResponseCounter(name = name, email = email)
     }
 
     override fun observeCurrentUserConditions(): Flow<CurrentUserConditionsModel?> {

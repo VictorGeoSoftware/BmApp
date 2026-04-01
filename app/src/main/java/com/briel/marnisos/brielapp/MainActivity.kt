@@ -18,19 +18,39 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SetUserOfflineUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SetUserOnlineUseCase
 import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
 import com.briel.marnisos.brielapp.ui.views.MainView
 import com.briel.marnisos.brielapp.ui.views.auth.AuthViewModel
 import com.briel.marnisos.brielapp.ui.views.auth.LoginScreen
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
+    private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase by inject()
+    private val setUserOnlineUseCase: SetUserOnlineUseCase by inject()
+    private val setUserOfflineUseCase: SetUserOfflineUseCase by inject()
+
     private val postNotificationsPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (!granted && !NotificationManagerCompat.from(this).areNotificationsEnabled()) {
             openAppNotificationSettings()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        sendUserActivity(isOnline = true)
+    }
+
+    override fun onStop() {
+        sendUserActivity(isOnline = false)
+        super.onStop()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,5 +103,23 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
             .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
         startActivity(intent)
+    }
+
+    private fun sendUserActivity(isOnline: Boolean) {
+        val user = getCurrentAuthUserUseCase() ?: return
+        val email = user.email?.trim().orEmpty()
+        if (email.isBlank()) return
+
+        val name = user.displayName
+            ?.takeIf { it.isNotBlank() }
+            ?: email.substringBefore('@')
+
+        lifecycleScope.launch {
+            if (isOnline) {
+                setUserOnlineUseCase(name = name, email = email)
+            } else {
+                setUserOfflineUseCase(name = name, email = email)
+            }
+        }
     }
 }
