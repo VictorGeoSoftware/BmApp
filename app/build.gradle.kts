@@ -1,12 +1,14 @@
+import org.gradle.kotlin.dsl.java
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.text.format
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
 }
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 val generatedDeployVersion = "v" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMM_HHmm"))
 val appDeployVersion = System.getenv("APP_DEPLOY_VERSION")?.takeIf { it.isNotBlank() } ?: generatedDeployVersion
