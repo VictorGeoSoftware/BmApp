@@ -3,6 +3,7 @@ package com.briel.marnisos.brielapp.domain.models
 data class ConsumptionReportModel(
     val success: Boolean,
     val userData: DoclingExtractedDataModel,
+    val currentConditions: CustomerCurrentConditionsModel? = null,
     val consumptionData: CleanedConsumptionDataModel,
     val proposals: List<ProposalPriceModel>,
     val iva: Double,
@@ -11,12 +12,12 @@ data class ConsumptionReportModel(
 
 data class DoclingExtractedDataModel(
     val cupsCode: String,
-    val customerDetails: CustomerDetailsModel,
-    val customerId: CustomerIdModel
+    val customerDetails: CustomerDetailsModel? = null,
+    val customerId: CustomerIdModel? = null
 )
 
 data class CustomerDetailsModel(
-    val address: String,
+    val address: String? = null,
     val name: String? = null,
 )
 

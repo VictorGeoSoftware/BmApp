@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class ConsumptionReportResponse(
     val success: Boolean,
     val userData: DoclingExtractedData,
+    val currentConditions: CustomerCurrentConditionsResponse? = null,
     val consumptionData: CleanedConsumptionData,
     val proposals: List<ProposalPriceData>,
     val iva: Double,
@@ -14,14 +15,14 @@ data class ConsumptionReportResponse(
 
 @Serializable
 data class DoclingExtractedData(
-    val cups_code: String,
-    val customer_details: CustomerDetails,
-    val customer_id: CustomerId
+    val cups_code: String = "",
+    val customer_details: CustomerDetails? = null,
+    val customer_id: CustomerId? = null
 )
 
 @Serializable
 data class CustomerDetails(
-    val address: String,
+    val address: String? = null,
     val name: String? = null
 )
 
