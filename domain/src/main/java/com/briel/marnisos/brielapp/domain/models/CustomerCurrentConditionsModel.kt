@@ -24,6 +24,7 @@ data class PowerTermConditionModel(
 )
 
 data class EnergyTermConditionModel(
+    val period: String? = null,
     val pricePerKwh: Double? = null,
     val consumedKwh: Double? = null,
     val billedAmount: Double? = null,

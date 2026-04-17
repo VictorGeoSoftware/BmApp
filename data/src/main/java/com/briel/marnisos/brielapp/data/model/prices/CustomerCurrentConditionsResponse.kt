@@ -29,6 +29,7 @@ data class PowerTermConditionResponse(
 
 @Serializable
 data class EnergyTermConditionResponse(
+    val period: String? = null,
     val price_per_kwh: Double? = null,
     val consumed_kwh: Double? = null,
     val billed_amount: Double? = null,

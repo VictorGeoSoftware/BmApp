@@ -514,29 +514,53 @@ class ComparatorViewModel(
         return mapped
     }
 
+    /**
+     * Maps backend energy_terms onto the UI energy periods (P1..P6) using the AI extraction
+     * contract:
+     *  - If any term carries an explicit period (e.g. "P1"), map it directly.
+     *  - If the only term has no period (typical 2.0TD flat-rate bills), broadcast its price
+     *    to every UI period.
+     *  - Periods that the bill does not expose (because consumption was 0 that month) are
+     *    filled via nearest-neighbor by index distance, preserving an editable estimate.
+     */
     private fun mapEnergyPricesByPeriod(
         energyPeriods: List<String>,
         conditions: com.briel.marnisos.brielapp.domain.models.CustomerCurrentConditionsModel,
     ): Map<String, String> {
-        val mapped = mutableMapOf<String, String>()
-        val remainingPeriods = energyPeriods.toMutableList()
+        if (energyPeriods.isEmpty()) return emptyMap()
 
-        conditions.energyTerms.forEach { term ->
-            val price = term.pricePerKwh ?: return@forEach
-            val explicitPeriod = normalizeConditionPeriod(term.periodDescription.orEmpty())
-            val targetPeriod = when {
-                explicitPeriod in remainingPeriods -> explicitPeriod
-                remainingPeriods.isNotEmpty() -> remainingPeriods.first()
-                else -> null
-            }
+        val termsWithPrice = conditions.energyTerms.filter { it.pricePerKwh != null }
+        if (termsWithPrice.isEmpty()) return emptyMap()
 
-            if (targetPeriod != null) {
-                mapped[targetPeriod] = price.toEditableDecimal()
-                remainingPeriods.remove(targetPeriod)
+        val flatTerm = termsWithPrice.singleOrNull { it.period.isNullOrBlank() }
+        if (flatTerm != null && termsWithPrice.size == 1) {
+            val flatPrice = flatTerm.pricePerKwh!!.toEditableDecimal()
+            return energyPeriods.associateWith { flatPrice }
+        }
+
+        val explicitPriceByPeriodIndex = mutableMapOf<Int, Double>()
+        termsWithPrice.forEach { term ->
+            val period = term.period?.let { normalizeConditionPeriod(it) } ?: return@forEach
+            val periodIndex = energyPeriods.indexOf(period)
+            if (periodIndex >= 0) {
+                explicitPriceByPeriodIndex[periodIndex] = term.pricePerKwh!!
             }
         }
 
+        if (explicitPriceByPeriodIndex.isEmpty()) return emptyMap()
+
+        val mapped = mutableMapOf<String, String>()
+        energyPeriods.forEachIndexed { periodIndex, period ->
+            val price = explicitPriceByPeriodIndex[periodIndex]
+                ?: nearestKnownPrice(periodIndex, explicitPriceByPeriodIndex)
+            mapped[period] = price.toEditableDecimal()
+        }
         return mapped
+    }
+
+    private fun nearestKnownPrice(targetIndex: Int, knownPrices: Map<Int, Double>): Double {
+        val nearestIndex = knownPrices.keys.minBy { kotlin.math.abs(it - targetIndex) }
+        return knownPrices.getValue(nearestIndex)
     }
 
     private fun normalizeConditionPeriod(rawPeriod: String): String {

@@ -73,6 +73,7 @@ object ConsumptionReportMapper {
 
     private fun EnergyTermConditionResponse.mapToDomain(): EnergyTermConditionModel {
         return EnergyTermConditionModel(
+            period = this.period,
             pricePerKwh = this.price_per_kwh,
             consumedKwh = this.consumed_kwh,
             billedAmount = this.billed_amount,
