@@ -20,7 +20,6 @@ import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.IncrementProposalResponseCounterUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
-import com.briel.marnisos.brielapp.domain.usecases.PersistCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
@@ -47,7 +46,6 @@ class ComparatorViewModel(
     private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase,
     private val clearCurrentUserConditionsUseCase: ClearCurrentUserConditionsUseCase,
     private val observeCurrentUserConditionsUseCase: ObserveCurrentUserConditionsUseCase,
-    private val persistCurrentUserConditionsUseCase: PersistCurrentUserConditionsUseCase,
     private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase,
     private val incrementProposalResponseCounterUseCase: IncrementProposalResponseCounterUseCase,
     private val generateComparatorReportPdfUseCase: GenerateComparatorReportPdfUseCase,
@@ -271,8 +269,6 @@ class ComparatorViewModel(
                     Pair(item.first, item.second.toInt())
                 }
 
-                prefillCurrentUserConditionsFromBackend(report)
-
                 val backendSupplyHolder = report.userData.customerDetails?.name.orEmpty()
                 val backendSupplyAddress = report.userData.customerDetails?.address.orEmpty()
                 val shouldApplyBackendSupplyHolder = !isSupplyHolderOverriddenByUser && (
@@ -451,133 +447,6 @@ class ComparatorViewModel(
     private fun parseAmountInput(input: String): Double {
         if (input.isBlank()) return 0.0
         return input.replace(',', '.').toDoubleOrNull() ?: 0.0
-    }
-
-    private fun prefillCurrentUserConditionsFromBackend(report: ConsumptionReportModel) {
-        val conditions = report.currentConditions ?: return
-
-        val powerPeriods = _powerTermRows.value.map { it.first }
-        val energyPeriods = _energyConsumedRows.value.map { it.first }
-
-        val powerPriceByPeriod = mapPowerPricesByPeriod(
-            powerPeriods = powerPeriods,
-            conditions = conditions
-        )
-        val energyPriceByPeriod = mapEnergyPricesByPeriod(
-            energyPeriods = energyPeriods,
-            conditions = conditions
-        )
-        val extraServicesValue = conditions.extraServices
-            .mapNotNull { it.totalBilled }
-            .sum()
-            .toEditableDecimal()
-
-        val mappedModel = CurrentUserConditionsModel(
-            powerTermPriceByPeriod = powerPriceByPeriod,
-            energyPriceByPeriod = energyPriceByPeriod,
-            extraServices = extraServicesValue,
-        )
-
-        cachedCurrentUserConditions = mappedModel
-        recomputeCustomerConditionsUiState()
-
-        viewModelScope.launch {
-            persistCurrentUserConditionsUseCase(mappedModel)
-        }
-    }
-
-    private fun mapPowerPricesByPeriod(
-        powerPeriods: List<String>,
-        conditions: com.briel.marnisos.brielapp.domain.models.CustomerCurrentConditionsModel,
-    ): Map<String, String> {
-        val mapped = mutableMapOf<String, String>()
-        val remainingPeriods = powerPeriods.toMutableList()
-
-        conditions.powerTerms.forEach { term ->
-            val price = term.pricePerKwDay ?: return@forEach
-            val explicitPeriod = normalizeConditionPeriod(term.period)
-            val targetPeriod = when {
-                explicitPeriod in remainingPeriods -> explicitPeriod
-                explicitPeriod == "PUNTA" && "P1" in remainingPeriods -> "P1"
-                explicitPeriod == "VALLE" && "P2" in remainingPeriods -> "P2"
-                explicitPeriod == "VALLE" && "P3" in remainingPeriods -> "P3"
-                remainingPeriods.isNotEmpty() -> remainingPeriods.first()
-                else -> null
-            }
-
-            if (targetPeriod != null) {
-                mapped[targetPeriod] = price.toEditableDecimal()
-                remainingPeriods.remove(targetPeriod)
-            }
-        }
-
-        return mapped
-    }
-
-    /**
-     * Maps backend energy_terms onto the UI energy periods (P1..P6) using the AI extraction
-     * contract:
-     *  - If any term carries an explicit period (e.g. "P1"), map it directly.
-     *  - If the only term has no period (typical 2.0TD flat-rate bills), broadcast its price
-     *    to every UI period.
-     *  - Periods that the bill does not expose (because consumption was 0 that month) are
-     *    filled via nearest-neighbor by index distance, preserving an editable estimate.
-     */
-    private fun mapEnergyPricesByPeriod(
-        energyPeriods: List<String>,
-        conditions: com.briel.marnisos.brielapp.domain.models.CustomerCurrentConditionsModel,
-    ): Map<String, String> {
-        if (energyPeriods.isEmpty()) return emptyMap()
-
-        val termsWithPrice = conditions.energyTerms.filter { it.pricePerKwh != null }
-        if (termsWithPrice.isEmpty()) return emptyMap()
-
-        val flatTerm = termsWithPrice.singleOrNull { it.period.isNullOrBlank() }
-        if (flatTerm != null && termsWithPrice.size == 1) {
-            val flatPrice = flatTerm.pricePerKwh!!.toEditableDecimal()
-            return energyPeriods.associateWith { flatPrice }
-        }
-
-        val explicitPriceByPeriodIndex = mutableMapOf<Int, Double>()
-        termsWithPrice.forEach { term ->
-            val period = term.period?.let { normalizeConditionPeriod(it) } ?: return@forEach
-            val periodIndex = energyPeriods.indexOf(period)
-            if (periodIndex >= 0) {
-                explicitPriceByPeriodIndex[periodIndex] = term.pricePerKwh!!
-            }
-        }
-
-        if (explicitPriceByPeriodIndex.isEmpty()) return emptyMap()
-
-        val mapped = mutableMapOf<String, String>()
-        energyPeriods.forEachIndexed { periodIndex, period ->
-            val price = explicitPriceByPeriodIndex[periodIndex]
-                ?: nearestKnownPrice(periodIndex, explicitPriceByPeriodIndex)
-            mapped[period] = price.toEditableDecimal()
-        }
-        return mapped
-    }
-
-    private fun nearestKnownPrice(targetIndex: Int, knownPrices: Map<Int, Double>): Double {
-        val nearestIndex = knownPrices.keys.minBy { kotlin.math.abs(it - targetIndex) }
-        return knownPrices.getValue(nearestIndex)
-    }
-
-    private fun normalizeConditionPeriod(rawPeriod: String): String {
-        val trimmed = rawPeriod.trim().uppercase(Locale.US)
-        if (trimmed.matches(Regex("P[1-6]"))) return trimmed
-
-        return when {
-            "PUNTA" in trimmed -> "PUNTA"
-            "LLANO" in trimmed -> "P2"
-            "VALLE" in trimmed -> "VALLE"
-            else -> ""
-        }
-    }
-
-    private fun Double.toEditableDecimal(): String {
-        val formatted = String.format(Locale.US, "%.8f", this)
-        return formatted.trimEnd('0').trimEnd('.').ifBlank { "0" }
     }
 
     private fun recomputeCustomerConditionsUiState() {
