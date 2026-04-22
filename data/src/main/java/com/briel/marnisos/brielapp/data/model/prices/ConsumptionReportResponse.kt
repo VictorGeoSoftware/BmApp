@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 data class ConsumptionReportResponse(
     val success: Boolean,
     val userData: DoclingExtractedData,
-    val currentConditions: CustomerCurrentConditionsResponse? = null,
     val consumptionData: CleanedConsumptionData,
     val proposals: List<ProposalPriceData>,
     val iva: Double,
