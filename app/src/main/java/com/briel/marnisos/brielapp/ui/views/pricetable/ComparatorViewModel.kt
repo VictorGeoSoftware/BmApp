@@ -2,6 +2,8 @@ package com.briel.marnisos.brielapp.ui.views.pricetable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.briel.marnisos.brielapp.monitoring.CrashErrorCategory
+import com.briel.marnisos.brielapp.monitoring.CrashReporter
 import com.briel.marnisos.brielapp.domain.models.ComparatorReportColumnModel
 import com.briel.marnisos.brielapp.domain.models.ComparatorReportPdfModel
 import com.briel.marnisos.brielapp.domain.models.ComparatorReportPeriodIntValueModel
@@ -50,7 +52,8 @@ class ComparatorViewModel(
     private val incrementProposalResponseCounterUseCase: IncrementProposalResponseCounterUseCase,
     private val generateComparatorReportPdfUseCase: GenerateComparatorReportPdfUseCase,
     private val proposalCalculationHelper: ProposalCalculationHelper,
-    private val comparatorPdfFileStore: ComparatorPdfFileStore
+    private val comparatorPdfFileStore: ComparatorPdfFileStore,
+    private val crashReporter: CrashReporter,
 ) : ViewModel() {
 
     private var lastCompletedJobId: String? = null
@@ -151,6 +154,8 @@ class ComparatorViewModel(
      */
     fun uploadConsumptionReport(pdfFile: File) {
         viewModelScope.launch {
+            crashReporter.setScreenContext("comparator")
+            crashReporter.setUseCaseContext("upload_consumption_report")
             _isUploadingReport.value = true
             _uploadStatus.value = "Uploading PDF..."
             _uploadError.value = null
@@ -164,6 +169,11 @@ class ComparatorViewModel(
                     pollJobStatus(jobSubmission.jobId)
                 }
                 .onFailure { error ->
+                    crashReporter.recordNonFatal(
+                        throwable = error,
+                        category = CrashErrorCategory.ASYNC_JOB,
+                        operation = "submit_consumption_report_job",
+                    )
                     _uploadError.value = "Failed to upload PDF: ${error.message}"
                     _uploadStatus.value = null
                     _isUploadingReport.value = false
@@ -216,6 +226,11 @@ class ComparatorViewModel(
                             return
                         }
                         JobStatusType.FAILED -> {
+                            crashReporter.recordNonFatal(
+                                throwable = IllegalStateException("Job processing failed for submitted report"),
+                                category = CrashErrorCategory.ASYNC_JOB,
+                                operation = "poll_job_status_failed",
+                            )
                             _uploadError.value = "Processing failed. Please try again."
                             _uploadStatus.value = null
                             _isUploadingReport.value = false
@@ -230,6 +245,11 @@ class ComparatorViewModel(
                     }
                 }
                 .onFailure { error ->
+                    crashReporter.recordNonFatal(
+                        throwable = error,
+                        category = CrashErrorCategory.NETWORK,
+                        operation = "get_job_status",
+                    )
                     _uploadError.value = "Failed to check status: ${error.message}"
                     _uploadStatus.value = null
                     _isUploadingReport.value = false
@@ -238,6 +258,11 @@ class ComparatorViewModel(
         }
 
         // Timeout reached
+        crashReporter.recordNonFatal(
+            throwable = IllegalStateException("Job processing timeout reached"),
+            category = CrashErrorCategory.ASYNC_JOB,
+            operation = "poll_job_status_timeout",
+        )
         _uploadError.value = "Processing timeout. Please try again."
         _uploadStatus.value = null
         _isUploadingReport.value = false
@@ -293,6 +318,11 @@ class ComparatorViewModel(
                 if (error.isJobExpiredOrNotFound()) {
                     clearPersistedLastCompletedJobId()
                 }
+                crashReporter.recordNonFatal(
+                    throwable = error,
+                    category = CrashErrorCategory.BACKEND,
+                    operation = "get_job_result",
+                )
                 _uploadError.value = "Failed to fetch results: ${error.message}"
                 _uploadStatus.value = null
                 _isUploadingReport.value = false
@@ -318,6 +348,11 @@ class ComparatorViewModel(
                     clearPersistedLastCompletedJobId()
                     return
                 }
+                crashReporter.recordNonFatal(
+                    throwable = error,
+                    category = CrashErrorCategory.BACKEND,
+                    operation = "refresh_consumption_report",
+                )
                 _uploadError.value = "Failed to refresh prices: ${error.message}"
             }
     }
@@ -506,6 +541,8 @@ class ComparatorViewModel(
         if (_isGeneratingPdf.value) return
 
         viewModelScope.launch {
+            crashReporter.setScreenContext("comparator")
+            crashReporter.setUseCaseContext("export_visible_proposals_pdf")
             _isGeneratingPdf.value = true
             _pdfExportError.value = null
 
@@ -523,10 +560,20 @@ class ComparatorViewModel(
                             _generatedPdfFile.emit(file)
                         }
                         .onFailure { error ->
+                            crashReporter.recordNonFatal(
+                                throwable = error,
+                                category = CrashErrorCategory.PDF_EXPORT,
+                                operation = "store_generated_pdf",
+                            )
                             _pdfExportError.value = "No se pudo preparar el archivo PDF: ${error.message}"
                         }
                 }
                 .onFailure { error ->
+                    crashReporter.recordNonFatal(
+                        throwable = error,
+                        category = CrashErrorCategory.PDF_EXPORT,
+                        operation = "generate_comparator_pdf",
+                    )
                     _pdfExportError.value = "No se pudo generar el PDF: ${error.message}"
                 }
 
