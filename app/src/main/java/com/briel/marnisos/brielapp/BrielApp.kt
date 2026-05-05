@@ -3,9 +3,9 @@ package com.briel.marnisos.brielapp
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.util.Log
 import com.briel.marnisos.brielapp.data.di.dataModule
 import com.briel.marnisos.brielapp.di.appModule
+import com.briel.marnisos.brielapp.logging.AppLogger
 import com.briel.marnisos.brielapp.monitoring.CrashReporter
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
@@ -53,14 +53,14 @@ class BrielApp : Application() {
         applicationScope.launch {
             try {
                 val token = FirebaseMessaging.getInstance().token.await()
-                Log.i(TAG, "FCM token obtained (masked): ${token.take(12)}...")
+                AppLogger.i(TAG, "FCM token obtained (masked): ${token.take(12)}...")
 
                 FirebaseMessaging.getInstance()
                     .subscribeToTopic(PRICE_UPDATES_TOPIC)
                     .await()
-                Log.i(TAG, "Subscribed to FCM topic: $PRICE_UPDATES_TOPIC")
+                AppLogger.i(TAG, "Subscribed to FCM topic: $PRICE_UPDATES_TOPIC")
             } catch (e: Exception) {
-                Log.e(TAG, "FCM initialization failed", e)
+                AppLogger.e(TAG, "FCM initialization failed", e)
             }
         }
     }

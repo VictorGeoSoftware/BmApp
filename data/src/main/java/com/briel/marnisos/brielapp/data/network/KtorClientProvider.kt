@@ -19,6 +19,9 @@ object KtorClientProvider {
     @Volatile
     private var _baseUrl: String = BuildConfig.API_BASE_URL
 
+    private val isProdRelease: Boolean
+        get() = BuildConfig.BUILD_TYPE == "release" && BuildConfig.FLAVOR == "prod"
+
     val baseUrl: String
         get() = _baseUrl
 
@@ -34,7 +37,7 @@ object KtorClientProvider {
 
             install(Logging) {
                 logger = Logger.SIMPLE
-                level = if (BuildConfig.DEBUG) LogLevel.BODY else LogLevel.NONE
+                level = if (isProdRelease) LogLevel.NONE else LogLevel.BODY
             }
 
             install(ContentNegotiation) {
