@@ -23,6 +23,7 @@ import com.briel.marnisos.brielapp.ui.theme.Corner
 import com.briel.marnisos.brielapp.ui.theme.extendedColors
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
 import com.briel.marnisos.brielapp.ui.views.common.SectionHeader
+import java.util.Locale
 
 @Composable
 fun PriceProposalColumn(
@@ -54,7 +55,7 @@ fun PriceProposalColumn(
 
         DynamicTableColumnView(
             modifier = Modifier.fillMaxWidth(),
-            values = powerTermItems.map { it.toString() },
+            values = powerTermItems.map { it.toSixDecimalsString() },
         )
 
         TotalSectionPriceView(
@@ -63,7 +64,7 @@ fun PriceProposalColumn(
 
         DynamicTableColumnView(
             modifier = Modifier.fillMaxWidth(),
-            values = consumedEnergyItems.map { it.toString() },
+            values = consumedEnergyItems.map { it.toSixDecimalsString() },
         )
 
         TotalSectionPriceView(
@@ -139,6 +140,8 @@ fun TotalSectionPriceView(content: String) {
         corner = Corner
     )
 }
+
+private fun Double.toSixDecimalsString(): String = String.format(Locale.US, "%.6f", this)
 
 @Composable
 private fun ProposalTitleView(content: String) {

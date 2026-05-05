@@ -76,7 +76,7 @@ fun ExtraServicesAndTaxesRow(
 
         Text(
             modifier = Modifier.padding(12.dp),
-            text = iva,
+            text = electricityTax,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = colors.tableText,
@@ -87,7 +87,7 @@ fun ExtraServicesAndTaxesRow(
 
         Text(
             modifier = Modifier.padding(12.dp),
-            text = electricityTax,
+            text = iva,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = colors.tableText,
