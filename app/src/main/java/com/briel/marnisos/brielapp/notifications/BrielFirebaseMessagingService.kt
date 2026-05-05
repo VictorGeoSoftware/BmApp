@@ -1,6 +1,6 @@
 package com.briel.marnisos.brielapp.notifications
 
-import android.util.Log
+import com.briel.marnisos.brielapp.logging.AppLogger
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
@@ -15,12 +15,12 @@ class BrielFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         val maskedToken = token.take(12) + "..."
-        Log.i(TAG, "New FCM token received (masked): $maskedToken")
+        AppLogger.i(TAG, "New FCM token received (masked): $maskedToken")
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        Log.d(TAG, "FCM message received from: ${message.from}")
+        AppLogger.d(TAG, "FCM message received from: ${message.from}")
 
         val notificationPayload = message.notification
         val data = message.data
@@ -29,7 +29,7 @@ class BrielFirebaseMessagingService : FirebaseMessagingService() {
         if (notificationPayload != null) {
             val title = notificationPayload.title.orEmpty()
             val body = notificationPayload.body.orEmpty()
-            Log.d(TAG, "Notification - Title: $title, Body: $body")
+            AppLogger.d(TAG, "Notification - Title: $title, Body: $body")
 
             if (title.isNotBlank() && body.isNotBlank()) {
                 val handler = NotificationHandler(applicationContext)
@@ -39,7 +39,7 @@ class BrielFirebaseMessagingService : FirebaseMessagingService() {
 
         // Handle data-only messages
         if (data.isNotEmpty()) {
-            Log.d(TAG, "Data payload: $data")
+            AppLogger.d(TAG, "Data payload: $data")
             handleDataMessage(data)
         }
     }
@@ -49,7 +49,7 @@ class BrielFirebaseMessagingService : FirebaseMessagingService() {
         if (dataType == PRICE_UPDATES_TYPE) {
             serviceScope.launch {
                 PriceUpdatesEventBus.publishPriceUpdate()
-                Log.i(TAG, "Published in-app price update event from FCM")
+                AppLogger.i(TAG, "Published in-app price update event from FCM")
             }
         }
     }
