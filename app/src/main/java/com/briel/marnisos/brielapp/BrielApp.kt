@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.util.Log
 import com.briel.marnisos.brielapp.data.di.dataModule
 import com.briel.marnisos.brielapp.di.appModule
+import com.briel.marnisos.brielapp.monitoring.CrashReporter
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.android.getKoin
 import org.koin.core.context.startKoin
 
 class BrielApp : Application() {
@@ -28,8 +30,23 @@ class BrielApp : Application() {
             modules(listOf(dataModule, appModule))
         }
 
+        configureCrashMonitoring()
+
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
         initializeFcm()
+    }
+
+    private fun configureCrashMonitoring() {
+        val crashReporter = getKoin().get<CrashReporter>()
+        val shouldCollectCrashes = BuildConfig.BUILD_TYPE == "release" && BuildConfig.FLAVOR == "prod"
+
+        crashReporter.setCollectionEnabled(shouldCollectCrashes)
+        crashReporter.setStaticAppContext(
+            deployVersion = BuildConfig.DEPLOY_VERSION,
+            flavor = BuildConfig.FLAVOR,
+            buildType = BuildConfig.BUILD_TYPE,
+            appVersion = BuildConfig.VERSION_NAME,
+        )
     }
 
     private fun initializeFcm() {

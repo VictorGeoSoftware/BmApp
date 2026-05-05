@@ -1,16 +1,21 @@
 package com.briel.marnisos.brielapp.di
 
+import com.briel.marnisos.brielapp.monitoring.CrashReporter
+import com.briel.marnisos.brielapp.monitoring.FirebaseCrashReporter
 import com.briel.marnisos.brielapp.ui.views.auth.AuthViewModel
 import com.briel.marnisos.brielapp.ui.views.currentuserconditions.CurrentUserConditionsViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.ProposalCalculationHelper
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfFileStore
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.koin.core.module.dsl.viewModel
 
 import org.koin.dsl.module
 
 val appModule = module {
+    single { FirebaseCrashlytics.getInstance() }
+    single<CrashReporter> { FirebaseCrashReporter(crashlytics = get()) }
     single { ProposalCalculationHelper() }
     single { ComparatorPdfFileStore(context = get()) }
     single { ComparatorPdfShareManager() }
@@ -30,7 +35,8 @@ val appModule = module {
             incrementProposalResponseCounterUseCase = get(),
             generateComparatorReportPdfUseCase = get(),
             proposalCalculationHelper = get(),
-            comparatorPdfFileStore = get()
+            comparatorPdfFileStore = get(),
+            crashReporter = get(),
         )
     }
 
@@ -46,7 +52,8 @@ val appModule = module {
             loginWithEmailUseCase = get(),
             getCurrentAuthUserUseCase = get(),
             getFirebaseIdTokenUseCase = get(),
-            syncAuthenticatedUserDataUseCase = get()
+            syncAuthenticatedUserDataUseCase = get(),
+            crashReporter = get(),
         )
     }
 }

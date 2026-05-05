@@ -2,6 +2,8 @@ package com.briel.marnisos.brielapp.ui.views.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.briel.marnisos.brielapp.monitoring.CrashErrorCategory
+import com.briel.marnisos.brielapp.monitoring.CrashReporter
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetFirebaseIdTokenUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
@@ -15,7 +17,8 @@ class AuthViewModel(
     private val loginWithEmailUseCase: LoginWithEmailUseCase,
     private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase,
     private val getFirebaseIdTokenUseCase: GetFirebaseIdTokenUseCase,
-    private val syncAuthenticatedUserDataUseCase: SyncAuthenticatedUserDataUseCase
+    private val syncAuthenticatedUserDataUseCase: SyncAuthenticatedUserDataUseCase,
+    private val crashReporter: CrashReporter,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -25,12 +28,20 @@ class AuthViewModel(
 
     fun loginWithEmail(email: String, password: String) {
         viewModelScope.launch {
+            crashReporter.setScreenContext("auth_login")
+            crashReporter.setUseCaseContext("login_with_email")
+
             _uiState.update { current ->
                 current.copy(isLoading = true, errorMessage = null)
             }
 
             val loginResult = loginWithEmailUseCase(email.trim(), password)
             val user = loginResult.getOrElse { error ->
+                crashReporter.recordNonFatal(
+                    throwable = error,
+                    category = CrashErrorCategory.AUTHENTICATION,
+                    operation = "login_with_email",
+                )
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
@@ -41,6 +52,11 @@ class AuthViewModel(
             }
 
             val token = getFirebaseIdTokenUseCase(forceRefresh = true).getOrElse { error ->
+                crashReporter.recordNonFatal(
+                    throwable = error,
+                    category = CrashErrorCategory.AUTHENTICATION,
+                    operation = "get_firebase_id_token",
+                )
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
@@ -57,6 +73,11 @@ class AuthViewModel(
                     }
                 }
                 .onFailure { error ->
+                    crashReporter.recordNonFatal(
+                        throwable = error,
+                        category = CrashErrorCategory.BACKEND,
+                        operation = "sync_authenticated_user_data",
+                    )
                     _uiState.update { current ->
                         current.copy(
                             isLoading = false,
