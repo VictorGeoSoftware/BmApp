@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">BrielApp</string>
+    <string name="app_name">PowerApp</string>
     <string name="notification_channel_id">briel_notifications</string>
-    <string name="notification_channel_name">Briel Notifications</string>
+    <string name="notification_channel_name">PowerApp Notifications</string>
     <string name="notification_channel_description">Notifications for price updates and app events</string>
     <string name="current_user_conditions_empty_state_message">Selecciona primero una factura de luz para proceder al estudio</string>
     <string name="current_user_conditions_title">Condiciones actuales</string>

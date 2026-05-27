@@ -1,0 +1,335 @@
+{
+  "version": "2.11",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bi8Au",
+      "x": 13,
+      "y": 0,
+      "name": "Frame",
+      "clip": true,
+      "fill": "#F0F2F5",
+      "gap": 64,
+      "padding": 64,
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "O5UC2",
+          "name": "V1 - P-Bolt Monogram",
+          "clip": true,
+          "width": 512,
+          "height": 512,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 135,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0EA5E9",
+                "position": 0
+              },
+              {
+                "color": "#1D4ED8",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 114,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#1D4ED840",
+            "offset": {
+              "x": 0,
+              "y": 16
+            },
+            "blur": 32
+          },
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "p7R4A",
+              "x": 110,
+              "y": 30,
+              "fill": "#FFFFFF",
+              "content": "P",
+              "fontFamily": "Inter",
+              "fontSize": 420,
+              "fontWeight": "900",
+              "letterSpacing": -30
+            },
+            {
+              "type": "path",
+              "id": "fgN3A",
+              "x": 0,
+              "y": 0,
+              "geometry": "M280 220l-70 100 50 0-20 90 80-110-50 0z",
+              "viewBox": [
+                0,
+                0,
+                512,
+                512
+              ],
+              "fill": "#FACC15",
+              "width": 512,
+              "height": 512
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "pJrMG",
+          "name": "V2 - Bolt + Savings",
+          "clip": true,
+          "width": 512,
+          "height": 512,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 160,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#FACC15",
+                "position": 0
+              },
+              {
+                "color": "#F59E0B",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 114,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#F59E0B40",
+            "offset": {
+              "x": 0,
+              "y": 16
+            },
+            "blur": 32
+          },
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "d3ej9s",
+              "width": 300,
+              "height": 300,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "path",
+                  "id": "oPsvy",
+                  "x": 0,
+                  "y": 0,
+                  "geometry": "M170 30l-110 150 80 0-30 110 130-160-80 0z",
+                  "viewBox": [
+                    0,
+                    0,
+                    300,
+                    300
+                  ],
+                  "fill": "#0F172A",
+                  "width": 300,
+                  "height": 300
+                },
+                {
+                  "type": "text",
+                  "id": "u2Leya",
+                  "x": 175,
+                  "y": 130,
+                  "fill": "#0F172A",
+                  "content": "€",
+                  "fontFamily": "Inter",
+                  "fontSize": 140,
+                  "fontWeight": "800"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "l23Ec7",
+          "name": "V3 - Swap Tariffs",
+          "clip": true,
+          "width": 512,
+          "height": 512,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 135,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#312E81",
+                "position": 0
+              },
+              {
+                "color": "#6D28D9",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 114,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#312E8140",
+            "offset": {
+              "x": 0,
+              "y": 16
+            },
+            "blur": 32
+          },
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "iS3QV",
+              "width": 320,
+              "height": 320,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "EYGd6",
+                  "x": 0,
+                  "y": 0,
+                  "innerRadius": 0.78,
+                  "fill": "#FFFFFF",
+                  "width": 320,
+                  "height": 320
+                },
+                {
+                  "type": "path",
+                  "id": "mCbbt",
+                  "x": 0,
+                  "y": 0,
+                  "geometry": "M180 60l-90 140 70 0-30 90 110-140-70 0z",
+                  "viewBox": [
+                    0,
+                    0,
+                    320,
+                    320
+                  ],
+                  "fill": "#FACC15",
+                  "width": 320,
+                  "height": 320
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "KICFo",
+          "name": "V4 - Power Insights",
+          "clip": true,
+          "width": 512,
+          "height": 512,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 160,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0F766E",
+                "position": 0
+              },
+              {
+                "color": "#065F46",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 114,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#0F766E40",
+            "offset": {
+              "x": 0,
+              "y": 16
+            },
+            "blur": 32
+          },
+          "padding": 100,
+          "justifyContent": "center",
+          "alignItems": "end",
+          "children": [
+            {
+              "type": "frame",
+              "id": "m2SHZG",
+              "gap": 18,
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 14,
+                  "id": "G5fXZe",
+                  "fill": "#A7F3D0",
+                  "width": 54,
+                  "height": 120
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 14,
+                  "id": "LuIeG",
+                  "fill": "#A7F3D0",
+                  "width": 54,
+                  "height": 180
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 14,
+                  "id": "w6YJr",
+                  "fill": "#A7F3D0",
+                  "width": 54,
+                  "height": 240
+                }
+              ]
+            },
+            {
+              "type": "path",
+              "id": "AvGyz",
+              "layoutPosition": "absolute",
+              "x": 0,
+              "y": 0,
+              "geometry": "M330 80l-90 140 70 0-20 120 100-140-70 0z",
+              "viewBox": [
+                0,
+                0,
+                512,
+                512
+              ],
+              "fill": "#FACC15",
+              "width": 512,
+              "height": 512
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
