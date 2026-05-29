@@ -104,7 +104,7 @@ private fun AnnualPriceDifferenceSection(
     val textColor = when {
         annualPriceDifference == null -> colors.tableText
         annualPriceDifference < 0.0 -> Color(0xFFD32F2F)
-        annualPriceDifference > 0.0 -> Color(0xFFFFFFFF)
+        annualPriceDifference > 0.0 -> Color(0xFF000000)
         else -> colors.tableText
     }
 
