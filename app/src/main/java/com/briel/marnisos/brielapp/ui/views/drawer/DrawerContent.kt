@@ -19,6 +19,7 @@ import com.briel.marnisos.brielapp.ui.models.ComparatorDestination
 internal fun DrawerContent(
     selectedDestination: ComparatorDestination,
     onDestinationSelected: (ComparatorDestination) -> Unit,
+    onLogoutClicked: () -> Unit,
     versionLabel: String,
 ) {
     Column(
@@ -50,6 +51,12 @@ internal fun DrawerContent(
             label = { Text("Configuración") },
             selected = selectedDestination == ComparatorDestination.CONFIGURATION,
             onClick = { onDestinationSelected(ComparatorDestination.CONFIGURATION) }
+        )
+
+        NavigationDrawerItem(
+            label = { Text("Cerrar sesión") },
+            selected = false,
+            onClick = onLogoutClicked,
         )
 
         Spacer(modifier = Modifier.weight(1f))

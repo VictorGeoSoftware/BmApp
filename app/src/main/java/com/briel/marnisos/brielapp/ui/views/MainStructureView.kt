@@ -51,6 +51,7 @@ import java.io.File
 fun MainView(
     modifier: Modifier = Modifier,
     comparatorViewModel: ComparatorViewModel = koinViewModel(),
+    onLogoutClicked: () -> Unit = {},
 ) {
     val tariffName by comparatorViewModel.tariffName.collectAsState()
     val powerTermRows by comparatorViewModel.powerTermRows.collectAsState()
@@ -111,6 +112,7 @@ fun MainView(
         onProposalVisibilityChanged = comparatorViewModel::setProposalVisibility,
         onSupplyHolderChanged = comparatorViewModel::updateSupplyHolder,
         onSupplyAddressChanged = comparatorViewModel::updateSupplyAddress,
+        onLogoutClicked = onLogoutClicked,
         versionLabel = BuildConfig.DEPLOY_VERSION,
         context = context
     )
@@ -146,6 +148,7 @@ fun MainStructureView(
     onProposalVisibilityChanged: (proposalTitle: String, isVisible: Boolean) -> Unit = { _, _ -> },
     onSupplyHolderChanged: (String) -> Unit = {},
     onSupplyAddressChanged: (String) -> Unit = {},
+    onLogoutClicked: () -> Unit = {},
     versionLabel: String,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -166,6 +169,10 @@ fun MainStructureView(
                     onDestinationSelected = { destination ->
                         selectedDestination = destination
                         scope.launch { drawerState.close() }
+                    },
+                    onLogoutClicked = {
+                        scope.launch { drawerState.close() }
+                        onLogoutClicked()
                     },
                     versionLabel = versionLabel,
                 )

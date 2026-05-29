@@ -31,4 +31,23 @@ class AuthApi(
             Result.failure(e)
         }
     }
+
+    suspend fun logout(idToken: String): Result<Unit> {
+        return try {
+            val response = client.post("$baseUrl/auth/logout") {
+                header(HttpHeaders.Authorization, "Bearer $idToken")
+            }
+
+            if (!response.status.isSuccess()) {
+                val responseBody = response.bodyAsText()
+                return Result.failure(
+                    IllegalStateException(responseBody.ifBlank { "Failed to logout user" })
+                )
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

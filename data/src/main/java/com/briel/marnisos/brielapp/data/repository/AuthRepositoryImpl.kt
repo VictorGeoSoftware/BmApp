@@ -41,6 +41,11 @@ class AuthRepositoryImpl(
     override fun getCurrentUser(): AuthUserModel? = firebaseAuth.currentUser?.toDomain()
 
     override suspend fun logout() {
+        val tokenResult = getIdToken(forceRefresh = false)
+        val token = tokenResult.getOrNull()
+        if (!token.isNullOrBlank()) {
+            authApi.logout(idToken = token)
+        }
         firebaseAuth.signOut()
     }
 }

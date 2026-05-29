@@ -7,6 +7,8 @@ import com.briel.marnisos.brielapp.data.model.prices.JobSubmissionResponse
 import com.briel.marnisos.brielapp.data.model.prices.PriceTableResultsResponse
 import com.briel.marnisos.brielapp.data.model.prices.UserConsumptionResponse
 import com.briel.marnisos.brielapp.data.model.auth.UserActivityEventDto
+import com.briel.marnisos.brielapp.data.utils.awaitTaskResult
+import com.google.firebase.auth.FirebaseAuth
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -200,8 +202,12 @@ class PriceTableApi(
         payload: UserActivityEventDto
     ): Result<Unit> {
         return try {
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
             val response = client.post("$baseUrl/$endpoint") {
                 headers.append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
                 setBody(payload)
             }
 
@@ -216,5 +222,12 @@ class PriceTableApi(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private suspend fun currentFirebaseIdTokenOrNull(): String? {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return null
+        return runCatching {
+            currentUser.getIdToken(false).awaitTaskResult().token
+        }.getOrNull()
     }
 }

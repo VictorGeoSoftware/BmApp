@@ -53,6 +53,10 @@ val appModule = module {
             getCurrentAuthUserUseCase = get(),
             getFirebaseIdTokenUseCase = get(),
             syncAuthenticatedUserDataUseCase = get(),
+            setUserOfflineUseCase = get(),
+            clearCurrentUserConditionsUseCase = get(),
+            clearLastCompletedJobIdUseCase = get(),
+            logoutUseCase = get(),
             crashReporter = get(),
         )
     }
