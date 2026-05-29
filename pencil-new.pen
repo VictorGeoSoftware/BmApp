@@ -328,6 +328,129 @@
               "height": 512
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "hIYe8",
+          "name": "EXPORT pdf_icon",
+          "clip": true,
+          "width": 512,
+          "height": 512,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 160,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#FACC15",
+                "position": 0
+              },
+              {
+                "color": "#F59E0B",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 114,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "vOdBx",
+              "x": 106,
+              "y": 106,
+              "name": "pg",
+              "width": 300,
+              "height": 300,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "path",
+                  "id": "cuffv",
+                  "x": 0,
+                  "y": 0,
+                  "name": "bolt",
+                  "geometry": "M170 30l-110 150 80 0-30 110 130-160-80 0z",
+                  "viewBox": [
+                    0,
+                    0,
+                    300,
+                    300
+                  ],
+                  "fill": "#0F172A",
+                  "width": 300,
+                  "height": 300
+                },
+                {
+                  "type": "text",
+                  "id": "G2eH2G",
+                  "x": 175,
+                  "y": 130,
+                  "name": "euro",
+                  "fill": "#0F172A",
+                  "content": "€",
+                  "fontFamily": "Inter",
+                  "fontSize": 140,
+                  "fontWeight": "800"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "WcWFv",
+          "name": "EXPORT fg_icon",
+          "width": 512,
+          "height": 512,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Zca1o",
+              "x": 106,
+              "y": 106,
+              "name": "fg",
+              "width": 300,
+              "height": 300,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "path",
+                  "id": "udTXa",
+                  "x": 0,
+                  "y": 0,
+                  "name": "bolt2",
+                  "geometry": "M170 30l-110 150 80 0-30 110 130-160-80 0z",
+                  "viewBox": [
+                    0,
+                    0,
+                    300,
+                    300
+                  ],
+                  "fill": "#0F172A",
+                  "width": 300,
+                  "height": 300
+                },
+                {
+                  "type": "text",
+                  "id": "TjUyi",
+                  "x": 175,
+                  "y": 130,
+                  "name": "euro2",
+                  "fill": "#0F172A",
+                  "content": "€",
+                  "fontFamily": "Inter",
+                  "fontSize": 140,
+                  "fontWeight": "800"
+                }
+              ]
+            }
+          ]
         }
       ]
     }
