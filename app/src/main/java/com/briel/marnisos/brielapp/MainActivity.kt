@@ -67,7 +67,9 @@ class MainActivity : ComponentActivity() {
                     val authState by authViewModel.uiState.collectAsState()
 
                     if (authState.isAuthenticated) {
-                        MainView()
+                        MainView(
+                            onLogoutClicked = authViewModel::logout,
+                        )
                     } else {
                         LoginScreen(
                             uiState = authState,
