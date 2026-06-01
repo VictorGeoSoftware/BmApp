@@ -82,19 +82,38 @@ internal object CupsCodeParser {
         return computeControlCode(supplyDigits) == controlCode
     }
 
+    /**
+     * Attempts to extract a valid CUPS code from a normalized candidate that
+     * may have trailing garbage (e.g. "TARIFA" glued onto the end by OCR).
+     * Tries 22 chars first (with frontier suffix), then 20 (without).
+     */
+    private fun tryTrimToValid(normalized: String): String? {
+        val fixed = fixOcrErrors(normalized)
+        // Try exact length first (already 20 or 22)
+        if (isValid(fixed)) return fixed
+        // Try truncating to 22 (with frontier suffix), then 20 (without)
+        for (len in intArrayOf(22, 20)) {
+            if (fixed.length > len) {
+                val trimmed = fixed.substring(0, len)
+                if (isValid(trimmed)) return trimmed
+            }
+        }
+        return null
+    }
+
     fun extractBestCandidate(text: String): String? {
         val upper = text.uppercase()
         candidateRegex.findAll(upper)
-            .map { fixOcrErrors(normalize(it.value)) }
-            .firstOrNull { isValid(it) }
+            .mapNotNull { tryTrimToValid(normalize(it.value)) }
+            .firstOrNull()
             ?.let { return it }
 
         // Fallback: normalize the full text and search again (handles cases
         // where separators between ES and the digits confused the first pass).
         val cleaned = normalize(text)
         return candidateRegex.findAll(cleaned)
-            .map { fixOcrErrors(normalize(it.value)) }
-            .firstOrNull { isValid(it) }
+            .mapNotNull { tryTrimToValid(normalize(it.value)) }
+            .firstOrNull()
     }
 
     private fun computeControlCode(sixteenDigits: String): String? {
