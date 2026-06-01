@@ -25,6 +25,7 @@ import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsU
 import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportByCupsJobUseCase
 import com.briel.marnisos.brielapp.notifications.PriceUpdatesEventBus
 import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsUiState
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfFileStore
@@ -40,6 +41,7 @@ import kotlin.math.round
 
 class ComparatorViewModel(
     private val submitConsumptionReportJobUseCase: SubmitConsumptionReportJobUseCase,
+    private val submitConsumptionReportByCupsJobUseCase: SubmitConsumptionReportByCupsJobUseCase,
     private val getJobStatusUseCase: GetJobStatusUseCase,
     private val getJobResultUseCase: GetJobResultUseCase,
     private val refreshConsumptionReportUseCase: RefreshConsumptionReportUseCase,
@@ -157,7 +159,7 @@ class ComparatorViewModel(
             crashReporter.setScreenContext("comparator")
             crashReporter.setUseCaseContext("upload_consumption_report")
             _isUploadingReport.value = true
-            _uploadStatus.value = "Uploading PDF..."
+            _uploadStatus.value = "Subiendo factura..."
             _uploadError.value = null
 
             // Step 1: Submit the job
@@ -174,7 +176,33 @@ class ComparatorViewModel(
                         category = CrashErrorCategory.ASYNC_JOB,
                         operation = "submit_consumption_report_job",
                     )
-                    _uploadError.value = "Failed to upload PDF: ${error.message}"
+                    _uploadError.value = "No se pudo subir la factura: ${error.message}"
+                    _uploadStatus.value = null
+                    _isUploadingReport.value = false
+                }
+        }
+    }
+
+    fun uploadConsumptionReportByCups(cupsCode: String) {
+        viewModelScope.launch {
+            crashReporter.setScreenContext("comparator")
+            crashReporter.setUseCaseContext("upload_consumption_report_by_cups")
+            _isUploadingReport.value = true
+            _uploadStatus.value = "Procesando CUPS..."
+            _uploadError.value = null
+
+            submitConsumptionReportByCupsJobUseCase(cupsCode)
+                .onSuccess { jobSubmission ->
+                    _uploadStatus.value = "Buscando ofertas..."
+                    pollJobStatus(jobSubmission.jobId)
+                }
+                .onFailure { error ->
+                    crashReporter.recordNonFatal(
+                        throwable = error,
+                        category = CrashErrorCategory.ASYNC_JOB,
+                        operation = "submit_consumption_report_by_cups_job",
+                    )
+                    _uploadError.value = "No se pudo procesar el CUPS: ${error.message}"
                     _uploadStatus.value = null
                     _isUploadingReport.value = false
                 }
@@ -200,6 +228,7 @@ class ComparatorViewModel(
         _proposalAnnualSavingsPercentageByTitle.value = emptyMap()
         _proposalFixedAmountByTitle.value = emptyMap()
         _proposalVisibilityByTitle.value = emptyMap()
+        lastCompletedJobId = null
     }
 
     /**

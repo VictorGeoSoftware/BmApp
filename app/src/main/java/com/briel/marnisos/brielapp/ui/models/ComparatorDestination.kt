@@ -4,4 +4,5 @@ internal enum class ComparatorDestination {
     PROPOSALS,
     CONFIGURATION,
     CURRENT_USER_CONDITIONS,
+    CUPS_SCANNER,
 }

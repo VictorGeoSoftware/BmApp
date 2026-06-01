@@ -21,6 +21,7 @@ internal fun TopActionBar(
     showPrintButton: Boolean,
     onGeneratePdfClick: () -> Unit,
     onPdfSelected: (File) -> Unit,
+    onScanCupsSelected: () -> Unit,
     context: Context,
     onOpenDrawer: () -> Unit,
 ) {
@@ -52,6 +53,7 @@ internal fun TopActionBar(
             SelectFileButton(
                 isUploadingReport = isUploadingReport,
                 onPdfSelected = onPdfSelected,
+                onScanCupsSelected = onScanCupsSelected,
                 context = context,
             )
         }

@@ -31,6 +31,7 @@ import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCa
 import com.briel.marnisos.brielapp.domain.usecases.SetUserOfflineUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SetUserOnlineUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportByCupsJobUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SyncAuthenticatedUserDataUseCase
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.dsl.module
@@ -60,6 +61,7 @@ val dataModule = module {
     
     // Async job processing use cases
     factory<SubmitConsumptionReportJobUseCase> { SubmitConsumptionReportJobUseCase.Factory.create(get()) }
+    factory<SubmitConsumptionReportByCupsJobUseCase> { SubmitConsumptionReportByCupsJobUseCase.Factory.create(get()) }
     factory<GetJobStatusUseCase> { GetJobStatusUseCase.Factory.create(get()) }
     factory<GetJobResultUseCase> { GetJobResultUseCase.Factory.create(get()) }
     factory<RefreshConsumptionReportUseCase> { RefreshConsumptionReportUseCase.Factory.create(get()) }
