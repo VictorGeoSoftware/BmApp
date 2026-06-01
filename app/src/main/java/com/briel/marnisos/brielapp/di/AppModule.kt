@@ -23,6 +23,7 @@ val appModule = module {
     viewModel {
         ComparatorViewModel(
             submitConsumptionReportJobUseCase = get(),
+            submitConsumptionReportByCupsJobUseCase = get(),
             getJobStatusUseCase = get(),
             getJobResultUseCase = get(),
             refreshConsumptionReportUseCase = get(),

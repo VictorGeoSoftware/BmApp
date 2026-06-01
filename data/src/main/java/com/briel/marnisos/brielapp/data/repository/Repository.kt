@@ -23,6 +23,7 @@ interface Repository {
     suspend fun getUserConsumptionData(): Result<UserConsumptionModel>
 
     suspend fun submitConsumptionReportJob(pdfFile: File): Result<JobSubmissionModel>
+    suspend fun submitConsumptionReportJobByCups(cupsCode: String): Result<JobSubmissionModel>
     suspend fun getJobStatus(jobId: String): Result<JobStatusModel>
     suspend fun getJobResult(jobId: String): Result<ConsumptionReportModel>
     suspend fun refreshConsumptionReport(jobId: String): Result<ConsumptionReportModel>
@@ -75,6 +76,12 @@ private class RepositoryImpl(
 
     override suspend fun submitConsumptionReportJob(pdfFile: File): Result<JobSubmissionModel> {
         return priceTableApi.submitConsumptionReportJob(pdfFile).map { response ->
+            response.mapToDomain()
+        }
+    }
+
+    override suspend fun submitConsumptionReportJobByCups(cupsCode: String): Result<JobSubmissionModel> {
+        return priceTableApi.submitConsumptionReportJobByCups(cupsCode).map { response ->
             response.mapToDomain()
         }
     }

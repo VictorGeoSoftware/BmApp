@@ -54,6 +54,12 @@ internal fun DrawerContent(
         )
 
         NavigationDrawerItem(
+            label = { Text("Escanear CUPS") },
+            selected = selectedDestination == ComparatorDestination.CUPS_SCANNER,
+            onClick = { onDestinationSelected(ComparatorDestination.CUPS_SCANNER) }
+        )
+
+        NavigationDrawerItem(
             label = { Text("Cerrar sesión") },
             selected = false,
             onClick = onLogoutClicked,

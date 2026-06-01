@@ -453,6 +453,1115 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "uYyD2",
+      "x": 3613,
+      "y": 0,
+      "name": "1 - Main Screen (Top Bar)",
+      "clip": true,
+      "width": 390,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "dNSZ5",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            20,
+            24,
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "WsYzy",
+              "name": "Time",
+              "fill": "$text-primary",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "nM8RB",
+              "name": "Icons",
+              "fill": "$text-primary",
+              "content": "···",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "y17xo",
+          "name": "Top Action Bar",
+          "width": "fill_container",
+          "height": 56,
+          "fill": "$surface",
+          "padding": [
+            0,
+            16
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "Ibbd5",
+              "name": "Menu Icon",
+              "width": 24,
+              "height": 24,
+              "iconFontName": "menu",
+              "iconFontFamily": "Material Symbols Outlined",
+              "fill": "$text-primary"
+            },
+            {
+              "type": "text",
+              "id": "kCmiO",
+              "name": "App Title",
+              "fill": "$text-primary",
+              "content": "BrielApp",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "CLqV2",
+              "name": "Action Button",
+              "fill": "$accent",
+              "cornerRadius": 20,
+              "gap": 8,
+              "padding": [
+                8,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "F2tAR",
+                  "name": "Bolt Icon",
+                  "width": 18,
+                  "height": 18,
+                  "iconFontName": "bolt",
+                  "iconFontFamily": "Material Symbols Outlined",
+                  "fill": "#FFFFFF"
+                },
+                {
+                  "type": "text",
+                  "id": "qXYiF",
+                  "name": "Btn Label",
+                  "fill": "#FFFFFF",
+                  "content": "Comparar",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "HEgIW",
+          "name": "Content Area",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            24,
+            16
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "j3kJd3",
+              "name": "Section Title",
+              "fill": "$text-primary",
+              "content": "Condiciones actuales",
+              "fontFamily": "Inter",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "X68ivF",
+              "name": "Placeholder Text",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Sube una factura o escanea tu CUPS para comparar ofertas de luz.",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "hPjuZ",
+              "name": "Empty State Card",
+              "width": "fill_container",
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0F172A10",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 32,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "M4LDT",
+                  "name": "Receipt Icon",
+                  "width": 48,
+                  "height": 48,
+                  "iconFontName": "receipt_long",
+                  "iconFontFamily": "Material Symbols Outlined",
+                  "fill": "$text-muted"
+                },
+                {
+                  "type": "text",
+                  "id": "rBTA9",
+                  "name": "Empty Title",
+                  "fill": "$text-primary",
+                  "content": "Sin datos todavia",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "IzuuM",
+                  "name": "Empty Desc",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": 240,
+                  "content": "Pulsa \"Comparar\" para empezar",
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "HDbYW",
+      "x": 4083,
+      "y": 0,
+      "name": "2 - BottomSheet Open",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "uvdEA",
+          "x": 0,
+          "y": 0,
+          "name": "Dim Overlay",
+          "fill": "$overlay",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "vR1Q5",
+          "x": 0,
+          "y": 560,
+          "name": "Bottom Sheet",
+          "width": 390,
+          "fill": "$surface",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "padding": [
+            12,
+            0,
+            32,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "eIkws",
+              "name": "Handle Row",
+              "width": "fill_container",
+              "padding": [
+                0,
+                0,
+                16,
+                0
+              ],
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "EMJcW",
+                  "name": "Handle",
+                  "fill": "$border",
+                  "width": 40,
+                  "height": 4
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "JOZUJ",
+              "name": "Title Row",
+              "width": "fill_container",
+              "padding": [
+                0,
+                20,
+                16,
+                20
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "wgb82",
+                  "name": "Sheet Title",
+                  "fill": "$text-primary",
+                  "content": "¿Cómo quieres comparar?",
+                  "fontFamily": "Inter",
+                  "fontSize": 17,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VE0Zy",
+              "name": "Option - Factura",
+              "width": "fill_container",
+              "gap": 16,
+              "padding": [
+                14,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "I9m8QP",
+                  "name": "Icon Bg 1",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "$accent-light",
+                  "cornerRadius": 12,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "ntTYN",
+                      "name": "PDF Icon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "picture_as_pdf",
+                      "iconFontFamily": "Material Symbols Outlined",
+                      "fill": "$accent"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "iOwrh",
+                  "name": "Text 1",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "GLocK",
+                      "name": "Opt1 Title",
+                      "fill": "$text-primary",
+                      "content": "Seleccionar una factura",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "G9Atyx",
+                      "name": "Opt1 Desc",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 280,
+                      "content": "Sube un PDF de tu factura eléctrica",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "n9DMSr",
+              "name": "Divider Row",
+              "width": "fill_container",
+              "padding": [
+                0,
+                20
+              ],
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "ffDwr",
+                  "name": "Divider",
+                  "fill": "$border",
+                  "width": "fill_container",
+                  "height": 1
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "igvIY",
+              "name": "Option - CUPS",
+              "width": "fill_container",
+              "gap": 16,
+              "padding": [
+                14,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "z679c",
+                  "name": "Icon Bg 2",
+                  "width": 44,
+                  "height": 44,
+                  "fill": "#DCFCE7",
+                  "cornerRadius": 12,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "uz7aD",
+                      "name": "Camera Icon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "photo_camera",
+                      "iconFontFamily": "Material Symbols Outlined",
+                      "fill": "$success"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "A6xQRJ",
+                  "name": "Text 2",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "O38dmU",
+                      "name": "Opt2 Title",
+                      "fill": "$text-primary",
+                      "content": "Escanear CUPS",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "aNNZe",
+                      "name": "Opt2 Desc",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 280,
+                      "content": "Usa la cámara para leer el código CUPS",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "x8Cds",
+      "x": 4553,
+      "y": 0,
+      "name": "3 - CUPS Scanner",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#1A1A2E",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "UF34n",
+          "x": 0,
+          "y": 0,
+          "name": "Camera BG",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 180,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0F172A",
+                "position": 0
+              },
+              {
+                "color": "#1E293B",
+                "position": 1
+              }
+            ]
+          },
+          "width": 390,
+          "height": 844
+        },
+        {
+          "type": "frame",
+          "id": "b7N66n",
+          "x": 0,
+          "y": 50,
+          "name": "Scanner Top Bar",
+          "width": 390,
+          "height": 56,
+          "padding": [
+            0,
+            16
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "JNPO9",
+              "name": "Back Arrow",
+              "width": 24,
+              "height": 24,
+              "iconFontName": "arrow_back",
+              "iconFontFamily": "Material Symbols Outlined",
+              "fill": "#FFFFFF"
+            },
+            {
+              "type": "text",
+              "id": "e6h6yx",
+              "name": "Scanner Title",
+              "fill": "#FFFFFF",
+              "content": "Escanear CUPS",
+              "fontFamily": "Inter",
+              "fontSize": 17,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "SPTCJ",
+              "name": "Spacer",
+              "width": 24,
+              "height": 24
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "ss8jz",
+          "x": 45,
+          "y": 130,
+          "name": "Instruction",
+          "fill": "#FFFFFF99",
+          "textGrowth": "fixed-width",
+          "width": 300,
+          "content": "Apunta la cámara al código CUPS de tu factura",
+          "textAlign": "center",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "rhjKi",
+          "x": 25,
+          "y": 340,
+          "name": "Scan Region",
+          "width": 340,
+          "height": 120,
+          "cornerRadius": 12,
+          "stroke": {
+            "align": "inside",
+            "thickness": 2,
+            "fill": "$accent"
+          },
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "LWjXO",
+              "x": 0,
+              "y": 0,
+              "name": "TL-H",
+              "fill": "#FFFFFF",
+              "width": 30,
+              "height": 4
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "vCMyv",
+              "x": 0,
+              "y": 0,
+              "name": "TL-V",
+              "fill": "#FFFFFF",
+              "width": 4,
+              "height": 30
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "IazCI",
+              "x": 310,
+              "y": 0,
+              "name": "TR-H",
+              "fill": "#FFFFFF",
+              "width": 30,
+              "height": 4
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "iXOdb",
+              "x": 336,
+              "y": 0,
+              "name": "TR-V",
+              "fill": "#FFFFFF",
+              "width": 4,
+              "height": 30
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "HU4J0",
+              "x": 0,
+              "y": 116,
+              "name": "BL-H",
+              "fill": "#FFFFFF",
+              "width": 30,
+              "height": 4
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "h1IWn",
+              "x": 0,
+              "y": 90,
+              "name": "BL-V",
+              "fill": "#FFFFFF",
+              "width": 4,
+              "height": 30
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "PVxK8",
+              "x": 310,
+              "y": 116,
+              "name": "BR-H",
+              "fill": "#FFFFFF",
+              "width": 30,
+              "height": 4
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "u9Wgk",
+              "x": 336,
+              "y": 90,
+              "name": "BR-V",
+              "fill": "#FFFFFF",
+              "width": 4,
+              "height": 30
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "WLZLB",
+          "x": 25,
+          "y": 490,
+          "name": "CUPS Display",
+          "width": 340,
+          "layout": "vertical",
+          "gap": 8,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Z3b1tb",
+              "name": "Detected Label",
+              "fill": "#FFFFFF60",
+              "content": "CÓDIGO CUPS DETECTADO",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "500",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "f84ted",
+              "name": "CUPS Value Box",
+              "fill": "#FFFFFF15",
+              "cornerRadius": 12,
+              "gap": 8,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "b2Njg",
+                  "name": "CUPS Code",
+                  "fill": "#FFFFFF",
+                  "content": "ES0022000007603872PJ",
+                  "fontFamily": "Inter Tight",
+                  "fontSize": 20,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "icon_font",
+                  "id": "MiNKW",
+                  "name": "Check Icon",
+                  "width": 22,
+                  "height": 22,
+                  "iconFontName": "check_circle",
+                  "iconFontFamily": "Material Symbols Outlined",
+                  "fill": "$success"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "tLLbj",
+          "x": 95,
+          "y": 568,
+          "name": "Confidence",
+          "fill": "#4ADE80",
+          "content": "✓ Formato válido · 20 caracteres",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "JoScD",
+          "x": 0,
+          "y": 700,
+          "name": "Bottom Actions",
+          "width": 390,
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            0,
+            24
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Isjsl",
+              "name": "Confirm Button",
+              "width": "fill_container",
+              "height": 52,
+              "fill": "$accent",
+              "cornerRadius": 14,
+              "gap": 8,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "C30G06",
+                  "name": "Search Icon",
+                  "width": 20,
+                  "height": 20,
+                  "iconFontName": "search",
+                  "iconFontFamily": "Material Symbols Outlined",
+                  "fill": "#FFFFFF"
+                },
+                {
+                  "type": "text",
+                  "id": "ePVoM",
+                  "name": "Confirm Label",
+                  "fill": "#FFFFFF",
+                  "content": "Buscar ofertas",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "VUp4x",
+              "name": "Manual Entry",
+              "fill": "$accent",
+              "content": "Introducir CUPS manualmente",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "W8AnT",
+      "x": 5023,
+      "y": 0,
+      "name": "4 - Fetching Proposals",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "M4Tegg",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            20,
+            24,
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "H32tZ",
+              "name": "Time",
+              "fill": "$text-primary",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "Lo1u5",
+              "name": "Icons",
+              "fill": "$text-primary",
+              "content": "···",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ZN4HA",
+          "name": "Top Bar",
+          "width": "fill_container",
+          "height": 56,
+          "fill": "$surface",
+          "padding": [
+            0,
+            16
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "e9NFPu",
+              "name": "Menu",
+              "width": 24,
+              "height": 24,
+              "iconFontName": "menu",
+              "iconFontFamily": "Material Symbols Outlined",
+              "fill": "$text-primary"
+            },
+            {
+              "type": "text",
+              "id": "j5joZ",
+              "name": "Title",
+              "fill": "$text-primary",
+              "content": "BrielApp",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "DscUK",
+              "name": "Spacer",
+              "width": 24,
+              "height": 24
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "QTcDF",
+          "name": "Loading Content",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            80,
+            24
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "mzXyE",
+              "name": "Spinner Bg",
+              "width": 80,
+              "height": 80,
+              "fill": "$accent-light",
+              "cornerRadius": 40,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "ka9Zl",
+                  "name": "Sync",
+                  "width": 36,
+                  "height": 36,
+                  "iconFontName": "sync",
+                  "iconFontFamily": "Material Symbols Outlined",
+                  "fill": "$accent"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Gp7p6",
+              "name": "Loading Title",
+              "fill": "$text-primary",
+              "content": "Buscando ofertas...",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "f7UNRJ",
+              "name": "Loading Desc",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": 300,
+              "content": "Estamos comparando las mejores ofertas para tu punto de suministro",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "xIfRN",
+              "name": "CUPS Card",
+              "width": "fill_container",
+              "fill": "$surface",
+              "cornerRadius": 12,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0F172A08",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "gap": 12,
+              "padding": [
+                16,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "uOyAl",
+                  "name": "Bolt",
+                  "width": 20,
+                  "height": 20,
+                  "iconFontName": "bolt",
+                  "iconFontFamily": "Material Symbols Outlined",
+                  "fill": "$warning"
+                },
+                {
+                  "type": "frame",
+                  "id": "b6WwNs",
+                  "name": "CUPS Info",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "H0CwxI",
+                      "name": "CUPS Label",
+                      "fill": "$text-muted",
+                      "content": "CUPS",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "nXTXW",
+                      "name": "CUPS Value",
+                      "fill": "$text-primary",
+                      "content": "ES0022000007603872PJ",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.5
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "U3IHOY",
+      "x": 5423,
+      "y": 440,
+      "name": "Flow 1-2",
+      "fill": "$accent",
+      "content": "Tap \"Comparar\" →",
+      "fontFamily": "Inter",
+      "fontSize": 12,
+      "fontWeight": "600"
+    },
+    {
+      "type": "text",
+      "id": "jmqfH",
+      "x": 5423,
+      "y": 440,
+      "name": "Flow 2-3",
+      "fill": "$success",
+      "content": "\"Escanear CUPS\" →",
+      "fontFamily": "Inter",
+      "fontSize": 12,
+      "fontWeight": "600"
+    },
+    {
+      "type": "text",
+      "id": "zRGfM",
+      "x": 5423,
+      "y": 440,
+      "name": "Flow 3-4",
+      "fill": "$accent",
+      "content": "\"Buscar ofertas\" →",
+      "fontFamily": "Inter",
+      "fontSize": 12,
+      "fontWeight": "600"
     }
-  ]
+  ],
+  "variables": {
+    "accent": {
+      "type": "color",
+      "value": "#1D4ED8"
+    },
+    "accent-light": {
+      "type": "color",
+      "value": "#DBEAFE"
+    },
+    "bg": {
+      "type": "color",
+      "value": "#F8FAFC"
+    },
+    "border": {
+      "type": "color",
+      "value": "#E2E8F0"
+    },
+    "overlay": {
+      "type": "color",
+      "value": "#0F172ACC"
+    },
+    "success": {
+      "type": "color",
+      "value": "#16A34A"
+    },
+    "surface": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "text-muted": {
+      "type": "color",
+      "value": "#94A3B8"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#0F172A"
+    },
+    "text-secondary": {
+      "type": "color",
+      "value": "#64748B"
+    },
+    "warning": {
+      "type": "color",
+      "value": "#F59E0B"
+    }
+  }
 }

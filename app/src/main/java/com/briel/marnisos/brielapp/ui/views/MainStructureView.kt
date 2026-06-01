@@ -38,6 +38,7 @@ import com.briel.marnisos.brielapp.ui.views.currentuserconditions.CurrentUserCon
 import com.briel.marnisos.brielapp.ui.views.drawer.DrawerContent
 import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
+import com.briel.marnisos.brielapp.ui.views.scanner.CupsScannerView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -107,6 +108,9 @@ fun MainView(
         onPdfSelected = { pdfFile ->
             comparatorViewModel.uploadConsumptionReport(pdfFile)
         },
+        onCupsCodeSelected = { cupsCode ->
+            comparatorViewModel.uploadConsumptionReportByCups(cupsCode)
+        },
         onGeneratePdfClick = comparatorViewModel::exportVisibleProposalsAsPdf,
         onProposalFixedAmountChanged = comparatorViewModel::updateProposalFixedAmount,
         onProposalVisibilityChanged = comparatorViewModel::setProposalVisibility,
@@ -134,6 +138,7 @@ fun MainStructureView(
     isGeneratingPdf: Boolean = false,
     onBeforeFetchPriceProposals: () -> Unit = {},
     onPdfSelected: (File) -> Unit = {},
+    onCupsCodeSelected: (String) -> Unit = {},
     onGeneratePdfClick: () -> Unit = {},
     context: Context,
     proposalPriceList: List<ProposalPriceModel>,
@@ -193,6 +198,9 @@ fun MainStructureView(
                     onBeforeFetchPriceProposals()
                     onPdfSelected(file)
                 },
+                onScanCupsSelected = {
+                    selectedDestination = ComparatorDestination.CUPS_SCANNER
+                },
                 context = context,
                 onOpenDrawer = {
                     scope.launch { drawerState.open() }
@@ -242,6 +250,23 @@ fun MainStructureView(
                         supplyAddress = supplyAddress,
                         onSupplyHolderChanged = onSupplyHolderChanged,
                         onSupplyAddressChanged = onSupplyAddressChanged,
+                    )
+                }
+
+                ComparatorDestination.CUPS_SCANNER -> {
+                    CupsScannerView(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        isUploadingReport = isUploadingReport,
+                        onBack = {
+                            selectedDestination = ComparatorDestination.CURRENT_USER_CONDITIONS
+                        },
+                        onCupsConfirmed = { cupsCode ->
+                            onBeforeFetchPriceProposals()
+                            onCupsCodeSelected(cupsCode)
+                            selectedDestination = ComparatorDestination.PROPOSALS
+                        },
                     )
                 }
             }

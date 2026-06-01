@@ -2,6 +2,7 @@ package com.briel.marnisos.brielapp.data.network
 
 import com.briel.marnisos.brielapp.data.model.prices.ConsumptionReportResponse
 import com.briel.marnisos.brielapp.data.model.prices.ComparatorReportPdfRequest
+import com.briel.marnisos.brielapp.data.model.prices.FetchConsumptionReportByCupsRequest
 import com.briel.marnisos.brielapp.data.model.prices.JobStatusResponse
 import com.briel.marnisos.brielapp.data.model.prices.JobSubmissionResponse
 import com.briel.marnisos.brielapp.data.model.prices.PriceTableResultsResponse
@@ -70,6 +71,9 @@ class PriceTableApi(
      */
     suspend fun submitConsumptionReportJob(pdfFile: File): Result<JobSubmissionResponse> {
         return try {
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
             val response = client.submitFormWithBinaryData(
                 url = "$baseUrl/fetch-user-consumption-report",
                 formData = formData {
@@ -78,7 +82,9 @@ class PriceTableApi(
                         append(HttpHeaders.ContentDisposition, "filename=\"${pdfFile.name}\"")
                     })
                 }
-            )
+            ) {
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
+            }
 
             val status = response.status
             if (status == HttpStatusCode.Accepted) {
@@ -86,6 +92,29 @@ class PriceTableApi(
                 Result.success(responseBody)
             } else {
                 Result.failure(Exception("Error submitting PDF job: $status"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun submitConsumptionReportJobByCups(cupsCode: String): Result<JobSubmissionResponse> {
+        return try {
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
+            val response = client.post("$baseUrl/fetch-user-consumption-report-by-cups") {
+                headers.append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
+                setBody(FetchConsumptionReportByCupsRequest(cupsCode = cupsCode))
+            }
+
+            val status = response.status
+            if (status == HttpStatusCode.Accepted) {
+                val responseBody = response.body<JobSubmissionResponse>()
+                Result.success(responseBody)
+            } else {
+                Result.failure(Exception("Error submitting CUPS job: $status"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -100,7 +129,12 @@ class PriceTableApi(
      */
     suspend fun getJobStatus(jobId: String): Result<JobStatusResponse> {
         return try {
-            val response = client.get("$baseUrl/consumption-report-status/$jobId")
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
+            val response = client.get("$baseUrl/consumption-report-status/$jobId") {
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
+            }
             val status = response.status
 
             if (status == HttpStatusCode.OK) {
@@ -122,7 +156,12 @@ class PriceTableApi(
      */
     suspend fun getJobResult(jobId: String): Result<ConsumptionReportResponse> {
         return try {
-            val response = client.get("$baseUrl/consumption-report-result/$jobId")
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
+            val response = client.get("$baseUrl/consumption-report-result/$jobId") {
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
+            }
             val status = response.status
 
             if (status == HttpStatusCode.OK) {
@@ -142,7 +181,12 @@ class PriceTableApi(
 
     suspend fun refreshConsumptionReport(jobId: String): Result<ConsumptionReportResponse> {
         return try {
-            val response = client.post("$baseUrl/consumption-report-refresh/$jobId")
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
+            val response = client.post("$baseUrl/consumption-report-refresh/$jobId") {
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
+            }
             val status = response.status
 
             if (status == HttpStatusCode.OK) {
@@ -160,8 +204,12 @@ class PriceTableApi(
 
     suspend fun generateComparatorReportPdf(request: ComparatorReportPdfRequest): Result<ByteArray> {
         return try {
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
             val response = client.post("$baseUrl/reports/comparator-pdf") {
                 headers.append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
                 accept(ContentType.Application.Pdf)
                 setBody(request)
             }
