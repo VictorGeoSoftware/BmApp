@@ -58,15 +58,20 @@ val extendedColors: BrielExtendedColors
     get() = LocalBrielExtendedColors.current
 
 private val DarkColorScheme = darkColorScheme(
-    primary = AppPrimary,
-    onPrimary = AppOnPrimary,
-    secondary = AppSecondary,
-    onSecondary = AppOnSecondary,
-    background = Color(0xFF020617),
-    onBackground = Color(0xFFE2E8F0),
-    surface = Color(0xFF0F172A),
-    onSurface = Color(0xFFE2E8F0),
-    outline = Color(0xFF94A3B8)
+    primary = DarkAppPrimary,
+    onPrimary = DarkAppOnPrimary,
+    secondary = DarkAppSecondary,
+    onSecondary = DarkAppOnSecondary,
+    tertiary = DarkAppTertiary,
+    onTertiary = DarkAppOnTertiary,
+    background = DarkAppBackground,
+    onBackground = DarkAppOnBackground,
+    surface = DarkAppSurface,
+    onSurface = DarkAppOnSurface,
+    surfaceVariant = DarkAppSurfaceVariant,
+    onSurfaceVariant = DarkAppOnSurfaceVariant,
+    outline = DarkAppOutline,
+    outlineVariant = DarkAppOutlineVariant
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -74,11 +79,16 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = AppOnPrimary,
     secondary = AppSecondary,
     onSecondary = AppOnSecondary,
+    tertiary = AppTertiary,
+    onTertiary = AppOnTertiary,
     background = AppBackground,
     onBackground = AppOnBackground,
     surface = AppSurface,
     onSurface = AppOnSurface,
-    outline = AppOutline
+    surfaceVariant = AppSurfaceVariant,
+    onSurfaceVariant = AppOnSurfaceVariant,
+    outline = AppOutline,
+    outlineVariant = AppOutlineVariant
 )
 
 @Composable
