@@ -4,7 +4,7 @@
     <string name="notification_channel_name">PowerApp Notifications</string>
     <string name="notification_channel_description">Notifications for price updates and app events</string>
     <string name="current_user_conditions_empty_state_message">Selecciona primero una factura de luz para proceder al estudio</string>
-    <string name="current_user_conditions_title">Condiciones actuales</string>
+    <string name="current_user_conditions_title">CONDICIONES ACTUALES</string>
     <string name="current_user_conditions_customer_data_title">DATOS DEL CLIENTE</string>
     <string name="current_user_conditions_supply_holder_label">Titular</string>
     <string name="current_user_conditions_supply_address_label">Dirección</string>
@@ -13,6 +13,14 @@
     <string name="current_user_conditions_energy_consumed_title">ENERGÍA CONSUMIDA</string>
     <string name="current_user_conditions_extra_services_title">SERVICIOS EXTRA</string>
     <string name="current_user_conditions_extra_services_hint">Introduce el importe total anual</string>
+    <string name="current_user_conditions_copy_button">Copiar</string>
+    <string name="current_user_conditions_copy_sheet_title">Copiar precios desde propuesta</string>
+    <string name="current_user_conditions_copy_sheet_subtitle">Selecciona una propuesta para copiar sus precios en las condiciones actuales.</string>
+    <string name="current_user_conditions_copy_sheet_list_label">Propuestas disponibles</string>
+    <string name="current_user_conditions_copy_sheet_item_metadata">Potencia: %1$d periodos · Energía: %2$d periodos</string>
+    <string name="current_user_conditions_copy_sheet_helper">Solo se muestran propuestas compatibles con tu tarifa.</string>
+    <string name="current_user_conditions_copy_success">Precios copiados desde %1$s</string>
+    <string name="cancel">Cancelar</string>
     <string name="annual_amount">Importe total anual</string>
     <string name="bm_grpd">BRIEL MARNYSOS CONSULTORÍA ENERGÉTICA S.L.U., como Responsable del tratamiento, de los datos personales proporcionados para la ejecución de la relación precontractual o contractual, le informa que sus datos serán tratados de conformidad con lo dispuesto en el Reglamento General (UE) 2016/679, de protección de datos (RGPD) y en la L.O. 3/2018, de protección de datos y garantía de los derechos digitales (LOPDGDD), con la finalidad de poder cumplir con las obligaciones mercantiles, contables y fiscales, y serán conservadas durante un plazo mínimo de 6 años por obligación legal, procediéndose posteriormente a su eliminación con medidas de seguridad adecuadas para garantizar la seudonimización de los datos o la destrucción total de los mismos. Los datos podrán ser cedidos a empresas energéticas o colaboradores por ser necesario para prestarle el servicio. Por último le informamos que puede ejercer los derechos de acceso, rectificación, portabilidad y supresión de sus datos, y los de limitación y oposición a su tratamiento, dirigiendo comunicación, motivada y acreditada, a dpo@brielmarnysos.com, o presentar una reclamación ante la autoridad competente (www.aepd.es)</string>
     <string name="bm_main_lable">BRIEL MARNYSOS CONSULTORÍA ENERGÉTICA S.L</string>

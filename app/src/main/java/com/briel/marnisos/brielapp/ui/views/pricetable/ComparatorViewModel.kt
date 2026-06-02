@@ -22,6 +22,7 @@ import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.IncrementProposalResponseCounterUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
+import com.briel.marnisos.brielapp.domain.usecases.PersistCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshConsumptionReportUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUseCase
@@ -50,6 +51,7 @@ class ComparatorViewModel(
     private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase,
     private val clearCurrentUserConditionsUseCase: ClearCurrentUserConditionsUseCase,
     private val observeCurrentUserConditionsUseCase: ObserveCurrentUserConditionsUseCase,
+    private val persistCurrentUserConditionsUseCase: PersistCurrentUserConditionsUseCase,
     private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase,
     private val incrementProposalResponseCounterUseCase: IncrementProposalResponseCounterUseCase,
     private val generateComparatorReportPdfUseCase: GenerateComparatorReportPdfUseCase,
@@ -441,6 +443,34 @@ class ComparatorViewModel(
         recomputeProposalPriceModels()
     }
 
+    fun copyProposalToCurrentUserConditions(proposalTitle: String) {
+        val selectedProposal = _proposalPriceModelList.value
+            .firstOrNull { proposal -> proposal.proposalTitle == proposalTitle }
+            ?: return
+
+        val powerTermPriceByPeriod = _powerTermRows.value
+            .mapIndexed { index, row ->
+                row.first to selectedProposal.powerTermItems.getOrNull(index).toDecimalInputString()
+            }
+            .toMap()
+
+        val energyPriceByPeriod = _energyConsumedRows.value
+            .mapIndexed { index, row ->
+                row.first to selectedProposal.consumedEnergyItems.getOrNull(index).toDecimalInputString()
+            }
+            .toMap()
+
+        val currentConditionsModel = CurrentUserConditionsModel(
+            powerTermPriceByPeriod = powerTermPriceByPeriod,
+            energyPriceByPeriod = energyPriceByPeriod,
+            extraServices = selectedProposal.extraServices.toTwoDecimalsString(),
+        )
+
+        viewModelScope.launch {
+            persistCurrentUserConditionsUseCase(currentConditionsModel)
+        }
+    }
+
     private fun setBaseProposals(proposals: List<ProposalPriceModel>) {
         baseProposalPriceModelList = proposals
         synchronizeProposalFixedAmountInputs(proposals)
@@ -564,6 +594,13 @@ class ComparatorViewModel(
     private fun Double.toTwoDecimalsString(): String {
         val roundedValue = round(this * 100.0) / 100.0
         return String.format(Locale.US, "%.2f", roundedValue)
+    }
+
+    private fun Double?.toDecimalInputString(): String {
+        if (this == null) return ""
+
+        val formatted = String.format(Locale.US, "%.8f", this)
+        return formatted.trimEnd('0').trimEnd('.').ifBlank { "0" }
     }
 
     fun exportVisibleProposalsAsPdf() {

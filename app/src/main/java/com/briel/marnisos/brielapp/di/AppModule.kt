@@ -32,6 +32,7 @@ val appModule = module {
             clearLastCompletedJobIdUseCase = get(),
             clearCurrentUserConditionsUseCase = get(),
             observeCurrentUserConditionsUseCase = get(),
+            persistCurrentUserConditionsUseCase = get(),
             getCurrentAuthUserUseCase = get(),
             incrementProposalResponseCounterUseCase = get(),
             generateComparatorReportPdfUseCase = get(),
