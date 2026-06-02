@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">PowerApp</string>
+    <string name="login_brand_icon_content_description">Icono de PowerApp</string>
+    <string name="login_subtitle">Gestion inteligente de energia para tu equipo.</string>
+    <string name="login_email_placeholder">Correo electronico</string>
+    <string name="login_password_placeholder">Contrasena</string>
+    <string name="login_keep_me_signed_in">Mantener sesion iniciada</string>
+    <string name="login_forgot_password">Olvidaste?</string>
+    <string name="login_button">Iniciar sesion</string>
+    <string name="login_button_loading">Iniciando sesion...</string>
+    <string name="login_continue_with_google">Continuar con Google</string>
+    <string name="login_no_account">No tienes cuenta?</string>
+    <string name="login_request_access">Solicitar acceso</string>
+</resources>
