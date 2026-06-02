@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,7 +62,8 @@ internal fun CupsScannerView(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
-    var detectedCupsCode by remember { mutableStateOf<String?>(null) }
+    var cupsCodeText by remember { mutableStateOf("") }
+    var wasEditedManually by remember { mutableStateOf(false) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
     val recognizer = remember { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
 
@@ -101,10 +103,11 @@ internal fun CupsScannerView(
                 text = "Escanear CUPS",
                 style = MaterialTheme.typography.titleMedium,
             )
+            val isValid = CupsCodeParser.isValid(cupsCodeText)
             Button(
-                enabled = !isUploadingReport && detectedCupsCode != null,
+                enabled = !isUploadingReport && isValid,
                 onClick = {
-                    detectedCupsCode?.let(onCupsConfirmed)
+                    onCupsConfirmed(CupsCodeParser.normalize(cupsCodeText))
                 },
             ) {
                 Text(if (isUploadingReport) "Procesando..." else "Confirmar")
@@ -162,8 +165,8 @@ internal fun CupsScannerView(
                                     recognizer.process(image)
                                         .addOnSuccessListener(ContextCompat.getMainExecutor(context)) { visionText ->
                                             val candidate = CupsCodeParser.extractBestCandidate(visionText.text)
-                                            if (candidate != null) {
-                                                detectedCupsCode = candidate
+                                            if (candidate != null && !wasEditedManually) {
+                                                cupsCodeText = candidate
                                             }
                                         }
                                         .addOnCompleteListener {
@@ -202,18 +205,29 @@ internal fun CupsScannerView(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(
-                        text = "Código detectado",
+                        text = "Escanea o introduce tu código CUPS",
                         style = MaterialTheme.typography.labelLarge,
                     )
-                    Text(
-                        text = detectedCupsCode ?: "Aún no detectado",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    val isValid = detectedCupsCode?.let(CupsCodeParser::isValid) == true
-                    Text(
-                        text = if (isValid) "Formato válido" else "Apunta al CUPS impreso en la factura",
-                        color = if (isValid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
+                    val fieldIsValid = CupsCodeParser.isValid(cupsCodeText)
+                    OutlinedTextField(
+                        value = cupsCodeText,
+                        onValueChange = { newValue ->
+                            cupsCodeText = newValue
+                            wasEditedManually = newValue.isNotEmpty()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("ES0021000012345678XX") },
+                        singleLine = true,
+                        isError = cupsCodeText.isNotEmpty() && !fieldIsValid,
+                        supportingText = {
+                            Text(
+                                text = when {
+                                    cupsCodeText.isEmpty() -> "Apunta al CUPS impreso en la factura"
+                                    fieldIsValid -> "Formato válido"
+                                    else -> "Formato no válido"
+                                },
+                            )
+                        },
                     )
                 }
             }
