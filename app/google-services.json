@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "496422828095",
-    "project_id": "bmweb-a0a70",
-    "storage_bucket": "bmweb-a0a70.firebasestorage.app"
+    "project_number": "939713844198",
+    "project_id": "brielmarnysos-1dc68",
+    "storage_bucket": "brielmarnysos-1dc68.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:496422828095:android:9a4f55aef38cd329d7608a",
+        "mobilesdk_app_id": "1:939713844198:android:37c1d31a0efa445c643c27",
         "android_client_info": {
           "package_name": "com.briel.marnisos.brielapp"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA0LG-qj140GmdF3A1MrcdNiWeKN_GR4QM"
+          "current_key": "AIzaSyB3o1D1McT19PvCkVUCsuZV1bUS93y4zcM"
         }
       ],
       "services": {
