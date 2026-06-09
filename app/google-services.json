@@ -12,7 +12,20 @@
           "package_name": "com.briel.marnisos.brielapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "939713844198-nc3ckmqc32s9ua96d3u8sgos8ne1chju.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.briel.marnisos.brielapp",
+            "certificate_hash": "b180759dbb503e7b0bb4753800341d57b04e9e61"
+          }
+        },
+        {
+          "client_id": "939713844198-0mtauamkv6bivqnue9rhqgs4tv9m3ge7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB3o1D1McT19PvCkVUCsuZV1bUS93y4zcM"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "939713844198-0mtauamkv6bivqnue9rhqgs4tv9m3ge7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },
@@ -31,7 +49,12 @@
           "package_name": "com.briel.marnisos.brielapp.dev"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "939713844198-0mtauamkv6bivqnue9rhqgs4tv9m3ge7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB3o1D1McT19PvCkVUCsuZV1bUS93y4zcM"
@@ -39,7 +62,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "939713844198-0mtauamkv6bivqnue9rhqgs4tv9m3ge7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

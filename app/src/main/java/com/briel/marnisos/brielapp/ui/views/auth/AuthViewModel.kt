@@ -9,6 +9,7 @@ import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCas
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetFirebaseIdTokenUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
+import com.briel.marnisos.brielapp.domain.usecases.LoginWithGoogleUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SetUserOfflineUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SyncAuthenticatedUserDataUseCase
@@ -19,6 +20,7 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val loginWithEmailUseCase: LoginWithEmailUseCase,
+    private val loginWithGoogleUseCase: LoginWithGoogleUseCase,
     private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase,
     private val getFirebaseIdTokenUseCase: GetFirebaseIdTokenUseCase,
     private val syncAuthenticatedUserDataUseCase: SyncAuthenticatedUserDataUseCase,
@@ -54,6 +56,67 @@ class AuthViewModel(
                     current.copy(
                         isLoading = false,
                         errorMessage = mapLoginError(error)
+                    )
+                }
+                return@launch
+            }
+
+            val token = getFirebaseIdTokenUseCase(forceRefresh = true).getOrElse { error ->
+                crashReporter.recordNonFatal(
+                    throwable = error,
+                    category = CrashErrorCategory.AUTHENTICATION,
+                    operation = "get_firebase_id_token",
+                )
+                _uiState.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        errorMessage = error.message ?: "Failed to obtain Firebase token"
+                    )
+                }
+                return@launch
+            }
+
+            syncAuthenticatedUserDataUseCase(idToken = token, userData = user)
+                .onSuccess {
+                    _uiState.update { current ->
+                        current.copy(isAuthenticated = true, isLoading = false, errorMessage = null)
+                    }
+                }
+                .onFailure { error ->
+                    crashReporter.recordNonFatal(
+                        throwable = error,
+                        category = CrashErrorCategory.BACKEND,
+                        operation = "sync_authenticated_user_data",
+                    )
+                    _uiState.update { current ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = error.message ?: "Failed to sync user data"
+                        )
+                    }
+                }
+        }
+    }
+
+    fun loginWithGoogle(googleIdToken: String) {
+        viewModelScope.launch {
+            crashReporter.setScreenContext("auth_login")
+            crashReporter.setUseCaseContext("login_with_google")
+
+            _uiState.update { current ->
+                current.copy(isLoading = true, errorMessage = null)
+            }
+
+            val user = loginWithGoogleUseCase(googleIdToken).getOrElse { error ->
+                crashReporter.recordNonFatal(
+                    throwable = error,
+                    category = CrashErrorCategory.AUTHENTICATION,
+                    operation = "login_with_google",
+                )
+                _uiState.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        errorMessage = error.message ?: "Google sign-in failed"
                     )
                 }
                 return@launch

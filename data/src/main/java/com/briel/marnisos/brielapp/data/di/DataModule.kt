@@ -22,6 +22,7 @@ import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetUserConsumptionUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
+import com.briel.marnisos.brielapp.domain.usecases.LoginWithGoogleUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.IncrementProposalResponseCounterUseCase
@@ -78,6 +79,7 @@ val dataModule = module {
 
     // Auth use cases
     factory<LoginWithEmailUseCase> { LoginWithEmailUseCase.Factory.create(get()) }
+    factory<LoginWithGoogleUseCase> { LoginWithGoogleUseCase.Factory.create(get()) }
     factory<GetCurrentAuthUserUseCase> { GetCurrentAuthUserUseCase.Factory.create(get()) }
     factory<GetFirebaseIdTokenUseCase> { GetFirebaseIdTokenUseCase.Factory.create(get()) }
     factory<SyncAuthenticatedUserDataUseCase> { SyncAuthenticatedUserDataUseCase.Factory.create(get()) }

@@ -7,6 +7,7 @@ import com.briel.marnisos.brielapp.data.utils.awaitTaskResult
 import com.briel.marnisos.brielapp.domain.models.AuthUserModel
 import com.briel.marnisos.brielapp.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
 class AuthRepositoryImpl(
     private val firebaseAuth: FirebaseAuth,
@@ -17,6 +18,18 @@ class AuthRepositoryImpl(
         return try {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).awaitTaskResult()
             val user = authResult.user ?: return Result.failure(IllegalStateException("User is null after login"))
+            Result.success(user.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun loginWithGoogle(googleIdToken: String): Result<AuthUserModel> {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
+            val authResult = firebaseAuth.signInWithCredential(credential).awaitTaskResult()
+            val user = authResult.user
+                ?: return Result.failure(IllegalStateException("User is null after Google sign-in"))
             Result.success(user.toDomain())
         } catch (e: Exception) {
             Result.failure(e)

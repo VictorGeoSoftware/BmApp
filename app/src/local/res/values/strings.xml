@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Placeholder: Google Sign-In is not available on the local flavor. -->
+    <string name="default_web_client_id" translatable="false">placeholder-local-no-google-sign-in</string>
+</resources>

@@ -141,6 +141,11 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.google.mlkit.text.recognition)
 
+    // Google Sign-In (Credential Manager)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.google.googleid)
+
     // Koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)

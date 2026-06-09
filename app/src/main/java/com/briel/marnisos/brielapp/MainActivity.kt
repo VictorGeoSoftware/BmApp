@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,9 +16,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SetUserOfflineUseCase
@@ -26,6 +32,8 @@ import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
 import com.briel.marnisos.brielapp.ui.views.MainView
 import com.briel.marnisos.brielapp.ui.views.auth.AuthViewModel
 import com.briel.marnisos.brielapp.ui.views.auth.LoginScreen
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.android.ext.android.inject
@@ -71,9 +79,25 @@ class MainActivity : ComponentActivity() {
                             onLogoutClicked = authViewModel::logout,
                         )
                     } else {
+                        val context = LocalContext.current
+                        val coroutineScope = rememberCoroutineScope()
+
                         LoginScreen(
                             uiState = authState,
-                            onLoginClicked = authViewModel::loginWithEmail
+                            onLoginClicked = authViewModel::loginWithEmail,
+                            onGoogleSignInClicked = {
+                                coroutineScope.launch {
+                                    launchGoogleSignIn(
+                                        context = context,
+                                        onSuccess = { idToken ->
+                                            authViewModel.loginWithGoogle(idToken)
+                                        },
+                                        onError = { error ->
+                                            Log.e("MainActivity", "Google Sign-In failed: ${error.message}", error)
+                                        }
+                                    )
+                                }
+                            }
                         )
                     }
                 }
@@ -105,6 +129,32 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
             .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
         startActivity(intent)
+    }
+
+    private suspend fun launchGoogleSignIn(
+        context: android.content.Context,
+        onSuccess: (idToken: String) -> Unit,
+        onError: (Exception) -> Unit,
+    ) {
+        try {
+            val googleIdOption = GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(false)
+                .setServerClientId(context.getString(R.string.default_web_client_id))
+                .build()
+
+            val request = GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build()
+
+            val credentialManager = CredentialManager.create(context)
+            val result = credentialManager.getCredential(context, request)
+            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
+            onSuccess(googleIdTokenCredential.idToken)
+        } catch (e: GetCredentialException) {
+            onError(e)
+        } catch (e: Exception) {
+            onError(e)
+        }
     }
 
     private fun sendUserActivity(isOnline: Boolean) {

@@ -69,6 +69,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
 
+    // Google Sign-In (Credential Manager)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.google.googleid)
+
     // Ktor client
     api(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)

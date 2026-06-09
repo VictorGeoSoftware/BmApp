@@ -52,6 +52,7 @@ val appModule = module {
     viewModel {
         AuthViewModel(
             loginWithEmailUseCase = get(),
+            loginWithGoogleUseCase = get(),
             getCurrentAuthUserUseCase = get(),
             getFirebaseIdTokenUseCase = get(),
             syncAuthenticatedUserDataUseCase = get(),

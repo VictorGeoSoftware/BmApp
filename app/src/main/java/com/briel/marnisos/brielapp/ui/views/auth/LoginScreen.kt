@@ -35,6 +35,7 @@ import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
 fun LoginScreen(
     uiState: AuthUiState,
     onLoginClicked: (email: String, password: String) -> Unit,
+    onGoogleSignInClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var email by remember { mutableStateOf("") }
@@ -128,7 +129,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(18.dp))
 
         OutlinedButton(
-            onClick = {},
+            onClick = onGoogleSignInClicked,
             enabled = !uiState.isLoading
         ) {
             Text(text = stringResource(id = R.string.login_continue_with_google))
@@ -172,7 +173,8 @@ private fun LoginScreenPreviewLight() {
     BrielAppTheme(darkTheme = false) {
         LoginScreen(
             uiState = AuthUiState(),
-            onLoginClicked = { _, _ -> }
+            onLoginClicked = { _, _ -> },
+            onGoogleSignInClicked = {}
         )
     }
 }
@@ -187,7 +189,8 @@ private fun LoginScreenPreviewDark() {
     BrielAppTheme(darkTheme = true) {
         LoginScreen(
             uiState = AuthUiState(),
-            onLoginClicked = { _, _ -> }
+            onLoginClicked = { _, _ -> },
+            onGoogleSignInClicked = {}
         )
     }
 }
