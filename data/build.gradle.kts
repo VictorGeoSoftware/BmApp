@@ -15,11 +15,18 @@ android {
 
     flavorDimensions += "environment"
     productFlavors {
-        create("prod") {
+        create("local") {
             dimension = "environment"
+            // 10.0.2.2 is the Android emulator alias for the host machine's localhost.
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8081/api/v1\"")
+        }
+        create("dev") {
+            dimension = "environment"
+            // TEMP: pointing at prod backend until QA backend (port 9081) is deployed.
+            // TODO: switch back to "http://217.154.181.175:9081/api/v1" once QA is up (see MULTI_ENV_DEPLOYMENT.md).
             buildConfigField("String", "API_BASE_URL", "\"http://217.154.181.175:8081/api/v1\"")
         }
-        create("local") {
+        create("prod") {
             dimension = "environment"
             buildConfigField("String", "API_BASE_URL", "\"http://217.154.181.175:8081/api/v1\"")
         }
