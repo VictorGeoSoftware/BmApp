@@ -2,6 +2,7 @@ package com.briel.marnisos.brielapp.ui.views
 
 import android.content.Context
 import android.widget.Toast
+import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -142,6 +143,7 @@ fun MainView(
  * ComparatorView — A Compose-only UI that mirrors the provided mockup.
  * Focused on the View layer; can be fed with a UI model from upper layers later.
  */
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 @Composable
 fun MainStructureView(
     modifier: Modifier = Modifier,
