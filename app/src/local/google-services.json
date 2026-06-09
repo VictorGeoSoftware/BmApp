@@ -9,26 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:939713844198:android:b7cf73f4d1b7d99e643c27",
         "android_client_info": {
-          "package_name": "com.briel.marnisos.brielapp"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyB3o1D1McT19PvCkVUCsuZV1bUS93y4zcM"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:939713844198:android:0b3d49a9e7fba7e2643c27",
-        "android_client_info": {
-          "package_name": "com.briel.marnisos.brielapp.dev"
+          "package_name": "com.briel.marnisos.brielapp.local"
         }
       },
       "oauth_client": [],
