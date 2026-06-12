@@ -1502,22 +1502,22 @@
           "x": 8,
           "y": 12,
           "name": "Screen Border",
+          "fill": "#E5E7EB",
           "width": 404,
           "height": 896,
           "stroke": "#2563EB",
-          "strokeWidth": 4,
-          "fill": "#E5E7EB"
+          "strokeWidth": 4
         },
         {
           "type": "rectangle",
+          "cornerRadius": 10,
           "id": "ccHeaderClient01",
           "x": 30,
           "y": 46,
           "name": "Datos Cliente Header",
+          "fill": "#F3D34A",
           "width": 360,
           "height": 46,
-          "fill": "#F3D34A",
-          "cornerRadius": 10,
           "stroke": "#222222",
           "strokeWidth": 1
         },
@@ -1535,14 +1535,14 @@
         },
         {
           "type": "rectangle",
+          "cornerRadius": 10,
           "id": "ccHeaderCurrent01",
           "x": 30,
           "y": 290,
           "name": "Condiciones Header",
+          "fill": "#F3D34A",
           "width": 360,
           "height": 46,
-          "fill": "#F3D34A",
-          "cornerRadius": 10,
           "stroke": "#222222",
           "strokeWidth": 1
         },
@@ -1560,14 +1560,14 @@
         },
         {
           "type": "rectangle",
+          "cornerRadius": 10,
           "id": "ccHeaderExtra01",
           "x": 30,
           "y": 814,
           "name": "Servicios Extra Header",
+          "fill": "#F3D34A",
           "width": 360,
           "height": 46,
-          "fill": "#F3D34A",
-          "cornerRadius": 10,
           "stroke": "#222222",
           "strokeWidth": 1
         },
@@ -1589,10 +1589,10 @@
           "x": 8,
           "y": 12,
           "name": "Dim Overlay",
-          "width": 404,
-          "height": 896,
+          "opacity": 0.35,
           "fill": "#111827",
-          "opacity": 0.35
+          "width": 404,
+          "height": 896
         },
         {
           "type": "frame",
@@ -1617,12 +1617,12 @@
           "children": [
             {
               "type": "rectangle",
+              "cornerRadius": 999,
               "id": "sheetHandle01",
               "name": "Handle",
-              "width": 54,
-              "height": 6,
               "fill": "#D1D5DB",
-              "cornerRadius": 999
+              "width": 54,
+              "height": 6
             },
             {
               "type": "text",
@@ -1847,22 +1847,22 @@
           "x": 8,
           "y": 12,
           "name": "Screen Border",
+          "fill": "#E5E7EB",
           "width": 404,
           "height": 896,
           "stroke": "#2563EB",
-          "strokeWidth": 4,
-          "fill": "#E5E7EB"
+          "strokeWidth": 4
         },
         {
           "type": "rectangle",
+          "cornerRadius": 10,
           "id": "ccHeaderCurrent02",
           "x": 30,
           "y": 290,
           "name": "Condiciones Header",
+          "fill": "#F3D34A",
           "width": 360,
           "height": 46,
-          "fill": "#F3D34A",
-          "cornerRadius": 10,
           "stroke": "#222222",
           "strokeWidth": 1
         },
@@ -1880,27 +1880,27 @@
         },
         {
           "type": "rectangle",
+          "cornerRadius": 12,
           "id": "updatedFieldHighlight01",
           "x": 28,
           "y": 412,
           "name": "Updated block highlight",
-          "width": 364,
-          "height": 210,
+          "opacity": 0.55,
           "fill": "#FEF9C3",
-          "cornerRadius": 12,
-          "opacity": 0.55
+          "width": 364,
+          "height": 210
         },
         {
           "type": "rectangle",
+          "cornerRadius": 12,
           "id": "updatedFieldHighlight02",
           "x": 28,
           "y": 640,
           "name": "Updated block highlight 2",
-          "width": 364,
-          "height": 165,
+          "opacity": 0.55,
           "fill": "#FEF9C3",
-          "cornerRadius": 12,
-          "opacity": 0.55
+          "width": 364,
+          "height": 165
         },
         {
           "type": "frame",
@@ -1927,6 +1927,491 @@
               "fontFamily": "Inter",
               "fontSize": 13,
               "fontWeight": "600"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "btihQ",
+      "x": 920,
+      "y": 746,
+      "name": "BmApp Launcher Icon 512",
+      "clip": true,
+      "width": 512,
+      "height": 512,
+      "fill": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "enabled": true,
+        "rotation": 143.5,
+        "size": {
+          "height": 1
+        },
+        "colors": [
+          {
+            "color": "#FACC15",
+            "position": 0
+          },
+          {
+            "color": "#F59E0B",
+            "position": 1
+          }
+        ]
+      },
+      "cornerRadius": 108,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "cQLbh",
+          "x": 0,
+          "y": 0,
+          "name": "Foreground Symbol",
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+            "mode": "fit"
+          },
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "T9t1z3",
+      "x": 920,
+      "y": 1338,
+      "name": "BmApp Feature Graphic 1024x500",
+      "clip": true,
+      "width": 1024,
+      "height": 500,
+      "fill": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "enabled": true,
+        "rotation": 145,
+        "size": {
+          "height": 1
+        },
+        "colors": [
+          {
+            "color": "#0B1220",
+            "position": 0
+          },
+          {
+            "color": "#1E3A8A",
+            "position": 1
+          }
+        ]
+      },
+      "cornerRadius": 40,
+      "layout": "none",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "ORUkZ",
+          "x": -140,
+          "y": -120,
+          "name": "Glow Left",
+          "fill": "#FACC1533",
+          "width": 420,
+          "height": 420,
+          "effect": {
+            "type": "blur",
+            "radius": 40
+          }
+        },
+        {
+          "type": "ellipse",
+          "id": "Q3s27",
+          "x": 700,
+          "y": -180,
+          "name": "Glow Right",
+          "fill": "#2563EB66",
+          "width": 500,
+          "height": 500,
+          "effect": {
+            "type": "blur",
+            "radius": 48
+          }
+        },
+        {
+          "type": "frame",
+          "id": "q7fI2r",
+          "x": 88,
+          "y": 88,
+          "name": "Logo Badge",
+          "clip": true,
+          "width": 136,
+          "height": 136,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 150,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#FACC15",
+                "position": 0
+              },
+              {
+                "color": "#F59E0B",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 32,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "PcF3q",
+              "x": 8,
+              "y": 8,
+              "name": "Logo Symbol",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+                "mode": "fit"
+              },
+              "width": 120,
+              "height": 120
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "tM9va",
+          "x": 248,
+          "y": 98,
+          "name": "App Name",
+          "fill": "#FFFFFF",
+          "content": "BmApp",
+          "fontFamily": "Inter",
+          "fontSize": 96,
+          "fontWeight": "800"
+        },
+        {
+          "type": "text",
+          "id": "ASQMW",
+          "x": 252,
+          "y": 220,
+          "name": "Tagline",
+          "fill": "#DCE6FF",
+          "textGrowth": "fixed-width",
+          "width": 360,
+          "content": "Gestiona consumo, pagos y alertas de energia en un solo lugar.",
+          "lineHeight": 1.2,
+          "fontFamily": "Inter",
+          "fontSize": 30,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "pmll6",
+          "x": 620,
+          "y": 54,
+          "name": "Dashboard Card",
+          "width": 338,
+          "height": 392,
+          "fill": "#FFFFFF12",
+          "cornerRadius": 26,
+          "stroke": "#FFFFFF26",
+          "strokeWidth": 1,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000055",
+            "offset": {
+              "x": 0,
+              "y": 20
+            },
+            "blur": 40
+          },
+          "layout": "vertical",
+          "gap": 14,
+          "padding": 20,
+          "children": [
+            {
+              "type": "text",
+              "id": "SoGY6",
+              "name": "Card Title",
+              "fill": "#FFFFFF",
+              "content": "Resumen rapido",
+              "fontFamily": "Inter",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "kR6rf",
+              "name": "Metric Row",
+              "width": "fill_container",
+              "height": 110,
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vL1nT",
+                  "name": "Metric Consumption",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "#0F172A99",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": 12,
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qaKyh",
+                      "name": "Consumption Value",
+                      "fill": "#FACC15",
+                      "content": "42 kWh",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "800"
+                    },
+                    {
+                      "type": "text",
+                      "id": "xZmVi",
+                      "name": "Consumption Label",
+                      "fill": "#C8D4FF",
+                      "content": "Consumo hoy",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hmQPq",
+                  "name": "Metric Savings",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "#0F172A99",
+                  "cornerRadius": 14,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": 12,
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "EurUD",
+                      "name": "Savings Value",
+                      "fill": "#22C55E",
+                      "content": "-18%",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "800"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Gsryd",
+                      "name": "Savings Label",
+                      "fill": "#C8D4FF",
+                      "content": "Ahorro",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "O0k8p",
+              "name": "Chart Area",
+              "width": "fill_container",
+              "height": 160,
+              "fill": "#0F172A99",
+              "cornerRadius": 14,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 12,
+              "justifyContent": "end",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "EyrDJ",
+                  "name": "Chart Label",
+                  "fill": "#C8D4FF",
+                  "content": "Ultimos 7 dias",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "MOVAh",
+                  "name": "Bar Row",
+                  "width": "fill_container",
+                  "height": 98,
+                  "gap": 8,
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "GwNNm",
+                      "name": "Bar Lun",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "i8MjN",
+                          "name": "Value Lun",
+                          "fill": "#FACC15",
+                          "width": "fill_container",
+                          "height": 52
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lzUG1",
+                      "name": "Bar Mar",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "I4DHz",
+                          "name": "Value Mar",
+                          "fill": "#FACC15",
+                          "width": "fill_container",
+                          "height": 74
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ikCAG",
+                      "name": "Bar Mie",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "OCIbH",
+                          "name": "Value Mie",
+                          "fill": "#FACC15",
+                          "width": "fill_container",
+                          "height": 38
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Y7ouFf",
+                      "name": "Bar Jue",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "GlKFA",
+                          "name": "Value Jue",
+                          "fill": "#FACC15",
+                          "width": "fill_container",
+                          "height": 80
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "zuYlW",
+                      "name": "Bar Vie",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "FPEyw",
+                          "name": "Value Vie",
+                          "fill": "#FACC15",
+                          "width": "fill_container",
+                          "height": 62
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LSRT0",
+                      "name": "Bar Sab",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "byJDd",
+                          "name": "Value Sab",
+                          "fill": "#FACC15",
+                          "width": "fill_container",
+                          "height": 44
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZhCwS",
+                      "name": "Bar Dom",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "v9Jlt",
+                          "name": "Value Dom",
+                          "fill": "#FACC15",
+                          "width": "fill_container",
+                          "height": 70
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
