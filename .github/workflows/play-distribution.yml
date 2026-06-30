@@ -63,7 +63,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: com.briel.marnisos.brielapp
+          packageName: com.briel.marnisos.powerapp
           releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
           track: ${{ inputs.track || 'internal' }}
           status: completed

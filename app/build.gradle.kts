@@ -52,7 +52,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.briel.marnisos.brielapp"
+        applicationId = "com.briel.marnisos.powerapp"
         minSdk = 27
         targetSdk = 36
         versionCode = resolvedVersionCode

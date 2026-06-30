@@ -45,7 +45,7 @@ jobs:
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           # PowerApp Dev (Firebase project brielmarnysos-1dc68)
-          appId: 1:939713844198:android:0b3d49a9e7fba7e2643c27
+          appId: ${{ secrets.FIREBASE_APP_ID_POWERAPP_DEV }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BRIELMARNYSOS }}
           groups: internal-testers
           file: app/build/outputs/apk/dev/debug/app-dev-debug.apk
