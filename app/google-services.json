@@ -96,6 +96,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "939713844198-nsoo3f4epe4qif91sbqbrbd41mgprj3n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.briel.marnisos.powerapp",
+            "certificate_hash": "ad10847ff84790d31a8c165bcfa7017c58582876"
+          }
+        },
+        {
           "client_id": "939713844198-sa2h6736fajde4kdp9g5t8ki5sjv73m3.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
