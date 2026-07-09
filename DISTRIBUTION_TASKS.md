@@ -151,7 +151,7 @@ Will be addressed during Docker containerization rollout (`MULTI_ENV_DEPLOYMENT.
 Current state:
 - `prod` → `http://217.154.181.175:8081/api/v1` ✅
 - `dev` → `http://217.154.181.175:8081/api/v1` ⚠️ **TEMP, points at prod** (QA backend on 9081 not deployed yet)
-- `local` → `http://10.0.2.2:8081/api/v1` ✅
+- `local` → `http://127.0.0.1:8081/api/v1` ✅ (requires `adb reverse tcp:8081 tcp:8081`; avoids VPN breaking the emulator's 10.0.2.2 alias)
 
 ### 5.1 — Deploy QA backend (deferred)
 Follow `MULTI_ENV_DEPLOYMENT.md` Phase 1 (local Docker Compose) and Phase 2 (VPS rollout). Verify with:
