@@ -2,6 +2,7 @@ package com.briel.marnisos.brielapp.data.di
 
 import android.content.Context
 import com.briel.marnisos.brielapp.data.local.CurrentUserConditionsLocalDataSource
+import com.briel.marnisos.brielapp.data.local.DeviceIdLocalDataSource
 import com.briel.marnisos.brielapp.data.local.LastCompletedJobIdLocalDataSource
 import com.briel.marnisos.brielapp.data.network.AuthApi
 import com.briel.marnisos.brielapp.data.network.KtorClientProvider
@@ -14,6 +15,7 @@ import com.briel.marnisos.brielapp.domain.repository.AuthRepository
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GetDeviceIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetFirebaseIdTokenUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobResultUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetJobStatusUseCase
@@ -51,6 +53,7 @@ val dataModule = module {
     // Local persistence
     single { LastCompletedJobIdLocalDataSource(context = get<Context>()) }
     single { CurrentUserConditionsLocalDataSource(context = get<Context>()) }
+    single { DeviceIdLocalDataSource(context = get<Context>()) }
 
     // Provide repository
     single<Repository> { buildRepository(get(), get(), get()) }
@@ -82,6 +85,7 @@ val dataModule = module {
     factory<LoginWithGoogleUseCase> { LoginWithGoogleUseCase.Factory.create(get()) }
     factory<GetCurrentAuthUserUseCase> { GetCurrentAuthUserUseCase.Factory.create(get()) }
     factory<GetFirebaseIdTokenUseCase> { GetFirebaseIdTokenUseCase.Factory.create(get()) }
+    factory<GetDeviceIdUseCase> { GetDeviceIdUseCase.Factory.create(get()) }
     factory<SyncAuthenticatedUserDataUseCase> { SyncAuthenticatedUserDataUseCase.Factory.create(get()) }
     factory<LogoutUseCase> { LogoutUseCase.Factory.create(get()) }
 }

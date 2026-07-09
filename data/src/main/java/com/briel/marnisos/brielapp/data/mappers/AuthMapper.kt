@@ -17,5 +17,6 @@ fun AuthUserModel.toDto(): UserDataPayloadDto = UserDataPayloadDto(
     email = email,
     displayName = displayName,
     photoURL = photoUrl,
-    providerIds = providerIds
+    providerIds = providerIds,
+    phoneUuid = phoneUuid
 )

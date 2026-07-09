@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.briel.marnisos.brielapp.monitoring.CrashErrorCategory
 import com.briel.marnisos.brielapp.monitoring.CrashReporter
+import com.briel.marnisos.brielapp.domain.error.AccessDeniedException
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GetDeviceIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetFirebaseIdTokenUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithGoogleUseCase
@@ -23,6 +25,7 @@ class AuthViewModel(
     private val loginWithGoogleUseCase: LoginWithGoogleUseCase,
     private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase,
     private val getFirebaseIdTokenUseCase: GetFirebaseIdTokenUseCase,
+    private val getDeviceIdUseCase: GetDeviceIdUseCase,
     private val syncAuthenticatedUserDataUseCase: SyncAuthenticatedUserDataUseCase,
     private val setUserOfflineUseCase: SetUserOfflineUseCase,
     private val clearCurrentUserConditionsUseCase: ClearCurrentUserConditionsUseCase,
@@ -76,25 +79,14 @@ class AuthViewModel(
                 return@launch
             }
 
-            syncAuthenticatedUserDataUseCase(idToken = token, userData = user)
+            val userWithDevice = user.copy(phoneUuid = getDeviceIdUseCase())
+            syncAuthenticatedUserDataUseCase(idToken = token, userData = userWithDevice)
                 .onSuccess {
                     _uiState.update { current ->
                         current.copy(isAuthenticated = true, isLoading = false, errorMessage = null)
                     }
                 }
-                .onFailure { error ->
-                    crashReporter.recordNonFatal(
-                        throwable = error,
-                        category = CrashErrorCategory.BACKEND,
-                        operation = "sync_authenticated_user_data",
-                    )
-                    _uiState.update { current ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Failed to sync user data"
-                        )
-                    }
-                }
+                .onFailure { error -> handleSyncFailure(error) }
         }
     }
 
@@ -137,25 +129,14 @@ class AuthViewModel(
                 return@launch
             }
 
-            syncAuthenticatedUserDataUseCase(idToken = token, userData = user)
+            val userWithDevice = user.copy(phoneUuid = getDeviceIdUseCase())
+            syncAuthenticatedUserDataUseCase(idToken = token, userData = userWithDevice)
                 .onSuccess {
                     _uiState.update { current ->
                         current.copy(isAuthenticated = true, isLoading = false, errorMessage = null)
                     }
                 }
-                .onFailure { error ->
-                    crashReporter.recordNonFatal(
-                        throwable = error,
-                        category = CrashErrorCategory.BACKEND,
-                        operation = "sync_authenticated_user_data",
-                    )
-                    _uiState.update { current ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Failed to sync user data"
-                        )
-                    }
-                }
+                .onFailure { error -> handleSyncFailure(error) }
         }
     }
 
@@ -214,6 +195,36 @@ class AuthViewModel(
         }
     }
 
+    private suspend fun handleSyncFailure(error: Throwable) {
+        if (error is AccessDeniedException) {
+            // Expected authorization rejection (allowlist / device binding).
+            // The Firebase credential is valid, so we must sign the user out;
+            // otherwise they would be auto-authenticated on the next launch and
+            // bypass this check. Then surface a contact-administration message.
+            runCatching { logoutUseCase() }
+            _uiState.update { current ->
+                current.copy(
+                    isAuthenticated = false,
+                    isLoading = false,
+                    errorMessage = ACCESS_DENIED_MESSAGE
+                )
+            }
+            return
+        }
+
+        crashReporter.recordNonFatal(
+            throwable = error,
+            category = CrashErrorCategory.BACKEND,
+            operation = "sync_authenticated_user_data",
+        )
+        _uiState.update { current ->
+            current.copy(
+                isLoading = false,
+                errorMessage = error.message ?: "Failed to sync user data"
+            )
+        }
+    }
+
     private fun mapLoginError(error: Throwable): String {
         val message = error.message.orEmpty().lowercase()
         return when {
@@ -222,5 +233,10 @@ class AuthViewModel(
             "too-many-requests" in message || "too many requests" in message -> "Too many attempts. Please try later"
             else -> error.message ?: "Unexpected error while logging in"
         }
+    }
+
+    private companion object {
+        private const val ACCESS_DENIED_MESSAGE =
+            "Esta cuenta no está autorizada para acceder. Contacta con el equipo de administración."
     }
 }

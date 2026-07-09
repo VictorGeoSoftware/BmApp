@@ -17,8 +17,13 @@ android {
     productFlavors {
         create("local") {
             dimension = "environment"
-            // 10.0.2.2 is the Android emulator alias for the host machine's localhost.
-            buildConfigField("String", "API_BASE_URL", "\"http://10.42.0.1:8081/api/v1\"")
+            // Requires: adb reverse tcp:8081 tcp:8081 (run once per device/emulator boot).
+            // We use 127.0.0.1 over the adb tunnel instead of the emulator's 10.0.2.2 alias
+            // because a full-tunnel VPN on the host breaks 10.0.2.2 -> host loopback. The adb
+            // reverse tunnel rides over adb (not the IP network), so it survives the VPN and
+            // also works on physical devices. Use 127.0.0.1 (not localhost, which may resolve
+            // to IPv6 ::1, which adb reverse does not bind).
+            buildConfigField("String", "API_BASE_URL", "\"http://127.0.0.1:8081/api/v1\"")
         }
         create("dev") {
             dimension = "environment"

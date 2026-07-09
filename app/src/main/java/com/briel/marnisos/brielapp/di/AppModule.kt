@@ -55,6 +55,7 @@ val appModule = module {
             loginWithGoogleUseCase = get(),
             getCurrentAuthUserUseCase = get(),
             getFirebaseIdTokenUseCase = get(),
+            getDeviceIdUseCase = get(),
             syncAuthenticatedUserDataUseCase = get(),
             setUserOfflineUseCase = get(),
             clearCurrentUserConditionsUseCase = get(),
