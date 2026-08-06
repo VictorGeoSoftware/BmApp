@@ -15,6 +15,7 @@ import com.briel.marnisos.brielapp.domain.usecases.LoginWithGoogleUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SetUserOfflineUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SyncAuthenticatedUserDataUseCase
+import com.briel.marnisos.brielapp.notifications.ForceLogoutEventBus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -38,6 +39,22 @@ class AuthViewModel(
         AuthUiState(isAuthenticated = getCurrentAuthUserUseCase() != null)
     )
     val uiState: StateFlow<AuthUiState> = _uiState
+
+    init {
+        // The FCM force-logout handler has already signed the user out
+        // locally; here we just move the UI back to the login screen.
+        viewModelScope.launch {
+            ForceLogoutEventBus.events.collect {
+                _uiState.update { current ->
+                    current.copy(
+                        isAuthenticated = false,
+                        isLoading = false,
+                        errorMessage = ACCESS_REVOKED_MESSAGE
+                    )
+                }
+            }
+        }
+    }
 
     fun loginWithEmail(email: String, password: String) {
         viewModelScope.launch {
@@ -238,5 +255,7 @@ class AuthViewModel(
     private companion object {
         private const val ACCESS_DENIED_MESSAGE =
             "Esta cuenta no está autorizada para acceder. Contacta con el equipo de administración."
+        private const val ACCESS_REVOKED_MESSAGE =
+            "Tu acceso ha sido revocado. Contacta con el equipo de administración."
     }
 }

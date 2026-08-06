@@ -9,4 +9,11 @@ interface AuthRepository {
     suspend fun syncUserData(idToken: String, userData: AuthUserModel): Result<Unit>
     fun getCurrentUser(): AuthUserModel?
     suspend fun logout()
+
+    /**
+     * Signs the user out of Firebase locally, without notifying the backend.
+     * Used when the backend has already revoked and wiped the account (any
+     * authenticated call would fail or recreate deleted data).
+     */
+    fun signOutLocally()
 }
