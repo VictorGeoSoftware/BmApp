@@ -61,4 +61,8 @@ class AuthRepositoryImpl(
         }
         firebaseAuth.signOut()
     }
+
+    override fun signOutLocally() {
+        firebaseAuth.signOut()
+    }
 }

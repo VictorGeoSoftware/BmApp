@@ -26,6 +26,7 @@ import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUs
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithGoogleUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SignOutLocallyUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.IncrementProposalResponseCounterUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistCurrentUserConditionsUseCase
@@ -88,4 +89,5 @@ val dataModule = module {
     factory<GetDeviceIdUseCase> { GetDeviceIdUseCase.Factory.create(get()) }
     factory<SyncAuthenticatedUserDataUseCase> { SyncAuthenticatedUserDataUseCase.Factory.create(get()) }
     factory<LogoutUseCase> { LogoutUseCase.Factory.create(get()) }
+    factory<SignOutLocallyUseCase> { SignOutLocallyUseCase.Factory.create(get()) }
 }

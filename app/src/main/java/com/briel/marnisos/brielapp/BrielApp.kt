@@ -59,6 +59,11 @@ class BrielApp : Application() {
                     .subscribeToTopic(PRICE_UPDATES_TOPIC)
                     .await()
                 AppLogger.i(TAG, "Subscribed to FCM topic: $PRICE_UPDATES_TOPIC")
+
+                FirebaseMessaging.getInstance()
+                    .subscribeToTopic(FORCE_LOGOUT_TOPIC)
+                    .await()
+                AppLogger.i(TAG, "Subscribed to FCM topic: $FORCE_LOGOUT_TOPIC")
             } catch (e: Exception) {
                 AppLogger.e(TAG, "FCM initialization failed", e)
             }
@@ -81,5 +86,6 @@ class BrielApp : Application() {
     companion object {
         private const val TAG = "BrielApp"
         private const val PRICE_UPDATES_TOPIC = "price_updates"
+        private const val FORCE_LOGOUT_TOPIC = "force_logout"
     }
 }
