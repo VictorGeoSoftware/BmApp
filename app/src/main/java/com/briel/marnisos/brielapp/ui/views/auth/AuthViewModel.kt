@@ -223,7 +223,7 @@ class AuthViewModel(
                 current.copy(
                     isAuthenticated = false,
                     isLoading = false,
-                    errorMessage = ACCESS_DENIED_MESSAGE
+                    errorMessage = error.message?.takeIf { it.isNotBlank() } ?: ACCESS_DENIED_MESSAGE
                 )
             }
             return

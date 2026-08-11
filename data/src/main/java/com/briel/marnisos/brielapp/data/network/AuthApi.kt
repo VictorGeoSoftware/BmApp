@@ -1,5 +1,6 @@
 package com.briel.marnisos.brielapp.data.network
 
+import com.briel.marnisos.brielapp.data.model.ErrorResponseDto
 import com.briel.marnisos.brielapp.data.model.auth.UserDataPayloadDto
 import com.briel.marnisos.brielapp.domain.error.AccessDeniedException
 import io.ktor.client.HttpClient
@@ -10,6 +11,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import kotlinx.serialization.json.Json
 
 class AuthApi(
     private val client: HttpClient = KtorClientProvider.client,
@@ -25,7 +27,7 @@ class AuthApi(
             if (!response.status.isSuccess()) {
                 val responseBody = response.bodyAsText()
                 if (response.status == HttpStatusCode.Forbidden) {
-                    return Result.failure(AccessDeniedException(responseBody.ifBlank { null }))
+                    return Result.failure(AccessDeniedException(parseErrorMessage(responseBody)))
                 }
                 return Result.failure(
                     IllegalStateException(responseBody.ifBlank { "Failed to sync user data" })
@@ -54,5 +56,16 @@ class AuthApi(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private fun parseErrorMessage(responseBody: String): String? {
+        if (responseBody.isBlank()) return null
+        return runCatching {
+            errorJson.decodeFromString<ErrorResponseDto>(responseBody).message
+        }.getOrNull()?.ifBlank { null }
+    }
+
+    private companion object {
+        private val errorJson = Json { ignoreUnknownKeys = true }
     }
 }
