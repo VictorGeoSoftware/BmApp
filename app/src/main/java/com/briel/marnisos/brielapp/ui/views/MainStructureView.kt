@@ -85,6 +85,7 @@ fun MainView(
     val customerConditionsUiState by comparatorViewModel.customerConditionsUiState.collectAsState()
     val supplyHolder by comparatorViewModel.supplyHolder.collectAsState()
     val supplyAddress by comparatorViewModel.supplyAddress.collectAsState()
+    val supplyCupsCode by comparatorViewModel.supplyCupsCode.collectAsState()
 
     val context = LocalContext.current
     val pdfShareManager = remember { ComparatorPdfShareManager() }
@@ -119,6 +120,7 @@ fun MainView(
         customerConditionsUiState = customerConditionsUiState,
         supplyHolder = supplyHolder,
         supplyAddress = supplyAddress,
+        supplyCupsCode = supplyCupsCode,
         onBeforeFetchPriceProposals = comparatorViewModel::resetCurrentUserConditionsAndProposals,
         onPdfSelected = { pdfFile ->
             comparatorViewModel.uploadConsumptionReport(pdfFile)
@@ -165,6 +167,7 @@ fun MainStructureView(
     customerConditionsUiState: CustomerConditionsUiState,
     supplyHolder: String = "",
     supplyAddress: String = "",
+    supplyCupsCode: String = "",
     onProposalFixedAmountChanged: (proposalTitle: String, fixedAmountInput: String) -> Unit = { _, _ -> },
     onProposalVisibilityChanged: (proposalTitle: String, isVisible: Boolean) -> Unit = { _, _ -> },
     onCopyProposalToCurrentConditions: (proposalTitle: String) -> Unit = {},
@@ -286,6 +289,7 @@ fun MainStructureView(
                         hasFetchedProposalData = hasFetchedProposalData,
                         supplyHolder = supplyHolder,
                         supplyAddress = supplyAddress,
+                        supplyCupsCode = supplyCupsCode,
                         onSupplyHolderChanged = onSupplyHolderChanged,
                         onSupplyAddressChanged = onSupplyAddressChanged,
                         onCopyCurrentConditionsClicked = {

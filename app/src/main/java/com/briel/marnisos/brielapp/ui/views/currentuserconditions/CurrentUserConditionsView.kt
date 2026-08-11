@@ -47,6 +47,7 @@ fun CurrentUserConditionsView(
     hasFetchedProposalData: Boolean,
     supplyHolder: String,
     supplyAddress: String,
+    supplyCupsCode: String,
     onSupplyHolderChanged: (String) -> Unit,
     onSupplyAddressChanged: (String) -> Unit,
     onCopyCurrentConditionsClicked: () -> Unit = {},
@@ -67,6 +68,7 @@ fun CurrentUserConditionsView(
         uiState = uiState,
         supplyHolder = supplyHolder,
         supplyAddress = supplyAddress,
+        supplyCupsCode = supplyCupsCode,
         onSupplyHolderChanged = onSupplyHolderChanged,
         onSupplyAddressChanged = onSupplyAddressChanged,
         onCopyCurrentConditionsClicked = onCopyCurrentConditionsClicked,
@@ -83,6 +85,7 @@ private fun CurrentUserConditionsMainView(
     uiState: CurrentUserConditionsFormState,
     supplyHolder: String,
     supplyAddress: String,
+    supplyCupsCode: String,
     onSupplyHolderChanged: (String) -> Unit,
     onSupplyAddressChanged: (String) -> Unit,
     onCopyCurrentConditionsClicked: () -> Unit,
@@ -143,6 +146,11 @@ private fun CurrentUserConditionsMainView(
                     value = supplyAddress,
                     onValueChanged = onSupplyAddressChanged,
                     placeholderText = stringResource(R.string.current_user_conditions_customer_data_placeholder),
+                )
+
+                CustomerDataReadOnlyRow(
+                    label = stringResource(R.string.current_user_conditions_cups_label),
+                    value = supplyCupsCode,
                 )
             }
         )
@@ -358,6 +366,7 @@ private fun CurrentUserConditionsPreviewWithData() {
             ),
             supplyHolder = "John Doe",
             supplyAddress = "123 Main Street",
+            supplyCupsCode = "ES0031607515707001RC",
             onSupplyHolderChanged = {},
             onSupplyAddressChanged = {},
             onCopyCurrentConditionsClicked = {},
@@ -378,12 +387,45 @@ private fun CurrentUserConditionsPreviewEmptyState() {
             uiState = CurrentUserConditionsFormState(),
             supplyHolder = "",
             supplyAddress = "",
+            supplyCupsCode = "",
             onSupplyHolderChanged = {},
             onSupplyAddressChanged = {},
             onCopyCurrentConditionsClicked = {},
             onPowerTermValueChanged = { _, _ -> },
             onEnergyValueChanged = { _, _ -> },
             onExtraServicesChanged = {},
+        )
+    }
+}
+
+@Composable
+private fun CustomerDataReadOnlyRow(
+    label: String,
+    value: String,
+) {
+    val colors = extendedColors
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = label,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.tableText,
+        )
+
+        Text(
+            modifier = Modifier.weight(2f),
+            text = value,
+            textAlign = TextAlign.Center,
+            fontSize = 16.sp,
+            color = colors.tableText,
         )
     }
 }
