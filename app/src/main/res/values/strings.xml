@@ -8,6 +8,7 @@
     <string name="current_user_conditions_customer_data_title">DATOS DEL CLIENTE</string>
     <string name="current_user_conditions_supply_holder_label">Titular</string>
     <string name="current_user_conditions_supply_address_label">Dirección</string>
+    <string name="current_user_conditions_cups_label" translatable="false">CUPS</string>
     <string name="current_user_conditions_customer_data_placeholder">Introduce el dato</string>
     <string name="current_user_conditions_power_term_title">TÉRMINO DE POTENCIA</string>
     <string name="current_user_conditions_energy_consumed_title">ENERGÍA CONSUMIDA</string>

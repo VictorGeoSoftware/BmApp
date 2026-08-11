@@ -66,7 +66,6 @@ class ComparatorViewModel(
     private var baseProposalPriceModelList: List<ProposalPriceModel> = emptyList()
     private var cachedCurrentUserConditions: CurrentUserConditionsModel? = null
     private var customerTotalAnnualPriceValue: Double = 0.0
-    private var supplyCupsCode: String = ""
     private var isSupplyHolderOverriddenByUser: Boolean = false
     private var lastBackendSupplyHolder: String = ""
 
@@ -75,6 +74,9 @@ class ComparatorViewModel(
 
     private val _supplyAddress = MutableStateFlow(value = "")
     val supplyAddress: StateFlow<String> = _supplyAddress
+
+    private val _supplyCupsCode = MutableStateFlow(value = "")
+    val supplyCupsCode: StateFlow<String> = _supplyCupsCode
 
     private val _tariffName = MutableStateFlow(value = "")
     val tariffName: StateFlow<String> = _tariffName
@@ -224,7 +226,7 @@ class ComparatorViewModel(
         _supplyAddress.value = ""
         isSupplyHolderOverriddenByUser = false
         lastBackendSupplyHolder = ""
-        supplyCupsCode = ""
+        _supplyCupsCode.value = ""
         _proposalPriceModelList.value = emptyList()
         _proposalAnnualPriceDeltaByTitle.value = emptyMap()
         _proposalAnnualSavingsPercentageByTitle.value = emptyMap()
@@ -331,7 +333,7 @@ class ComparatorViewModel(
                 }
 
                 lastBackendSupplyHolder = backendSupplyHolder
-                supplyCupsCode = report.userData.cupsCode.ifBlank { report.consumptionData.cups }
+                _supplyCupsCode.value = report.userData.cupsCode.ifBlank { report.consumptionData.cups }
 
                 // Proposals now come directly from backend
                 ivaPercentFromBackend = report.iva
@@ -659,7 +661,7 @@ class ComparatorViewModel(
         return ComparatorReportPdfModel(
             supplyHolder = _supplyHolder.value.ifBlank { "--" },
             supplyAddress = _supplyAddress.value.ifBlank { "--" },
-            cups = supplyCupsCode.ifBlank { "--" },
+            cups = _supplyCupsCode.value.ifBlank { "--" },
             tariffName = _tariffName.value,
             powerTermRows = powerRows.map { row ->
                 ComparatorReportPeriodValueModel(period = row.first, value = row.second)
