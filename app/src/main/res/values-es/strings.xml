@@ -35,7 +35,7 @@
     <string name="fee_first_progress">%1$d de %2$d campos completados</string>
     <string name="current_user_conditions_extra_services_optional">SERVICIOS EXTRA (opcional)</string>
     <string name="current_user_conditions_copy_from_proposal">Copiar precios desde propuesta</string>
-    <string name="current_user_conditions_go_to_proposals">Ver propuestas</string>
+    <string name="current_user_conditions_go_to_proposals">Ir a las propuestas de precios</string>
     <string name="proposals_best_option_title">Mejor opción: %1$s</string>
     <string name="proposals_best_option_message">Ahorro estimado de %1$s\u00A0€ al año frente a sus condiciones actuales.</string>
     <string name="consumption_study_step_uploading_bill">Subiendo factura...</string>
@@ -54,4 +54,6 @@
     <string name="proposals_pdf_export_error">No se pudo generar el informe PDF.</string>
     <string name="fetch_consumption_headline">Selecciona primero una factura de luz para proceder al estudio</string>
     <string name="drawer_locked_hint_consumption">Carga una factura o escanea un CUPS para empezar el estudio.</string>
+    <string name="current_user_conditions_copy_prices_action">Copiar precios de una propuesta</string>
+    <string name="proposals_create_report">Crear informe</string>
 </resources>

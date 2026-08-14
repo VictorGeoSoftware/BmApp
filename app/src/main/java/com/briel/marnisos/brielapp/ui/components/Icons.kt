@@ -287,6 +287,22 @@ val CheckCircleIcon: ImageVector = strokeIcon(name = "CheckCircle") {
     }
 }
 
+/** Two offset sheets — copy the prices of an existing proposal. */
+val CopyIcon: ImageVector = strokeIcon(name = "Copy") {
+    strokedPath {
+        moveTo(9f, 9f)
+        horizontalLineTo(19f)
+        verticalLineTo(21f)
+        horizontalLineTo(9f)
+        close()
+    }
+    strokedPath {
+        moveTo(15f, 5f)
+        horizontalLineTo(5f)
+        verticalLineTo(17f)
+    }
+}
+
 /** Scan frame — start a study by reading the CUPS code. */
 val ScanIcon: ImageVector = strokeIcon(name = "Scan") {
     strokedPath {

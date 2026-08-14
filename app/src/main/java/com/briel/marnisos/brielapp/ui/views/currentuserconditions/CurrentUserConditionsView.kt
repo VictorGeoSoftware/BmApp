@@ -18,11 +18,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import com.briel.marnisos.brielapp.ui.components.CopyIcon
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
@@ -60,6 +67,7 @@ import org.koin.androidx.compose.koinViewModel
  */
 @Composable
 internal fun CurrentUserConditionsScreen(
+    onNavigateToProposals: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CurrentUserConditionsViewModel = koinViewModel(),
 ) {
@@ -119,6 +127,23 @@ internal fun CurrentUserConditionsScreen(
             onEnergyValueChanged = viewModel::onEnergyValueChanged,
             onExtraServicesChanged = viewModel::onExtraServicesChanged,
         )
+
+        // Once every price is in, the screen is done but nothing told the broker where to
+        // go next. The call to action only appears when the gate is actually open.
+        if (uiState.gate.isUnlocked) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                onClick = onNavigateToProposals,
+            ) {
+                Text(
+                    text = stringResource(R.string.current_user_conditions_go_to_proposals),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
     }
 }
 
@@ -131,7 +156,12 @@ private fun CopyProposalPricesSheet(
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        // The sheet ends with Cancel/Copy actions: a partially expanded sheet hides
+        // them below the fold, so it must open fully expanded.
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -370,29 +400,40 @@ private fun CurrentConditionsHeader(
 ) {
     val colors = extendedColors
 
-    Row(
+    Column(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         HeaderBox(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             text = title,
             background = colors.headerHighlight,
             corner = Corner,
         )
 
-        TextButton(
+        // Yellow is the section-label colour in this screen, so a yellow button read as a
+        // second label. Dark fill + pill shape + icon make it unmistakably a control.
+        Button(
             modifier = Modifier
-                .border(width = 1.dp, color = colors.sectionBorder, shape = RoundedCornerShape(Corner))
-                .background(colors.headerBackground, RoundedCornerShape(Corner)),
+                .fillMaxWidth()
+                .height(48.dp),
             onClick = onCopyClicked,
+            shape = RoundedCornerShape(percent = 50),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary,
+            ),
         ) {
+            Icon(
+                imageVector = CopyIcon,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = stringResource(R.string.current_user_conditions_copy_button),
+                text = stringResource(R.string.current_user_conditions_copy_prices_action),
                 style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.tableText,
+                fontWeight = FontWeight.Bold,
             )
         }
     }
