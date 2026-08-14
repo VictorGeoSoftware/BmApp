@@ -2,8 +2,8 @@ package com.briel.marnisos.brielapp.ui.views.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.briel.marnisos.brielapp.monitoring.CrashErrorCategory
-import com.briel.marnisos.brielapp.monitoring.CrashReporter
+import com.briel.marnisos.brielapp.domain.monitoring.CrashErrorCategory
+import com.briel.marnisos.brielapp.domain.monitoring.CrashReporter
 import com.briel.marnisos.brielapp.domain.error.AccessDeniedException
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase

@@ -6,7 +6,7 @@ import android.app.NotificationManager
 import com.briel.marnisos.brielapp.data.di.dataModule
 import com.briel.marnisos.brielapp.di.appModule
 import com.briel.marnisos.brielapp.logging.AppLogger
-import com.briel.marnisos.brielapp.monitoring.CrashReporter
+import com.briel.marnisos.brielapp.domain.monitoring.CrashReporter
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -1,51 +1,62 @@
 package com.briel.marnisos.brielapp.di
 
-import com.briel.marnisos.brielapp.monitoring.CrashReporter
+import com.briel.marnisos.brielapp.domain.monitoring.CrashReporter
 import com.briel.marnisos.brielapp.monitoring.FirebaseCrashReporter
+import com.briel.marnisos.brielapp.ui.views.AppShellViewModel
 import com.briel.marnisos.brielapp.ui.views.auth.AuthViewModel
+import com.briel.marnisos.brielapp.ui.views.configuration.ConfigurationViewModel
 import com.briel.marnisos.brielapp.ui.views.currentuserconditions.CurrentUserConditionsViewModel
-import com.briel.marnisos.brielapp.ui.views.pricetable.ComparatorViewModel
-import com.briel.marnisos.brielapp.ui.views.pricetable.ProposalCalculationHelper
+import com.briel.marnisos.brielapp.ui.views.fetchconsumption.FetchConsumptionViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfFileStore
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
+import com.briel.marnisos.brielapp.ui.views.proposals.ProposalsViewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.koin.core.module.dsl.viewModel
-
 import org.koin.dsl.module
 
 val appModule = module {
     single { FirebaseCrashlytics.getInstance() }
     single<CrashReporter> { FirebaseCrashReporter(crashlytics = get()) }
-    single { ProposalCalculationHelper() }
     single { ComparatorPdfFileStore(context = get()) }
     single { ComparatorPdfShareManager() }
 
     viewModel {
-        ComparatorViewModel(
-            submitConsumptionReportJobUseCase = get(),
-            submitConsumptionReportByCupsJobUseCase = get(),
-            getJobStatusUseCase = get(),
-            getJobResultUseCase = get(),
-            refreshConsumptionReportUseCase = get(),
-            persistLastCompletedJobIdUseCase = get(),
-            getLastCompletedJobIdUseCase = get(),
-            clearLastCompletedJobIdUseCase = get(),
-            clearCurrentUserConditionsUseCase = get(),
+        AppShellViewModel(
+            consumptionStudyRepository = get(),
+            priceUpdatesNotifier = get(),
+            observeFeeFirstGateUseCase = get(),
+        )
+    }
+
+    viewModel {
+        FetchConsumptionViewModel(
+            consumptionStudyRepository = get(),
+        )
+    }
+
+    viewModel {
+        CurrentUserConditionsViewModel(
+            consumptionSessionRepository = get(),
             observeCurrentUserConditionsUseCase = get(),
             persistCurrentUserConditionsUseCase = get(),
-            getCurrentAuthUserUseCase = get(),
-            incrementProposalResponseCounterUseCase = get(),
+            observeFeeFirstGateUseCase = get(),
+        )
+    }
+
+    viewModel {
+        ProposalsViewModel(
+            consumptionSessionRepository = get(),
+            observeCurrentUserConditionsUseCase = get(),
+            calculateComparatorSummaryUseCase = get(),
             generateComparatorReportPdfUseCase = get(),
-            proposalCalculationHelper = get(),
             comparatorPdfFileStore = get(),
             crashReporter = get(),
         )
     }
 
     viewModel {
-        CurrentUserConditionsViewModel(
-            observeCurrentUserConditionsUseCase = get(),
-            persistCurrentUserConditionsUseCase = get(),
+        ConfigurationViewModel(
+            consumptionSessionRepository = get(),
         )
     }
 

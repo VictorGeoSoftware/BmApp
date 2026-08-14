@@ -1,28 +1,37 @@
 package com.briel.marnisos.brielapp.ui.views.common
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import java.io.File
+import com.briel.marnisos.brielapp.R
+import com.briel.marnisos.brielapp.ui.components.ScanIcon
 
+/**
+ * Top bar of the authenticated shell.
+ *
+ * The scan shortcut is intentionally limited to the fetch-consumption destination
+ * (rule R7): exposing it everywhere let the broker wipe an in-progress study by
+ * accident.
+ */
 @Composable
 internal fun TopActionBar(
     isUploadingReport: Boolean,
     isGeneratingPdf: Boolean,
     showPrintButton: Boolean,
+    showScanShortcut: Boolean,
     onGeneratePdfClick: () -> Unit,
-    onPdfSelected: (File) -> Unit,
     onScanCupsSelected: () -> Unit,
-    context: Context,
     onOpenDrawer: () -> Unit,
 ) {
     Row(
@@ -41,21 +50,28 @@ internal fun TopActionBar(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (showPrintButton) {
                 PrintButton(
                     isGeneratingPdf = isGeneratingPdf,
-                    onGeneratePdfClick = onGeneratePdfClick
+                    onGeneratePdfClick = onGeneratePdfClick,
                 )
             }
 
-            SelectFileButton(
-                isUploadingReport = isUploadingReport,
-                onPdfSelected = onPdfSelected,
-                onScanCupsSelected = onScanCupsSelected,
-                context = context,
-            )
+            if (showScanShortcut) {
+                IconButton(
+                    onClick = onScanCupsSelected,
+                    enabled = !isUploadingReport,
+                ) {
+                    Icon(
+                        imageVector = ScanIcon,
+                        contentDescription = stringResource(R.string.fetch_consumption_scan_title),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+            }
         }
     }
 }

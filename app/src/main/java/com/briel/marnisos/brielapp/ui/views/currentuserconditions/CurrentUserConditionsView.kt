@@ -1,29 +1,41 @@
 package com.briel.marnisos.brielapp.ui.views.currentuserconditions
 
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,52 +43,180 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.briel.marnisos.brielapp.R
+import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
 import com.briel.marnisos.brielapp.ui.theme.Corner
 import com.briel.marnisos.brielapp.ui.theme.extendedColors
 import com.briel.marnisos.brielapp.ui.views.common.HeaderBox
 import com.briel.marnisos.brielapp.ui.views.common.SectionHeader
+import com.briel.marnisos.brielapp.ui.views.feefirst.FeeFirstGateBanner
 import org.koin.androidx.compose.koinViewModel
 
+/**
+ * The fee-first gate. Until every power and energy period holds a valid price, the
+ * proposals and configuration destinations stay locked.
+ */
 @Composable
-fun CurrentUserConditionsView(
+internal fun CurrentUserConditionsScreen(
     modifier: Modifier = Modifier,
-    powerPeriods: List<String>,
-    energyPeriods: List<String>,
-    hasFetchedProposalData: Boolean,
-    supplyHolder: String,
-    supplyAddress: String,
-    supplyCupsCode: String,
-    onSupplyHolderChanged: (String) -> Unit,
-    onSupplyAddressChanged: (String) -> Unit,
-    onCopyCurrentConditionsClicked: () -> Unit = {},
-    currentUserConditionsViewModel: CurrentUserConditionsViewModel = koinViewModel(),
+    viewModel: CurrentUserConditionsViewModel = koinViewModel(),
 ) {
-    val uiState by currentUserConditionsViewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var isCopySheetVisible by rememberSaveable { mutableStateOf(false) }
+    var selectedProposalTitle by rememberSaveable { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
-    LaunchedEffect(powerPeriods, energyPeriods) {
-        currentUserConditionsViewModel.ensurePeriods(
-            powerPeriods = powerPeriods,
-            energyPeriods = energyPeriods,
+    if (isCopySheetVisible) {
+        CopyProposalPricesSheet(
+            proposals = uiState.availableProposals,
+            selectedProposalTitle = selectedProposalTitle,
+            onProposalSelected = { title -> selectedProposalTitle = title },
+            onDismissRequest = { isCopySheetVisible = false },
+            onConfirm = {
+                val title = selectedProposalTitle ?: return@CopyProposalPricesSheet
+                viewModel.copyPricesFromProposal(title)
+                isCopySheetVisible = false
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.current_user_conditions_copy_success, title),
+                    Toast.LENGTH_SHORT,
+                ).show()
+            },
         )
     }
 
-    CurrentUserConditionsMainView(
-        modifier = modifier,
-        hasFetchedProposalData = hasFetchedProposalData,
-        uiState = uiState,
-        supplyHolder = supplyHolder,
-        supplyAddress = supplyAddress,
-        supplyCupsCode = supplyCupsCode,
-        onSupplyHolderChanged = onSupplyHolderChanged,
-        onSupplyAddressChanged = onSupplyAddressChanged,
-        onCopyCurrentConditionsClicked = onCopyCurrentConditionsClicked,
-        onPowerTermValueChanged = currentUserConditionsViewModel::onPowerTermValueChanged,
-        onEnergyValueChanged = currentUserConditionsViewModel::onEnergyValueChanged,
-        onExtraServicesChanged = currentUserConditionsViewModel::onExtraServicesChanged,
-    )
+    Column(modifier = modifier.fillMaxSize()) {
+        if (uiState.hasFetchedConsumption) {
+            FeeFirstGateBanner(
+                gate = uiState.gate,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
+            )
+        }
+
+        CurrentUserConditionsMainView(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            hasFetchedProposalData = uiState.hasFetchedConsumption,
+            uiState = uiState.form,
+            supplyHolder = uiState.supplyHolder,
+            supplyAddress = uiState.supplyAddress,
+            supplyCupsCode = uiState.supplyCupsCode,
+            onSupplyHolderChanged = viewModel::onSupplyHolderChanged,
+            onSupplyAddressChanged = viewModel::onSupplyAddressChanged,
+            onCopyCurrentConditionsClicked = {
+                if (!uiState.canCopyFromProposal) return@CurrentUserConditionsMainView
+                selectedProposalTitle = selectedProposalTitle
+                    ?.takeIf { selected ->
+                        uiState.availableProposals.any { it.proposalTitle == selected }
+                    }
+                    ?: uiState.availableProposals.first().proposalTitle
+                isCopySheetVisible = true
+            },
+            onPowerTermValueChanged = viewModel::onPowerTermValueChanged,
+            onEnergyValueChanged = viewModel::onEnergyValueChanged,
+            onExtraServicesChanged = viewModel::onExtraServicesChanged,
+        )
+    }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CopyProposalPricesSheet(
+    proposals: List<ProposalPriceModel>,
+    selectedProposalTitle: String?,
+    onProposalSelected: (String) -> Unit,
+    onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.current_user_conditions_copy_sheet_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+            )
+
+            Text(
+                text = stringResource(R.string.current_user_conditions_copy_sheet_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+            )
+
+            Text(
+                text = stringResource(R.string.current_user_conditions_copy_sheet_list_label),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 320.dp),
+            ) {
+                items(
+                    items = proposals,
+                    key = { proposal -> proposal.proposalTitle },
+                ) { proposal ->
+                    ListItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onProposalSelected(proposal.proposalTitle) },
+                        headlineContent = { Text(text = proposal.proposalTitle) },
+                        trailingContent = {
+                            RadioButton(
+                                selected = selectedProposalTitle == proposal.proposalTitle,
+                                onClick = null,
+                            )
+                        },
+                    )
+                }
+            }
+
+            Text(
+                text = stringResource(R.string.current_user_conditions_copy_sheet_helper),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onDismissRequest,
+                ) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onConfirm,
+                    enabled = selectedProposalTitle != null,
+                ) {
+                    Text(text = stringResource(R.string.current_user_conditions_copy_button))
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun CurrentUserConditionsMainView(

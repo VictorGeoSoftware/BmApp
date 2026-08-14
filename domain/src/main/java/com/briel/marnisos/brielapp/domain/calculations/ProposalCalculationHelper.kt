@@ -1,4 +1,4 @@
-package com.briel.marnisos.brielapp.ui.views.pricetable
+package com.briel.marnisos.brielapp.domain.calculations
 
 import com.briel.marnisos.brielapp.domain.models.ProposalPriceModel
 import kotlin.math.round

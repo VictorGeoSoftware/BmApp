@@ -36,4 +36,47 @@
     <string name="login_continue_with_google">Continue with Google</string>
     <string name="login_no_account">No account yet?</string>
     <string name="login_request_access">Request access</string>
+
+    <!-- Fee-first navigation flow -->
+    <string name="drawer_menu_title">Menu</string>
+    <string name="drawer_current_conditions">Current conditions</string>
+    <string name="drawer_proposals">Proposals</string>
+    <string name="drawer_configuration">Configuration</string>
+    <string name="drawer_new_study">New proposal study</string>
+    <string name="drawer_logout">Log out</string>
+    <string name="drawer_locked_hint">Complete the current prices to unlock.</string>
+    <string name="drawer_locked_content_description">Locked</string>
+    <string name="fetch_consumption_title">Fetch consumption</string>
+    <string name="fetch_consumption_subtitle">We need the real consumption before entering the current prices.</string>
+    <string name="fetch_consumption_method_label">CHOOSE A METHOD</string>
+    <string name="fetch_consumption_scan_title">Scan CUPS code</string>
+    <string name="fetch_consumption_scan_subtitle">Use the camera to read the code</string>
+    <string name="fetch_consumption_upload_title">Upload bill PDF</string>
+    <string name="fetch_consumption_upload_subtitle">We extract the data automatically</string>
+    <string name="fee_first_locked_banner_title">Proposals locked</string>
+    <string name="fee_first_locked_banner_message">Fill in every power and energy price to unlock the menu.</string>
+    <string name="fee_first_unlocked_banner_title">Navigation unlocked</string>
+    <string name="fee_first_unlocked_banner_message">You can now open Proposals and Configuration.</string>
+    <string name="fee_first_progress">%1$d of %2$d fields completed</string>
+    <string name="current_user_conditions_extra_services_optional">EXTRA SERVICES (optional)</string>
+    <string name="current_user_conditions_copy_from_proposal">Copy prices from proposal</string>
+    <string name="current_user_conditions_go_to_proposals">View proposals</string>
+    <string name="proposals_best_option_title">Best option: %1$s</string>
+    <string name="proposals_best_option_message">Estimated saving of %1$s\u00A0€ per year versus the current conditions.</string>
+    <string name="consumption_study_step_uploading_bill">Uploading bill...</string>
+    <string name="consumption_study_step_submitting_cups">Looking up CUPS...</string>
+    <string name="consumption_study_step_queued">Waiting in queue...</string>
+    <string name="consumption_study_step_processing">Analysing your bill...</string>
+    <string name="consumption_study_step_fetching_results">Fetching results...</string>
+    <string name="consumption_study_error_submit">The study could not be started. Please try again.</string>
+    <string name="consumption_study_error_processing">Processing failed. Please try again.</string>
+    <string name="consumption_study_error_status">Could not check the study status.</string>
+    <string name="consumption_study_error_result">Could not fetch the study results.</string>
+    <string name="consumption_study_error_timeout">The study timed out. Please try again.</string>
+    <string name="proposals_empty_message">No proposals to compare yet.</string>
+    <string name="configuration_title">Proposal visibility</string>
+    <string name="configuration_subtitle">Choose which proposals appear in the comparison and in the PDF report.</string>
+    <string name="proposals_pdf_export_error">The PDF report could not be generated.</string>
+    <string name="fetch_consumption_headline">Start by loading the customer\'s electricity bill</string>
+    <string name="drawer_locked_hint_consumption">Load a bill or scan a CUPS code to start the study.</string>
 </resources>

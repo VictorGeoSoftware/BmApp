@@ -1,5 +1,6 @@
 package com.briel.marnisos.brielapp.notifications
 
+import com.briel.marnisos.brielapp.domain.repository.PriceUpdatesNotifier
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
@@ -22,6 +23,7 @@ class BrielFirebaseMessagingService : FirebaseMessagingService(), KoinComponent 
     private val signOutLocallyUseCase: SignOutLocallyUseCase by inject()
     private val clearCurrentUserConditionsUseCase: ClearCurrentUserConditionsUseCase by inject()
     private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase by inject()
+    private val priceUpdatesNotifier: PriceUpdatesNotifier by inject()
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
@@ -59,7 +61,7 @@ class BrielFirebaseMessagingService : FirebaseMessagingService(), KoinComponent 
         when (data["type"]) {
             PRICE_UPDATES_TYPE -> {
                 serviceScope.launch {
-                    PriceUpdatesEventBus.publishPriceUpdate()
+                    priceUpdatesNotifier.publishPriceUpdate()
                     AppLogger.i(TAG, "Published in-app price update event from FCM")
                 }
             }

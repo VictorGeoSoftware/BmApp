@@ -8,12 +8,23 @@ import com.briel.marnisos.brielapp.data.network.AuthApi
 import com.briel.marnisos.brielapp.data.network.KtorClientProvider
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
 import com.briel.marnisos.brielapp.data.repository.AuthRepositoryImpl
+import com.briel.marnisos.brielapp.data.repository.ConsumptionSessionRepositoryImpl
+import com.briel.marnisos.brielapp.data.repository.ConsumptionStudyRepositoryImpl
+import com.briel.marnisos.brielapp.data.repository.PriceUpdatesNotifierImpl
 import com.briel.marnisos.brielapp.data.repository.Repository
 import com.briel.marnisos.brielapp.data.repository.buildRepository
 import com.briel.marnisos.brielapp.data.usecases.create
+import com.briel.marnisos.brielapp.domain.usecases.create as createDomainUseCase
+import com.briel.marnisos.brielapp.domain.calculations.ProposalCalculationHelper
 import com.briel.marnisos.brielapp.domain.repository.AuthRepository
+import com.briel.marnisos.brielapp.domain.repository.ConsumptionSessionRepository
+import com.briel.marnisos.brielapp.domain.repository.ConsumptionStudyRepository
+import com.briel.marnisos.brielapp.domain.repository.PriceUpdatesNotifier
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
+import com.briel.marnisos.brielapp.domain.usecases.CalculateComparatorSummaryUseCase
+import com.briel.marnisos.brielapp.domain.usecases.EvaluateFeeFirstGateUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ObserveFeeFirstGateUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetDeviceIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetFirebaseIdTokenUseCase
@@ -38,9 +49,18 @@ import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportJobUse
 import com.briel.marnisos.brielapp.domain.usecases.SubmitConsumptionReportByCupsJobUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SyncAuthenticatedUserDataUseCase
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val dataModule = module {
+    // Application-scoped coroutine scope for work that must outlive a screen.
+    single<CoroutineScope>(named(APPLICATION_SCOPE)) {
+        CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    }
+
     // Provide a singleton HttpClient from KtorClientProvider
     single { KtorClientProvider.client }
 
@@ -59,6 +79,17 @@ val dataModule = module {
     // Provide repository
     single<Repository> { buildRepository(get(), get(), get()) }
     single<AuthRepository> { AuthRepositoryImpl(firebaseAuth = get(), authApi = get()) }
+    single<ConsumptionSessionRepository> { ConsumptionSessionRepositoryImpl() }
+    single<PriceUpdatesNotifier> { PriceUpdatesNotifierImpl() }
+    single<ConsumptionStudyRepository> {
+        ConsumptionStudyRepositoryImpl(
+            repository = get(),
+            consumptionSessionRepository = get(),
+            authRepository = get(),
+            crashReporter = get(),
+            applicationScope = get(named(APPLICATION_SCOPE)),
+        )
+    }
 
     // Provide use cases
     factory<GetPriceTablesUseCase> { GetPriceTablesUseCase.Factory.create(get()) }
@@ -81,6 +112,20 @@ val dataModule = module {
     factory<ObserveCurrentUserConditionsUseCase> { ObserveCurrentUserConditionsUseCase.Factory.create(get()) }
     factory<PersistCurrentUserConditionsUseCase> { PersistCurrentUserConditionsUseCase.Factory.create(get()) }
 
+    // Fee-first gate
+    factory<EvaluateFeeFirstGateUseCase> { EvaluateFeeFirstGateUseCase.Factory.createDomainUseCase() }
+    single { ProposalCalculationHelper() }
+    factory<CalculateComparatorSummaryUseCase> {
+        CalculateComparatorSummaryUseCase.Factory.createDomainUseCase(proposalCalculationHelper = get())
+    }
+    factory<ObserveFeeFirstGateUseCase> {
+        ObserveFeeFirstGateUseCase.Factory.create(
+            repository = get(),
+            consumptionSessionRepository = get(),
+            evaluateFeeFirstGateUseCase = get(),
+        )
+    }
+
     // Auth use cases
     factory<LoginWithEmailUseCase> { LoginWithEmailUseCase.Factory.create(get()) }
     factory<LoginWithGoogleUseCase> { LoginWithGoogleUseCase.Factory.create(get()) }
@@ -91,3 +136,5 @@ val dataModule = module {
     factory<LogoutUseCase> { LogoutUseCase.Factory.create(get()) }
     factory<SignOutLocallyUseCase> { SignOutLocallyUseCase.Factory.create(get()) }
 }
+
+const val APPLICATION_SCOPE = "applicationScope"
