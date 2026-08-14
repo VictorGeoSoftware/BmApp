@@ -48,6 +48,7 @@ val appModule = module {
             consumptionSessionRepository = get(),
             observeCurrentUserConditionsUseCase = get(),
             calculateComparatorSummaryUseCase = get(),
+            selectUncompetitiveProposalsUseCase = get(),
             generateComparatorReportPdfUseCase = get(),
             comparatorPdfFileStore = get(),
             crashReporter = get(),

@@ -28,5 +28,17 @@ interface ConsumptionSessionRepository {
 
     fun setProposalFixedAmount(proposalTitle: String, fixedAmountInput: String)
 
+    /**
+     * Hides [proposalTitles] exactly as the Configuration screen would, but only the
+     * first time it is called for [signature].
+     *
+     * The one-shot guard is what makes the automatic hiding safe: the broker can
+     * re-enable any of those proposals in Configuration and the choice sticks, because
+     * the rule will not run again for the same study and the same customer prices.
+     * A new signature (new study, or edited prices) means the comparison changed, so
+     * re-applying is the correct behaviour.
+     */
+    fun hideProposalsOnce(signature: String, proposalTitles: Set<String>)
+
     fun clear()
 }

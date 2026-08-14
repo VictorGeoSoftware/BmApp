@@ -15,6 +15,7 @@ import com.briel.marnisos.brielapp.domain.repository.ConsumptionSessionRepositor
 import com.briel.marnisos.brielapp.domain.usecases.CalculateComparatorSummaryUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SelectUncompetitiveProposalsUseCase
 import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsUiState
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfFileStore
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,6 +34,7 @@ class ProposalsViewModel(
     private val consumptionSessionRepository: ConsumptionSessionRepository,
     private val observeCurrentUserConditionsUseCase: ObserveCurrentUserConditionsUseCase,
     private val calculateComparatorSummaryUseCase: CalculateComparatorSummaryUseCase,
+    private val selectUncompetitiveProposalsUseCase: SelectUncompetitiveProposalsUseCase,
     private val generateComparatorReportPdfUseCase: GenerateComparatorReportPdfUseCase,
     private val comparatorPdfFileStore: ComparatorPdfFileStore,
     private val crashReporter: CrashReporter,
@@ -60,6 +62,35 @@ class ProposalsViewModel(
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
         initialValue = ProposalsUiState(),
     )
+
+    init {
+        // Only while this screen is alive: arriving at Proposals is what applies the rule,
+        // and the repository guard keeps it to once per study + customer prices.
+        viewModelScope.launch {
+            combine(
+                consumptionSessionRepository.session,
+                observeCurrentUserConditionsUseCase(),
+                consumptionSessionRepository.proposalFixedAmountByTitle,
+            ) { session, conditions, fixedAmountByTitle ->
+                session?.jobId to calculateComparatorSummaryUseCase(
+                    session,
+                    conditions,
+                    fixedAmountByTitle,
+                )
+            }.collect { (jobId, summary) ->
+                hideUncompetitiveProposals(jobId, summary)
+            }
+        }
+    }
+
+    private fun hideUncompetitiveProposals(jobId: String?, summary: ComparatorSummaryModel) {
+        if (jobId == null || summary.proposals.isEmpty()) return
+
+        consumptionSessionRepository.hideProposalsOnce(
+            signature = "$jobId@${summary.customerTotalAnnualPrice}",
+            proposalTitles = selectUncompetitiveProposalsUseCase(summary),
+        )
+    }
 
     fun onProposalFixedAmountChanged(proposalTitle: String, fixedAmountInput: String) {
         consumptionSessionRepository.setProposalFixedAmount(proposalTitle, fixedAmountInput)

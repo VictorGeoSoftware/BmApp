@@ -17,6 +17,9 @@ import kotlinx.coroutines.flow.update
  */
 internal class ConsumptionSessionRepositoryImpl : ConsumptionSessionRepository {
 
+    /** Guards the automatic hiding so it runs once per study + customer-price combination. */
+    private var lastAutoHideSignature: String? = null
+
     private val _session = MutableStateFlow<ConsumptionSessionModel?>(value = null)
     override val session: StateFlow<ConsumptionSessionModel?> = _session.asStateFlow()
 
@@ -86,12 +89,27 @@ internal class ConsumptionSessionRepositoryImpl : ConsumptionSessionRepository {
         }
     }
 
+    override fun hideProposalsOnce(signature: String, proposalTitles: Set<String>) {
+        if (signature == lastAutoHideSignature) return
+        lastAutoHideSignature = signature
+
+        if (proposalTitles.isEmpty()) return
+
+        _proposalVisibilityByTitle.update { current ->
+            // Only touch titles the study actually returned, mirroring setProposalVisibility.
+            current + proposalTitles
+                .filter { title -> current.containsKey(title) }
+                .associateWith { false }
+        }
+    }
+
     override fun clear() {
         _session.value = null
         _proposalVisibilityByTitle.value = emptyMap()
         _proposalFixedAmountByTitle.value = emptyMap()
         isSupplyHolderOverriddenByUser = false
         lastBackendSupplyHolder = ""
+        lastAutoHideSignature = null
     }
 
     private fun synchronizeProposalOverrides(

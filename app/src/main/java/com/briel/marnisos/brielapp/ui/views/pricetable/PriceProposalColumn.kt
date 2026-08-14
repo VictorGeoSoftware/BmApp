@@ -149,7 +149,7 @@ private fun ProposalTitleView(content: String) {
 
     HeaderBox(
         modifier = Modifier.fillMaxWidth(),
-        text = content,
+        text = content.middleEllipsize(),
         background = colors.headerBackground,
         corner = Corner
     )
