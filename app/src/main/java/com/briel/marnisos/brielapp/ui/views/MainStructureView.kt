@@ -112,14 +112,9 @@ fun MainView(
                 .statusBarsPadding(),
         ) {
             TopActionBar(
-                isUploadingReport = shellState.isStudyRunning,
                 isGeneratingPdf = proposalsState.isGeneratingPdf,
                 showPrintButton = currentRoute == BmAppRoute.Proposals && proposalsState.hasProposals,
                 onGeneratePdfClick = proposalsViewModel::exportVisibleProposalsAsPdf,
-                showScanShortcut = currentRoute == BmAppRoute.FetchConsumption,
-                onScanCupsSelected = {
-                    navController.navigate(BmAppRoute.CupsScanner) { launchSingleTop = true }
-                },
                 onOpenDrawer = { scope.launch { drawerState.open() } },
             )
 

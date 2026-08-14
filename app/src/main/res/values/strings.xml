@@ -60,7 +60,7 @@
     <string name="fee_first_progress">%1$d of %2$d fields completed</string>
     <string name="current_user_conditions_extra_services_optional">EXTRA SERVICES (optional)</string>
     <string name="current_user_conditions_copy_from_proposal">Copy prices from proposal</string>
-    <string name="current_user_conditions_go_to_proposals">View proposals</string>
+    <string name="current_user_conditions_go_to_proposals">Go to price proposals</string>
     <string name="proposals_best_option_title">Best option: %1$s</string>
     <string name="proposals_best_option_message">Estimated saving of %1$s\u00A0€ per year versus the current conditions.</string>
     <string name="consumption_study_step_uploading_bill">Uploading bill...</string>
@@ -79,4 +79,6 @@
     <string name="proposals_pdf_export_error">The PDF report could not be generated.</string>
     <string name="fetch_consumption_headline">Start by loading the customer\'s electricity bill</string>
     <string name="drawer_locked_hint_consumption">Load a bill or scan a CUPS code to start the study.</string>
+    <string name="current_user_conditions_copy_prices_action">Copy prices from a proposal</string>
+    <string name="proposals_create_report">Create report</string>
 </resources>

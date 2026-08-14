@@ -4,34 +4,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.briel.marnisos.brielapp.R
-import com.briel.marnisos.brielapp.ui.components.ScanIcon
 
 /**
  * Top bar of the authenticated shell.
  *
- * The scan shortcut is intentionally limited to the fetch-consumption destination
- * (rule R7): exposing it everywhere let the broker wipe an in-progress study by
- * accident.
+ * Only the report action lives here, and only on the proposals screen. The scan
+ * shortcut was removed: the fetch-consumption screen already offers scanning as an
+ * explicit choice, so the duplicate in the top bar was noise (supersedes rule R7).
  */
 @Composable
 internal fun TopActionBar(
-    isUploadingReport: Boolean,
     isGeneratingPdf: Boolean,
     showPrintButton: Boolean,
-    showScanShortcut: Boolean,
     onGeneratePdfClick: () -> Unit,
-    onScanCupsSelected: () -> Unit,
     onOpenDrawer: () -> Unit,
 ) {
     Row(
@@ -57,20 +49,6 @@ internal fun TopActionBar(
                     isGeneratingPdf = isGeneratingPdf,
                     onGeneratePdfClick = onGeneratePdfClick,
                 )
-            }
-
-            if (showScanShortcut) {
-                IconButton(
-                    onClick = onScanCupsSelected,
-                    enabled = !isUploadingReport,
-                ) {
-                    Icon(
-                        imageVector = ScanIcon,
-                        contentDescription = stringResource(R.string.fetch_consumption_scan_title),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(22.dp),
-                    )
-                }
             }
         }
     }

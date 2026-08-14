@@ -71,7 +71,11 @@ internal fun BmAppNavHost(
         }
 
         composable<BmAppRoute.CurrentConditions> {
-            CurrentUserConditionsScreen()
+            CurrentUserConditionsScreen(
+                onNavigateToProposals = {
+                    navController.navigate(BmAppRoute.Proposals) { launchSingleTop = true }
+                },
+            )
         }
 
         composable<BmAppRoute.Proposals> {
