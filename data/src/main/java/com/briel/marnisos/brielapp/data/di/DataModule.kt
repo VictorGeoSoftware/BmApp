@@ -23,6 +23,7 @@ import com.briel.marnisos.brielapp.domain.repository.PriceUpdatesNotifier
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.CalculateComparatorSummaryUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SelectUncompetitiveProposalsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.EvaluateFeeFirstGateUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveFeeFirstGateUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
@@ -115,6 +116,7 @@ val dataModule = module {
     // Fee-first gate
     factory<EvaluateFeeFirstGateUseCase> { EvaluateFeeFirstGateUseCase.Factory.createDomainUseCase() }
     single { ProposalCalculationHelper() }
+    factory<SelectUncompetitiveProposalsUseCase> { SelectUncompetitiveProposalsUseCase() }
     factory<CalculateComparatorSummaryUseCase> {
         CalculateComparatorSummaryUseCase.Factory.createDomainUseCase(proposalCalculationHelper = get())
     }

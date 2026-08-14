@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
@@ -109,7 +110,11 @@ fun MainView(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .statusBarsPadding(),
+                .statusBarsPadding()
+                // Without this the last row sits under the gesture/navigation bar on
+                // devices with no physical bezel (Pixel 8). Insets adapt to the bar in
+                // use, so this is correct for both gesture and 3-button navigation.
+                .navigationBarsPadding(),
         ) {
             TopActionBar(
                 isGeneratingPdf = proposalsState.isGeneratingPdf,
