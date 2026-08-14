@@ -11,4 +11,47 @@
     <string name="login_continue_with_google">Continuar con Google</string>
     <string name="login_no_account">No tienes cuenta?</string>
     <string name="login_request_access">Solicitar acceso</string>
+
+    <!-- Flujo de navegacion fee-first -->
+    <string name="drawer_menu_title">Menú</string>
+    <string name="drawer_current_conditions">Condiciones actuales</string>
+    <string name="drawer_proposals">Propuestas</string>
+    <string name="drawer_configuration">Configuración</string>
+    <string name="drawer_new_study">Nuevo estudio de propuestas</string>
+    <string name="drawer_logout">Cerrar sesión</string>
+    <string name="drawer_locked_hint">Completa los precios actuales para desbloquear.</string>
+    <string name="drawer_locked_content_description">Bloqueado</string>
+    <string name="fetch_consumption_title">Obtener consumo</string>
+    <string name="fetch_consumption_subtitle">Necesitamos tu consumo real antes de introducir las condiciones actuales.</string>
+    <string name="fetch_consumption_method_label">ELIGE UN MÉTODO</string>
+    <string name="fetch_consumption_scan_title">Escanear código CUPS</string>
+    <string name="fetch_consumption_scan_subtitle">Usa la cámara para leer el código</string>
+    <string name="fetch_consumption_upload_title">Subir factura PDF</string>
+    <string name="fetch_consumption_upload_subtitle">Extraemos los datos automáticamente</string>
+    <string name="fee_first_locked_banner_title">Propuestas bloqueadas</string>
+    <string name="fee_first_locked_banner_message">Rellena todos los precios de potencia y energía para desbloquear el menú.</string>
+    <string name="fee_first_unlocked_banner_title">Navegación desbloqueada</string>
+    <string name="fee_first_unlocked_banner_message">Ya puedes consultar Propuestas y Configuración.</string>
+    <string name="fee_first_progress">%1$d de %2$d campos completados</string>
+    <string name="current_user_conditions_extra_services_optional">SERVICIOS EXTRA (opcional)</string>
+    <string name="current_user_conditions_copy_from_proposal">Copiar precios desde propuesta</string>
+    <string name="current_user_conditions_go_to_proposals">Ver propuestas</string>
+    <string name="proposals_best_option_title">Mejor opción: %1$s</string>
+    <string name="proposals_best_option_message">Ahorro estimado de %1$s\u00A0€ al año frente a sus condiciones actuales.</string>
+    <string name="consumption_study_step_uploading_bill">Subiendo factura...</string>
+    <string name="consumption_study_step_submitting_cups">Consultando CUPS...</string>
+    <string name="consumption_study_step_queued">Esperando en la cola...</string>
+    <string name="consumption_study_step_processing">Analizando tu factura...</string>
+    <string name="consumption_study_step_fetching_results">Obteniendo resultados...</string>
+    <string name="consumption_study_error_submit">No se pudo iniciar el estudio. Inténtalo de nuevo.</string>
+    <string name="consumption_study_error_processing">El procesamiento ha fallado. Inténtalo de nuevo.</string>
+    <string name="consumption_study_error_status">No se pudo comprobar el estado del estudio.</string>
+    <string name="consumption_study_error_result">No se pudieron obtener los resultados del estudio.</string>
+    <string name="consumption_study_error_timeout">El estudio ha tardado demasiado. Inténtalo de nuevo.</string>
+    <string name="proposals_empty_message">Aún no hay propuestas que comparar.</string>
+    <string name="configuration_title">Visibilidad de propuestas</string>
+    <string name="configuration_subtitle">Elige qué propuestas se muestran en la comparativa y en el informe PDF.</string>
+    <string name="proposals_pdf_export_error">No se pudo generar el informe PDF.</string>
+    <string name="fetch_consumption_headline">Selecciona primero una factura de luz para proceder al estudio</string>
+    <string name="drawer_locked_hint_consumption">Carga una factura o escanea un CUPS para empezar el estudio.</string>
 </resources>

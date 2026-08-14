@@ -1,5 +1,7 @@
 package com.briel.marnisos.brielapp.monitoring
 
+import com.briel.marnisos.brielapp.domain.monitoring.CrashErrorCategory
+import com.briel.marnisos.brielapp.domain.monitoring.CrashReporter
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 class FirebaseCrashReporter(

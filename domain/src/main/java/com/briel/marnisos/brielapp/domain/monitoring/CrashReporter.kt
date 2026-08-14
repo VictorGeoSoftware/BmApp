@@ -1,4 +1,4 @@
-package com.briel.marnisos.brielapp.monitoring
+package com.briel.marnisos.brielapp.domain.monitoring
 
 interface CrashReporter {
     fun setCollectionEnabled(enabled: Boolean)

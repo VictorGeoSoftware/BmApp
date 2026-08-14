@@ -3,153 +3,153 @@ package com.briel.marnisos.brielapp.ui.views.currentuserconditions
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.briel.marnisos.brielapp.domain.models.CurrentUserConditionsModel
+import com.briel.marnisos.brielapp.domain.repository.ConsumptionSessionRepository
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ObserveFeeFirstGateUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistCurrentUserConditionsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Locale
 
+/**
+ * Screen ViewModel for the fee-first gate.
+ *
+ * The persisted conditions are the single source of truth: every edit is written
+ * through the repository and flows back into the UI, so no local form copy is kept.
+ */
 class CurrentUserConditionsViewModel(
+    private val consumptionSessionRepository: ConsumptionSessionRepository,
     private val observeCurrentUserConditionsUseCase: ObserveCurrentUserConditionsUseCase,
     private val persistCurrentUserConditionsUseCase: PersistCurrentUserConditionsUseCase,
+    observeFeeFirstGateUseCase: ObserveFeeFirstGateUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CurrentUserConditionsFormState())
-    val uiState: StateFlow<CurrentUserConditionsFormState> = _uiState
+    private val latestConditions = MutableStateFlow<CurrentUserConditionsModel?>(value = null)
 
-    init {
-        viewModelScope.launch {
-            observeCurrentUserConditionsUseCase().collect { cachedConditions ->
-                cachedConditions ?: return@collect
+    val uiState: StateFlow<CurrentUserConditionsUiState> = combine(
+        consumptionSessionRepository.session,
+        observeCurrentUserConditionsUseCase(),
+        observeFeeFirstGateUseCase(),
+    ) { session, conditions, gate ->
+        latestConditions.value = conditions
 
-                _uiState.update { current ->
-                    current.copy(
-                        powerTermRows = mergeWithCurrentOrder(
-                            currentRows = current.powerTermRows,
-                            incomingValues = cachedConditions.powerTermPriceByPeriod,
-                        ),
-                        energyConsumedRows = mergeWithCurrentOrder(
-                            currentRows = current.energyConsumedRows,
-                            incomingValues = cachedConditions.energyPriceByPeriod,
-                        ),
-                        extraServices = cachedConditions.extraServices,
-                    )
-                }
-            }
-        }
-    }
-
-    fun ensurePeriods(
-        powerPeriods: List<String>,
-        energyPeriods: List<String>,
-    ) {
-        _uiState.update { current ->
-            val powerValueByPeriod = current.powerTermRows.toMap()
-            val energyValueByPeriod = current.energyConsumedRows.toMap()
-
-            current.copy(
-                powerTermRows = powerPeriods.map { period ->
-                    period to powerValueByPeriod[period].orEmpty()
+        CurrentUserConditionsUiState(
+            gate = gate,
+            form = CurrentUserConditionsFormState(
+                powerTermRows = session?.powerPeriods.orEmpty().map { period ->
+                    period to conditions?.powerTermPriceByPeriod?.get(period).orEmpty()
                 },
-                energyConsumedRows = energyPeriods.map { period ->
-                    period to energyValueByPeriod[period].orEmpty()
+                energyConsumedRows = session?.energyPeriods.orEmpty().map { period ->
+                    period to conditions?.energyPriceByPeriod?.get(period).orEmpty()
                 },
-            )
-        }
-
-        persistCurrentState()
-    }
+                extraServices = conditions?.extraServices.orEmpty(),
+            ),
+            supplyHolder = session?.supplyHolder.orEmpty(),
+            supplyAddress = session?.supplyAddress.orEmpty(),
+            supplyCupsCode = session?.supplyCupsCode.orEmpty(),
+            availableProposals = session?.proposals.orEmpty(),
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+        initialValue = CurrentUserConditionsUiState(),
+    )
 
     fun onPowerTermValueChanged(period: String, value: String) {
         if (!isValidDecimalInput(value)) return
-
-        _uiState.update { current ->
-            current.copy(
-                powerTermRows = current.powerTermRows.map { row ->
-                    if (row.first == period) {
-                        period to value
-                    } else {
-                        row
-                    }
-                }
-            )
+        persist { current ->
+            current.copy(powerTermPriceByPeriod = current.powerTermPriceByPeriod + (period to value))
         }
-
-        persistCurrentState()
     }
 
     fun onEnergyValueChanged(period: String, value: String) {
         if (!isValidDecimalInput(value)) return
-
-        _uiState.update { current ->
-            current.copy(
-                energyConsumedRows = current.energyConsumedRows.map { row ->
-                    if (row.first == period) {
-                        period to value
-                    } else {
-                        row
-                    }
-                }
-            )
+        persist { current ->
+            current.copy(energyPriceByPeriod = current.energyPriceByPeriod + (period to value))
         }
-
-        persistCurrentState()
     }
 
     fun onExtraServicesChanged(value: String) {
         if (!isValidDecimalInput(value)) return
-
-        _uiState.update { current ->
-            current.copy(extraServices = value)
-        }
-
-        persistCurrentState()
+        persist { current -> current.copy(extraServices = value) }
     }
 
-    private fun mergeWithCurrentOrder(
-        currentRows: List<Pair<String, String>>,
-        incomingValues: Map<String, String>,
-    ): List<Pair<String, String>> {
-        if (incomingValues.isEmpty()) return currentRows
+    fun onSupplyHolderChanged(value: String) {
+        consumptionSessionRepository.updateSupplyHolder(value)
+    }
 
-        if (currentRows.isEmpty()) {
-            return incomingValues.map { (period, value) ->
-                period to value
+    fun onSupplyAddressChanged(value: String) {
+        consumptionSessionRepository.updateSupplyAddress(value)
+    }
+
+    /** Copies the selected proposal's prices into the customer's current conditions. */
+    fun copyPricesFromProposal(proposalTitle: String) {
+        val session = consumptionSessionRepository.session.value ?: return
+        val proposal = session.proposals
+            .firstOrNull { candidate -> candidate.proposalTitle == proposalTitle }
+            ?: return
+
+        val powerTermPriceByPeriod = session.powerTermRows
+            .mapIndexed { index, row ->
+                row.first to proposal.powerTermItems.getOrNull(index).toDecimalInput()
             }
-        }
+            .toMap()
 
-        val currentPeriods = currentRows.map { it.first }
-        val mergedKnownPeriods = currentPeriods.map { period ->
-            period to incomingValues[period].orEmpty()
-        }
-
-        val missingPeriods = incomingValues.keys.filterNot { it in currentPeriods }
-
-        return mergedKnownPeriods + missingPeriods.map { period ->
-            period to incomingValues[period].orEmpty()
-        }
-    }
-
-    private fun persistCurrentState() {
-        val state = _uiState.value
-
-        val model = CurrentUserConditionsModel(
-            powerTermPriceByPeriod = state.powerTermRows.toMap(),
-            energyPriceByPeriod = state.energyConsumedRows.toMap(),
-            extraServices = state.extraServices,
-        )
+        val energyPriceByPeriod = session.energyConsumedRows
+            .mapIndexed { index, row ->
+                row.first to proposal.consumedEnergyItems.getOrNull(index).toDecimalInput()
+            }
+            .toMap()
 
         viewModelScope.launch {
-            persistCurrentUserConditionsUseCase(model)
+            persistCurrentUserConditionsUseCase(
+                CurrentUserConditionsModel(
+                    powerTermPriceByPeriod = powerTermPriceByPeriod,
+                    energyPriceByPeriod = energyPriceByPeriod,
+                    extraServices = String.format(Locale.US, "%.2f", proposal.extraServices),
+                ),
+            )
         }
     }
 
-    private fun isValidDecimalInput(value: String): Boolean {
-        return value.matches(Regex("^\\d*([.,]\\d{0,8})?$"))
+    private fun persist(transform: (CurrentUserConditionsModel) -> CurrentUserConditionsModel) {
+        val current = latestConditions.value ?: EMPTY_CONDITIONS
+        val updated = transform(current)
+        latestConditions.value = updated
+
+        viewModelScope.launch {
+            persistCurrentUserConditionsUseCase(updated)
+        }
+    }
+
+    private fun isValidDecimalInput(value: String): Boolean =
+        value.matches(Regex("^\\d*([.,]\\d{0,8})?$"))
+
+    private fun Double?.toDecimalInput(): String {
+        if (this == null) return ""
+        return String.format(Locale.US, "%.8f", this)
+            .trimEnd('0')
+            .trimEnd('.')
+            .ifBlank { "0" }
+    }
+
+    private companion object {
+        const val STOP_TIMEOUT_MILLIS = 5_000L
+        val EMPTY_CONDITIONS = CurrentUserConditionsModel(
+            powerTermPriceByPeriod = emptyMap(),
+            energyPriceByPeriod = emptyMap(),
+            extraServices = "",
+        )
     }
 }
 
+/**
+ * Editable rows of the current-conditions form.
+ */
 data class CurrentUserConditionsFormState(
     val powerTermRows: List<Pair<String, String>> = emptyList(),
     val energyConsumedRows: List<Pair<String, String>> = emptyList(),

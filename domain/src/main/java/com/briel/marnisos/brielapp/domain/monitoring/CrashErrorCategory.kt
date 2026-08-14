@@ -1,4 +1,4 @@
-package com.briel.marnisos.brielapp.monitoring
+package com.briel.marnisos.brielapp.domain.monitoring
 
 enum class CrashErrorCategory {
     AUTHENTICATION,
