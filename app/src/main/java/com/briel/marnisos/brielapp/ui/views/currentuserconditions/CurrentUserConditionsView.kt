@@ -114,6 +114,7 @@ internal fun CurrentUserConditionsScreen(
             supplyCupsCode = uiState.supplyCupsCode,
             onSupplyHolderChanged = viewModel::onSupplyHolderChanged,
             onSupplyAddressChanged = viewModel::onSupplyAddressChanged,
+            onCompanyNameChanged = viewModel::onCompanyNameChanged,
             onCopyCurrentConditionsClicked = {
                 if (!uiState.canCopyFromProposal) return@CurrentUserConditionsMainView
                 selectedProposalTitle = selectedProposalTitle
@@ -135,7 +136,10 @@ internal fun CurrentUserConditionsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp),
-                onClick = onNavigateToProposals,
+                onClick = {
+                    viewModel.onNavigateToProposalsClicked()
+                    onNavigateToProposals()
+                },
             ) {
                 Text(
                     text = stringResource(R.string.current_user_conditions_go_to_proposals),
@@ -258,6 +262,7 @@ private fun CurrentUserConditionsMainView(
     supplyCupsCode: String,
     onSupplyHolderChanged: (String) -> Unit,
     onSupplyAddressChanged: (String) -> Unit,
+    onCompanyNameChanged: (String) -> Unit,
     onCopyCurrentConditionsClicked: () -> Unit,
     onPowerTermValueChanged: (period: String, value: String) -> Unit,
     onEnergyValueChanged: (period: String, value: String) -> Unit,
@@ -321,6 +326,17 @@ private fun CurrentUserConditionsMainView(
                 CustomerDataReadOnlyRow(
                     label = stringResource(R.string.current_user_conditions_cups_label),
                     value = supplyCupsCode,
+                )
+
+                // The incumbent supplier is not present in the bill read nor in the
+                // proposals, so there is nothing to prefill it from: the broker types it.
+                CustomerDataInputRow(
+                    label = stringResource(R.string.current_user_conditions_company_name_label),
+                    value = uiState.companyName,
+                    onValueChanged = onCompanyNameChanged,
+                    placeholderText = stringResource(
+                        R.string.current_user_conditions_company_name_placeholder,
+                    ),
                 )
             }
         )
@@ -550,6 +566,7 @@ private fun CurrentUserConditionsPreviewWithData() {
             supplyCupsCode = "ES0031607515707001RC",
             onSupplyHolderChanged = {},
             onSupplyAddressChanged = {},
+            onCompanyNameChanged = {},
             onCopyCurrentConditionsClicked = {},
             onPowerTermValueChanged = { _, _ -> },
             onEnergyValueChanged = { _, _ -> },
@@ -571,6 +588,7 @@ private fun CurrentUserConditionsPreviewEmptyState() {
             supplyCupsCode = "",
             onSupplyHolderChanged = {},
             onSupplyAddressChanged = {},
+            onCompanyNameChanged = {},
             onCopyCurrentConditionsClicked = {},
             onPowerTermValueChanged = { _, _ -> },
             onEnergyValueChanged = { _, _ -> },

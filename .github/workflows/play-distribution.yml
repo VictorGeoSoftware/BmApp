@@ -13,6 +13,8 @@ on:
           - alpha
           - beta
   push:
+    branches:
+      - master
     tags:
       - 'v*'
 

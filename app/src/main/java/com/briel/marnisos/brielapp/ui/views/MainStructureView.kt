@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.briel.marnisos.brielapp.BuildConfig
@@ -91,11 +92,7 @@ fun MainView(
                             // R6: reset the study; the gate change drives the navigation.
                             shellViewModel.startNewStudy()
                         } else {
-                            navController.navigate(route) {
-                                popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+                            navController.navigateToSection(route)
                         }
                     },
                     onLogoutClicked = {
@@ -141,3 +138,22 @@ private val DrawerRoutes: List<BmAppRoute> = listOf(
     BmAppRoute.FetchConsumption,
     BmAppRoute.CupsScanner,
 )
+
+/**
+ * Switches between the shell's top-level sections.
+ *
+ * Deliberately without `saveState`/`restoreState`. Those belong to the bottom-navigation
+ * recipe, where every section is a *nested graph* with its own back stack. This graph is
+ * flat and [BmAppRoute.CurrentConditions] is both a section and the start destination, so
+ * `popUpTo(startDestination) { saveState = true }` saved the popped stack under the very
+ * id that a following `navigate(CurrentConditions) { restoreState = true }` then read
+ * back: choosing "Current conditions" restored the stack it had just saved and landed the
+ * broker on Proposals again. Every section here is a single entry sitting directly on the
+ * start destination, so there is no back stack worth preserving.
+ */
+private fun NavHostController.navigateToSection(route: BmAppRoute) {
+    navigate(route) {
+        popUpTo(graph.startDestinationId) { inclusive = false }
+        launchSingleTop = true
+    }
+}

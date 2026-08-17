@@ -56,4 +56,7 @@
     <string name="drawer_locked_hint_consumption">Carga una factura o escanea un CUPS para empezar el estudio.</string>
     <string name="current_user_conditions_copy_prices_action">Copiar precios de una propuesta</string>
     <string name="proposals_create_report">Crear informe</string>
+    <string name="current_user_conditions_company_name_label">Comercializadora actual</string>
+    <string name="current_user_conditions_company_name_placeholder">Introduce la comercializadora</string>
+    <string name="top_bar_open_drawer_content_description">Abrir menú</string>
 </resources>
