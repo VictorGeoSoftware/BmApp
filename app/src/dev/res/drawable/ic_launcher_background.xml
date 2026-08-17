@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dev-flavour launcher background: the prod yellow gradient at 70% opacity,
+  pre-flattened over white so the adaptive-icon background layer stays fully
+  opaque. A literal alpha here would punch a transparent hole in the icon mask,
+  because the launcher composites this layer against no backdrop.
+
+  prod #FFFACC15 -> dev #FFFCDB5B
+  prod #FFF59E0B -> dev #FFF8BB54
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="14"
+                android:startY="0"
+                android:endX="94"
+                android:endY="108">
+                <item android:color="#FFFCDB5B" android:offset="0.0" />
+                <item android:color="#FFF8BB54" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>
