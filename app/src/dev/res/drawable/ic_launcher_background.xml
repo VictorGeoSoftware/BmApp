@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Dev-flavour launcher background: the prod yellow gradient at 70% opacity,
-  pre-flattened over white so the adaptive-icon background layer stays fully
-  opaque. A literal alpha here would punch a transparent hole in the icon mask,
-  because the launcher composites this layer against no backdrop.
+  Dev-flavour launcher background: a purple gradient, so Firebase builds are
+  instantly distinguishable from the yellow Play build on a tester's home
+  screen (both can be installed side by side via the `.dev` applicationId
+  suffix).
 
-  prod #FFFACC15 -> dev #FFFCDB5B
-  prod #FFF59E0B -> dev #FFF8BB54
+  Mirrors the prod gradient geometry, swapping the yellow ramp for purple:
+  prod #FFFACC15 (yellow-400) -> dev #FFA855F7 (purple-500)
+  prod #FFF59E0B (amber-500)  -> dev #FF7E22CE (purple-700)
+
+  Kept fully opaque on purpose: a literal alpha here would punch a transparent
+  hole in the icon mask, because the launcher composites this layer against no
+  backdrop.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
@@ -22,8 +27,8 @@
                 android:startY="0"
                 android:endX="94"
                 android:endY="108">
-                <item android:color="#FFFCDB5B" android:offset="0.0" />
-                <item android:color="#FFF8BB54" android:offset="1.0" />
+                <item android:color="#FFA855F7" android:offset="0.0" />
+                <item android:color="#FF7E22CE" android:offset="1.0" />
             </gradient>
         </aapt:attr>
     </path>
