@@ -20,6 +20,12 @@ internal class ConsumptionSessionRepositoryImpl : ConsumptionSessionRepository {
     /** Guards the automatic hiding so it runs once per study + customer-price combination. */
     private var lastAutoHideSignature: String? = null
 
+    /**
+     * Job ids whose collected prices already reached the backend. Survives the
+     * current-conditions ViewModel so an edit round-trip cannot store the customer twice.
+     */
+    private val submittedCollectedPriceJobIds = mutableSetOf<String>()
+
     private val _session = MutableStateFlow<ConsumptionSessionModel?>(value = null)
     override val session: StateFlow<ConsumptionSessionModel?> = _session.asStateFlow()
 
@@ -103,6 +109,9 @@ internal class ConsumptionSessionRepositoryImpl : ConsumptionSessionRepository {
         }
     }
 
+    override fun markCollectedPricesSubmitted(jobId: String): Boolean =
+        submittedCollectedPriceJobIds.add(jobId)
+
     override fun clear() {
         _session.value = null
         _proposalVisibilityByTitle.value = emptyMap()
@@ -110,6 +119,7 @@ internal class ConsumptionSessionRepositoryImpl : ConsumptionSessionRepository {
         isSupplyHolderOverriddenByUser = false
         lastBackendSupplyHolder = ""
         lastAutoHideSignature = null
+        submittedCollectedPriceJobIds.clear()
     }
 
     private fun synchronizeProposalOverrides(

@@ -36,13 +36,6 @@ class CurrentUserConditionsViewModel(
 
     private val latestConditions = MutableStateFlow<CurrentUserConditionsModel?>(value = null)
 
-    /**
-     * Job ids whose prices have already been submitted, so navigating back and forth
-     * cannot store the same customer twice. Without a CUPS on the stored row there is
-     * no other way to detect a duplicate.
-     */
-    private val submittedJobIds = mutableSetOf<String>()
-
     val uiState: StateFlow<CurrentUserConditionsUiState> = combine(
         consumptionSessionRepository.session,
         observeCurrentUserConditionsUseCase(),
@@ -103,10 +96,13 @@ class CurrentUserConditionsViewModel(
      * Deliberately fire-and-forget: collecting prices is a background concern and must
      * never block, slow down or fail the broker's flow. A failed send is lost, which is
      * an accepted trade-off while there is no offline outbox.
+     *
+     * The once-per-job guard lives in the repository, so returning here to correct a
+     * price and tapping again cannot store the same customer twice.
      */
     fun onNavigateToProposalsClicked() {
         val session = consumptionSessionRepository.session.value ?: return
-        if (!session.jobId.let(submittedJobIds::add)) return
+        if (!consumptionSessionRepository.markCollectedPricesSubmitted(session.jobId)) return
         if (!shouldCollectPricesUseCase(session.tariffName)) return
 
         val collectedPrices = buildCollectedPricesUseCase(session, latestConditions.value)
