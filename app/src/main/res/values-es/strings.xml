@@ -58,4 +58,5 @@
     <string name="proposals_create_report">Crear informe</string>
     <string name="current_user_conditions_company_name_label">Comercializadora actual</string>
     <string name="current_user_conditions_company_name_placeholder">Introduce la comercializadora</string>
+    <string name="top_bar_open_drawer_content_description">Abrir menú</string>
 </resources>
