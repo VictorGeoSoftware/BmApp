@@ -1,6 +1,7 @@
 package com.briel.marnisos.brielapp.data.network
 
 import com.briel.marnisos.brielapp.data.model.prices.ConsumptionReportResponse
+import com.briel.marnisos.brielapp.data.model.prices.CollectedPricesRequest
 import com.briel.marnisos.brielapp.data.model.prices.ComparatorReportPdfRequest
 import com.briel.marnisos.brielapp.data.model.prices.FetchConsumptionReportByCupsRequest
 import com.briel.marnisos.brielapp.data.model.prices.JobStatusResponse
@@ -243,6 +244,36 @@ class PriceTableApi(
             endpoint = "user-activity/proposals-response",
             payload = UserActivityEventDto(name = name, email = email)
         )
+    }
+
+    /**
+     * Submits the customer's current prices for analysis.
+     *
+     * The backend answers 204 when the tariff is out of scope (2.0TD); that is a
+     * successful outcome, not a failure, so any 2xx is treated as success.
+     */
+    suspend fun submitCollectedPrices(request: CollectedPricesRequest): Result<Unit> {
+        return try {
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
+            val response = client.post("$baseUrl/collected-prices") {
+                headers.append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
+                setBody(request)
+            }
+
+            if (!response.status.isSuccess()) {
+                val responseBody = response.bodyAsText()
+                return Result.failure(
+                    IllegalStateException(responseBody.ifBlank { "Failed to submit collected prices" })
+                )
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     private suspend fun sendUserActivityEvent(
