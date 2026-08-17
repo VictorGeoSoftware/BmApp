@@ -39,6 +39,9 @@ val appModule = module {
             consumptionSessionRepository = get(),
             observeCurrentUserConditionsUseCase = get(),
             persistCurrentUserConditionsUseCase = get(),
+            shouldCollectPricesUseCase = get(),
+            buildCollectedPricesUseCase = get(),
+            submitCollectedPricesUseCase = get(),
             observeFeeFirstGateUseCase = get(),
         )
     }
