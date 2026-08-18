@@ -29,6 +29,7 @@ import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.briel.marnisos.brielapp.ui.navigation.BmAppNavHost
 import com.briel.marnisos.brielapp.ui.navigation.BmAppRoute
 import com.briel.marnisos.brielapp.ui.navigation.analyticsScreenName
+import com.briel.marnisos.brielapp.ui.navigation.canReach
 import com.briel.marnisos.brielapp.ui.views.common.TopActionBar
 import com.briel.marnisos.brielapp.ui.views.proposals.ProposalsViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
@@ -69,7 +70,15 @@ fun MainView(
 
     // Keyed on the resolved route, not on the back stack entry: a recomposition or a
     // configuration change must not inflate the screen_view count.
-    LaunchedEffect(currentRoute, analyticsTracker) {
+    //
+    // Routes the current stage cannot reach are skipped deliberately. BmAppNavHost
+    // redirects away from them within a frame (the fee-first gate), so reporting one
+    // would record a screen the broker never actually saw — on a cold start without a
+    // study that is a phantom `current_conditions` view before the bounce to
+    // `fetch_consumption`. The predicate mirrors the gate's own condition, so the two
+    // cannot drift apart.
+    LaunchedEffect(currentRoute, shellState.stage, analyticsTracker) {
+        if (!shellState.stage.canReach(currentRoute)) return@LaunchedEffect
         analyticsTracker.trackScreen(currentRoute.analyticsScreenName)
     }
 
