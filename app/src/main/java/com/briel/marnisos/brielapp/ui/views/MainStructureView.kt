@@ -25,14 +25,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.briel.marnisos.brielapp.BuildConfig
 import com.briel.marnisos.brielapp.R
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.briel.marnisos.brielapp.ui.navigation.BmAppNavHost
 import com.briel.marnisos.brielapp.ui.navigation.BmAppRoute
+import com.briel.marnisos.brielapp.ui.navigation.analyticsScreenName
 import com.briel.marnisos.brielapp.ui.views.common.TopActionBar
 import com.briel.marnisos.brielapp.ui.views.proposals.ProposalsViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 /**
  * Authenticated app shell: drawer, top bar and the navigation graph.
@@ -46,6 +49,7 @@ fun MainView(
     onLogoutClicked: () -> Unit = {},
     shellViewModel: AppShellViewModel = koinViewModel(),
     proposalsViewModel: ProposalsViewModel = koinViewModel(),
+    analyticsTracker: AnalyticsTracker = koinInject(),
 ) {
     val shellState by shellViewModel.uiState.collectAsStateWithLifecycle()
     val proposalsState by proposalsViewModel.uiState.collectAsStateWithLifecycle()
@@ -61,6 +65,12 @@ fun MainView(
         DrawerRoutes.firstOrNull { route ->
             currentBackStackEntry?.destination?.hasRoute(route::class) == true
         } ?: BmAppRoute.CurrentConditions
+    }
+
+    // Keyed on the resolved route, not on the back stack entry: a recomposition or a
+    // configuration change must not inflate the screen_view count.
+    LaunchedEffect(currentRoute, analyticsTracker) {
+        analyticsTracker.trackScreen(currentRoute.analyticsScreenName)
     }
 
     LaunchedEffect(proposalsViewModel, context, pdfShareManager) {

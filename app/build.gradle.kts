@@ -124,6 +124,7 @@ dependencies {
     // Modules
     implementation(project(":domain"))
     implementation(project(":data"))
+    implementation(project(":analytics"))
 
     // App dependencies
     implementation(libs.androidx.core.ktx)
