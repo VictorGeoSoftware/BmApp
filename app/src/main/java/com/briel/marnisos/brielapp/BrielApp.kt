@@ -3,9 +3,11 @@ package com.briel.marnisos.brielapp
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import com.briel.marnisos.brielapp.analytics.di.analyticsModule
 import com.briel.marnisos.brielapp.data.di.dataModule
 import com.briel.marnisos.brielapp.di.appModule
 import com.briel.marnisos.brielapp.logging.AppLogger
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.briel.marnisos.brielapp.domain.monitoring.CrashReporter
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
@@ -27,10 +29,11 @@ class BrielApp : Application() {
 
         startKoin {
             androidContext(this@BrielApp)
-            modules(listOf(dataModule, appModule))
+            modules(listOf(dataModule, analyticsModule, appModule))
         }
 
         configureCrashMonitoring()
+        configureAnalytics()
 
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
         initializeFcm()
@@ -47,6 +50,13 @@ class BrielApp : Application() {
             buildType = BuildConfig.BUILD_TYPE,
             appVersion = BuildConfig.VERSION_NAME,
         )
+    }
+
+    private fun configureAnalytics() {
+        // The gate itself lives in :analytics (AnalyticsCollectionPolicy); when it is
+        // closed the injected tracker is a no-op, so this call is a safe confirmation
+        // rather than the actual switch.
+        getKoin().get<AnalyticsTracker>().setCollectionEnabled(true)
     }
 
     private fun initializeFcm() {

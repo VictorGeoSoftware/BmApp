@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,9 +27,11 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SetUserOfflineUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SetUserOnlineUseCase
+import com.briel.marnisos.brielapp.ui.navigation.LOGIN_SCREEN_NAME
 import com.briel.marnisos.brielapp.ui.theme.BrielAppTheme
 import com.briel.marnisos.brielapp.ui.views.MainView
 import com.briel.marnisos.brielapp.ui.views.auth.AuthViewModel
@@ -43,6 +46,7 @@ class MainActivity : ComponentActivity() {
     private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase by inject()
     private val setUserOnlineUseCase: SetUserOnlineUseCase by inject()
     private val setUserOfflineUseCase: SetUserOfflineUseCase by inject()
+    private val analyticsTracker: AnalyticsTracker by inject()
 
     private val postNotificationsPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -87,6 +91,12 @@ class MainActivity : ComponentActivity() {
                     } else {
                         val context = LocalContext.current
                         val coroutineScope = rememberCoroutineScope()
+
+                        // Login sits outside the NavHost, so the shell's screen_view
+                        // tracking cannot see it.
+                        LaunchedEffect(analyticsTracker) {
+                            analyticsTracker.trackScreen(LOGIN_SCREEN_NAME)
+                        }
 
                         LoginScreen(
                             uiState = authState,

@@ -2,6 +2,9 @@ package com.briel.marnisos.brielapp.ui.views.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsEvent
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsFailureReason
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.briel.marnisos.brielapp.domain.monitoring.CrashErrorCategory
 import com.briel.marnisos.brielapp.domain.monitoring.CrashReporter
 import com.briel.marnisos.brielapp.domain.error.AccessDeniedException
@@ -33,6 +36,7 @@ class AuthViewModel(
     private val clearLastCompletedJobIdUseCase: ClearLastCompletedJobIdUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val crashReporter: CrashReporter,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -60,6 +64,7 @@ class AuthViewModel(
         viewModelScope.launch {
             crashReporter.setScreenContext("auth_login")
             crashReporter.setUseCaseContext("login_with_email")
+            analyticsTracker.track(AnalyticsEvent.LoginStarted)
 
             _uiState.update { current ->
                 current.copy(isLoading = true, errorMessage = null)
@@ -72,6 +77,7 @@ class AuthViewModel(
                     category = CrashErrorCategory.AUTHENTICATION,
                     operation = "login_with_email",
                 )
+                analyticsTracker.track(AnalyticsEvent.LoginFailed(error.toLoginFailureReason()))
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
@@ -87,6 +93,7 @@ class AuthViewModel(
                     category = CrashErrorCategory.AUTHENTICATION,
                     operation = "get_firebase_id_token",
                 )
+                analyticsTracker.track(AnalyticsEvent.LoginFailed(AnalyticsFailureReason.UNAUTHORIZED))
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
@@ -99,6 +106,7 @@ class AuthViewModel(
             val userWithDevice = user.copy(phoneUuid = getDeviceIdUseCase())
             syncAuthenticatedUserDataUseCase(idToken = token, userData = userWithDevice)
                 .onSuccess {
+                    analyticsTracker.track(AnalyticsEvent.LoginSucceeded)
                     _uiState.update { current ->
                         current.copy(isAuthenticated = true, isLoading = false, errorMessage = null)
                     }
@@ -111,6 +119,7 @@ class AuthViewModel(
         viewModelScope.launch {
             crashReporter.setScreenContext("auth_login")
             crashReporter.setUseCaseContext("login_with_google")
+            analyticsTracker.track(AnalyticsEvent.LoginStarted)
 
             _uiState.update { current ->
                 current.copy(isLoading = true, errorMessage = null)
@@ -122,6 +131,7 @@ class AuthViewModel(
                     category = CrashErrorCategory.AUTHENTICATION,
                     operation = "login_with_google",
                 )
+                analyticsTracker.track(AnalyticsEvent.LoginFailed(error.toLoginFailureReason()))
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
@@ -137,6 +147,7 @@ class AuthViewModel(
                     category = CrashErrorCategory.AUTHENTICATION,
                     operation = "get_firebase_id_token",
                 )
+                analyticsTracker.track(AnalyticsEvent.LoginFailed(AnalyticsFailureReason.UNAUTHORIZED))
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
@@ -149,6 +160,7 @@ class AuthViewModel(
             val userWithDevice = user.copy(phoneUuid = getDeviceIdUseCase())
             syncAuthenticatedUserDataUseCase(idToken = token, userData = userWithDevice)
                 .onSuccess {
+                    analyticsTracker.track(AnalyticsEvent.LoginSucceeded)
                     _uiState.update { current ->
                         current.copy(isAuthenticated = true, isLoading = false, errorMessage = null)
                     }
@@ -193,6 +205,7 @@ class AuthViewModel(
                 clearLastCompletedJobIdUseCase()
                 logoutUseCase()
             }.onSuccess {
+                analyticsTracker.track(AnalyticsEvent.LoggedOut)
                 _uiState.update { current ->
                     current.copy(isAuthenticated = false, isLoading = false, errorMessage = null)
                 }
@@ -219,6 +232,9 @@ class AuthViewModel(
             // otherwise they would be auto-authenticated on the next launch and
             // bypass this check. Then surface a contact-administration message.
             runCatching { logoutUseCase() }
+            analyticsTracker.track(
+                AnalyticsEvent.LoginFailed(AnalyticsFailureReason.PERMISSION_DENIED)
+            )
             _uiState.update { current ->
                 current.copy(
                     isAuthenticated = false,
@@ -234,11 +250,32 @@ class AuthViewModel(
             category = CrashErrorCategory.BACKEND,
             operation = "sync_authenticated_user_data",
         )
+        analyticsTracker.track(AnalyticsEvent.LoginFailed(AnalyticsFailureReason.NETWORK))
         _uiState.update { current ->
             current.copy(
                 isLoading = false,
                 errorMessage = error.message ?: "Failed to sync user data"
             )
+        }
+    }
+
+    /**
+     * Collapses a login error into the fixed analytics vocabulary.
+     *
+     * Never derive this from [Throwable.message] directly — the message can contain
+     * the e-mail address or a server payload, neither of which may reach analytics.
+     */
+    private fun Throwable.toLoginFailureReason(): AnalyticsFailureReason {
+        val message = message.orEmpty().lowercase()
+        return when {
+            "invalid-credential" in message || "invalid credential" in message ->
+                AnalyticsFailureReason.UNAUTHORIZED
+            "user-disabled" in message || "user disabled" in message ->
+                AnalyticsFailureReason.PERMISSION_DENIED
+            "too-many-requests" in message || "too many requests" in message ->
+                AnalyticsFailureReason.TIMEOUT
+            "network" in message -> AnalyticsFailureReason.NETWORK
+            else -> AnalyticsFailureReason.UNKNOWN
         }
     }
 

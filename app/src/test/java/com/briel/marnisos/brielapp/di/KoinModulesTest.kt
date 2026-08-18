@@ -1,7 +1,9 @@
 package com.briel.marnisos.brielapp.di
 
 import android.content.Context
+import com.briel.marnisos.brielapp.analytics.di.analyticsModule
 import com.briel.marnisos.brielapp.data.di.dataModule
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.mockk.mockk
@@ -34,6 +36,9 @@ class KoinModulesTest {
     private val platformOverrides = module {
         single<FirebaseCrashlytics> { mockk(relaxed = true) }
         single<FirebaseAuth> { mockk(relaxed = true) }
+        // Declared last so it wins over analyticsModule: the real binding would reach
+        // for FirebaseAnalytics.getInstance() on a release-gated variant.
+        single<AnalyticsTracker> { mockk(relaxed = true) }
     }
 
     @Before
@@ -51,7 +56,7 @@ class KoinModulesTest {
     @Test
     fun `every definition in the graph resolves`() {
         startKoin {
-            modules(dataModule, appModule, platformOverrides)
+            modules(dataModule, analyticsModule, appModule, platformOverrides)
         }.checkModules {
             withInstance<Context>(mockk(relaxed = true))
         }
