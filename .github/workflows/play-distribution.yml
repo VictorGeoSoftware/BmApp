@@ -6,11 +6,11 @@ on:
       track:
         description: 'Play Store track to publish to'
         required: true
-        default: 'internal'
+        default: 'alpha'
         type: choice
         options:
-          - internal
           - alpha
+          - internal
           - beta
   push:
     branches:
@@ -67,5 +67,5 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.briel.marnisos.powerapp
           releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
-          track: ${{ inputs.track || 'internal' }}
+          track: ${{ inputs.track || 'alpha' }}
           status: completed
