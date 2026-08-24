@@ -20,18 +20,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.briel.marnisos.brielapp.BuildConfig
 import com.briel.marnisos.brielapp.R
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.briel.marnisos.brielapp.ui.navigation.BmAppNavHost
 import com.briel.marnisos.brielapp.ui.navigation.BmAppRoute
+import com.briel.marnisos.brielapp.ui.navigation.analyticsScreenName
+import com.briel.marnisos.brielapp.ui.navigation.canReach
 import com.briel.marnisos.brielapp.ui.views.common.TopActionBar
 import com.briel.marnisos.brielapp.ui.views.proposals.ProposalsViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 /**
  * Authenticated app shell: drawer, top bar and the navigation graph.
@@ -45,6 +50,7 @@ fun MainView(
     onLogoutClicked: () -> Unit = {},
     shellViewModel: AppShellViewModel = koinViewModel(),
     proposalsViewModel: ProposalsViewModel = koinViewModel(),
+    analyticsTracker: AnalyticsTracker = koinInject(),
 ) {
     val shellState by shellViewModel.uiState.collectAsStateWithLifecycle()
     val proposalsState by proposalsViewModel.uiState.collectAsStateWithLifecycle()
@@ -60,6 +66,20 @@ fun MainView(
         DrawerRoutes.firstOrNull { route ->
             currentBackStackEntry?.destination?.hasRoute(route::class) == true
         } ?: BmAppRoute.CurrentConditions
+    }
+
+    // Keyed on the resolved route, not on the back stack entry: a recomposition or a
+    // configuration change must not inflate the screen_view count.
+    //
+    // Routes the current stage cannot reach are skipped deliberately. BmAppNavHost
+    // redirects away from them within a frame (the fee-first gate), so reporting one
+    // would record a screen the broker never actually saw — on a cold start without a
+    // study that is a phantom `current_conditions` view before the bounce to
+    // `fetch_consumption`. The predicate mirrors the gate's own condition, so the two
+    // cannot drift apart.
+    LaunchedEffect(currentRoute, shellState.stage, analyticsTracker) {
+        if (!shellState.stage.canReach(currentRoute)) return@LaunchedEffect
+        analyticsTracker.trackScreen(currentRoute.analyticsScreenName)
     }
 
     LaunchedEffect(proposalsViewModel, context, pdfShareManager) {
@@ -91,11 +111,7 @@ fun MainView(
                             // R6: reset the study; the gate change drives the navigation.
                             shellViewModel.startNewStudy()
                         } else {
-                            navController.navigate(route) {
-                                popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+                            navController.navigateToSection(route)
                         }
                     },
                     onLogoutClicked = {
@@ -141,3 +157,22 @@ private val DrawerRoutes: List<BmAppRoute> = listOf(
     BmAppRoute.FetchConsumption,
     BmAppRoute.CupsScanner,
 )
+
+/**
+ * Switches between the shell's top-level sections.
+ *
+ * Deliberately without `saveState`/`restoreState`. Those belong to the bottom-navigation
+ * recipe, where every section is a *nested graph* with its own back stack. This graph is
+ * flat and [BmAppRoute.CurrentConditions] is both a section and the start destination, so
+ * `popUpTo(startDestination) { saveState = true }` saved the popped stack under the very
+ * id that a following `navigate(CurrentConditions) { restoreState = true }` then read
+ * back: choosing "Current conditions" restored the stack it had just saved and landed the
+ * broker on Proposals again. Every section here is a single entry sitting directly on the
+ * start destination, so there is no back stack worth preserving.
+ */
+private fun NavHostController.navigateToSection(route: BmAppRoute) {
+    navigate(route) {
+        popUpTo(graph.startDestinationId) { inclusive = false }
+        launchSingleTop = true
+    }
+}

@@ -27,7 +27,7 @@ class EvaluateFeeFirstGateUseCaseTest {
 
         assertEquals(FeeFirstStage.CURRENT_CONDITIONS_REQUIRED, gate.stage)
         assertTrue(gate.hasFetchedConsumption)
-        assertEquals(5, gate.requiredFieldCount)
+        assertEquals(6, gate.requiredFieldCount)
         assertEquals(0, gate.completedRequiredFieldCount)
     }
 
@@ -42,8 +42,8 @@ class EvaluateFeeFirstGateUseCaseTest {
         )
 
         assertEquals(FeeFirstStage.CURRENT_CONDITIONS_REQUIRED, gate.stage)
-        assertEquals(3, gate.completedRequiredFieldCount)
-        assertEquals(5, gate.requiredFieldCount)
+        assertEquals(4, gate.completedRequiredFieldCount)
+        assertEquals(6, gate.requiredFieldCount)
     }
 
     @Test
@@ -56,7 +56,7 @@ class EvaluateFeeFirstGateUseCaseTest {
             ),
         )
 
-        assertEquals(1, gate.completedRequiredFieldCount)
+        assertEquals(2, gate.completedRequiredFieldCount)
         assertFalse(gate.areCurrentConditionsComplete)
     }
 
@@ -72,7 +72,7 @@ class EvaluateFeeFirstGateUseCaseTest {
 
         assertEquals(FeeFirstStage.UNLOCKED, gate.stage)
         assertTrue(gate.isUnlocked)
-        assertEquals(5, gate.completedRequiredFieldCount)
+        assertEquals(6, gate.completedRequiredFieldCount)
     }
 
     @Test
@@ -93,8 +93,33 @@ class EvaluateFeeFirstGateUseCaseTest {
         )
 
         assertEquals(FeeFirstStage.UNLOCKED, gate.stage)
-        assertEquals(2, gate.requiredFieldCount)
-        assertEquals(2, gate.completedRequiredFieldCount)
+        assertEquals(3, gate.requiredFieldCount)
+        assertEquals(3, gate.completedRequiredFieldCount)
+    }
+
+    @Test
+    fun `stays locked while the supplier is missing even with every price filled`() {
+        val gate = evaluateFeeFirstGate(
+            session(),
+            conditions(
+                companyName = "   ",
+                powerTerm = mapOf("P1" to "0,101664", "P2" to "0,015864"),
+                energy = mapOf("P1" to "0,145200", "P2" to "0,132870", "P3" to "0,098450"),
+            ),
+        )
+
+        assertEquals(FeeFirstStage.CURRENT_CONDITIONS_REQUIRED, gate.stage)
+        assertFalse(gate.isUnlocked)
+        assertEquals(6, gate.requiredFieldCount)
+        assertEquals(5, gate.completedRequiredFieldCount)
+    }
+
+    @Test
+    fun `counts the supplier on its own before any price is entered`() {
+        val gate = evaluateFeeFirstGate(session(), conditions(companyName = "Endesa"))
+
+        assertEquals(1, gate.completedRequiredFieldCount)
+        assertFalse(gate.isUnlocked)
     }
 
     private fun session(
@@ -114,10 +139,12 @@ class EvaluateFeeFirstGateUseCaseTest {
     )
 
     private fun conditions(
+        companyName: String = "Iberdrola",
         powerTerm: Map<String, String> = emptyMap(),
         energy: Map<String, String> = emptyMap(),
         extraServices: String = "",
     ) = CurrentUserConditionsModel(
+        companyName = companyName,
         powerTermPriceByPeriod = powerTerm,
         energyPriceByPeriod = energy,
         extraServices = extraServices,

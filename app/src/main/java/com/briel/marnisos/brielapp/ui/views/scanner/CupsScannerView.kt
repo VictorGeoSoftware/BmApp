@@ -39,9 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsEvent
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsFailureReason
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import org.koin.compose.koinInject
 import java.util.concurrent.Executors
 
 @ExperimentalGetImage
@@ -51,6 +55,7 @@ internal fun CupsScannerView(
     onBack: () -> Unit,
     onCupsConfirmed: (String) -> Unit,
     modifier: Modifier = Modifier,
+    analyticsTracker: AnalyticsTracker = koinInject(),
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -71,6 +76,20 @@ internal fun CupsScannerView(
         contract = ActivityResultContracts.RequestPermission(),
     ) { granted ->
         hasCameraPermission = granted
+        if (!granted) {
+            analyticsTracker.track(
+                AnalyticsEvent.CupsScanFailed(AnalyticsFailureReason.PERMISSION_DENIED)
+            )
+        }
+    }
+
+    // Measures how long OCR takes to lock onto a CUPS, and whether it ever does.
+    // Only the timing and the outcome are reported, never the recognised code.
+    val scanStartedAtMillis = remember { System.currentTimeMillis() }
+    var hasReportedScanSuccess by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        analyticsTracker.track(AnalyticsEvent.CupsScanStarted)
     }
 
     LaunchedEffect(Unit) {
@@ -167,6 +186,15 @@ internal fun CupsScannerView(
                                             val candidate = CupsCodeParser.extractBestCandidate(visionText.text)
                                             if (candidate != null && !wasEditedManually) {
                                                 cupsCodeText = candidate
+                                                if (!hasReportedScanSuccess) {
+                                                    hasReportedScanSuccess = true
+                                                    analyticsTracker.track(
+                                                        AnalyticsEvent.CupsScanSucceeded(
+                                                            durationMs = System.currentTimeMillis() -
+                                                                scanStartedAtMillis,
+                                                        )
+                                                    )
+                                                }
                                             }
                                         }
                                         .addOnCompleteListener {

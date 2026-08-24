@@ -7,8 +7,9 @@ import com.briel.marnisos.brielapp.domain.models.FeeFirstGateModel
 /**
  * Evaluates the fee-first gate for a given session and set of current conditions.
  *
- * Rule: every power-term period and every energy period present in the active study
- * must hold a valid decimal greater than zero. Extra services are excluded on purpose.
+ * Rule: the customer's current supplier must be named, and every power-term period
+ * and every energy period present in the active study must hold a valid decimal
+ * greater than zero. Extra services are excluded on purpose.
  */
 fun interface EvaluateFeeFirstGateUseCase {
 
@@ -31,12 +32,16 @@ fun EvaluateFeeFirstGateUseCase.Factory.create(): EvaluateFeeFirstGateUseCase =
                 currentUserConditions?.energyPriceByPeriod?.get(period)
             }
 
+        // The supplier counts as one more required field, so the screen's progress
+        // indicator stays truthful rather than showing "complete" while it is blank.
+        val isCompanyNameFilled = !currentUserConditions?.companyName.isNullOrBlank()
+
         FeeFirstGateModel(
             hasFetchedConsumption = true,
-            requiredFieldCount = requiredPeriodValues.size,
+            requiredFieldCount = requiredPeriodValues.size + 1,
             completedRequiredFieldCount = requiredPeriodValues.count { value ->
                 value.isFilledPrice()
-            },
+            } + if (isCompanyNameFilled) 1 else 0,
         )
     }
 

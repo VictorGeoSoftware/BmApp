@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.briel.marnisos.brielapp.domain.models.CurrentUserConditionsModel
 import com.briel.marnisos.brielapp.domain.repository.ConsumptionSessionRepository
+import com.briel.marnisos.brielapp.domain.usecases.BuildCollectedPricesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveFeeFirstGateUseCase
 import com.briel.marnisos.brielapp.domain.usecases.PersistCurrentUserConditionsUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ShouldCollectPricesUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SubmitCollectedPricesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +28,9 @@ class CurrentUserConditionsViewModel(
     private val consumptionSessionRepository: ConsumptionSessionRepository,
     private val observeCurrentUserConditionsUseCase: ObserveCurrentUserConditionsUseCase,
     private val persistCurrentUserConditionsUseCase: PersistCurrentUserConditionsUseCase,
+    private val shouldCollectPricesUseCase: ShouldCollectPricesUseCase,
+    private val buildCollectedPricesUseCase: BuildCollectedPricesUseCase,
+    private val submitCollectedPricesUseCase: SubmitCollectedPricesUseCase,
     observeFeeFirstGateUseCase: ObserveFeeFirstGateUseCase,
 ) : ViewModel() {
 
@@ -47,6 +53,7 @@ class CurrentUserConditionsViewModel(
                     period to conditions?.energyPriceByPeriod?.get(period).orEmpty()
                 },
                 extraServices = conditions?.extraServices.orEmpty(),
+                companyName = conditions?.companyName.orEmpty(),
             ),
             supplyHolder = session?.supplyHolder.orEmpty(),
             supplyAddress = session?.supplyAddress.orEmpty(),
@@ -76,6 +83,34 @@ class CurrentUserConditionsViewModel(
     fun onExtraServicesChanged(value: String) {
         if (!isValidDecimalInput(value)) return
         persist { current -> current.copy(extraServices = value) }
+    }
+
+    fun onCompanyNameChanged(value: String) {
+        persist { current -> current.copy(companyName = value) }
+    }
+
+    /**
+     * Submits the customer's current prices for analysis, then lets navigation
+     * proceed regardless of the outcome.
+     *
+     * Deliberately fire-and-forget: collecting prices is a background concern and must
+     * never block, slow down or fail the broker's flow. A failed send is lost, which is
+     * an accepted trade-off while there is no offline outbox.
+     *
+     * The once-per-job guard lives in the repository, so returning here to correct a
+     * price and tapping again cannot store the same customer twice.
+     */
+    fun onNavigateToProposalsClicked() {
+        val session = consumptionSessionRepository.session.value ?: return
+        if (!consumptionSessionRepository.markCollectedPricesSubmitted(session.jobId)) return
+        if (!shouldCollectPricesUseCase(session.tariffName)) return
+
+        val collectedPrices = buildCollectedPricesUseCase(session, latestConditions.value)
+            ?: return
+
+        viewModelScope.launch {
+            submitCollectedPricesUseCase(collectedPrices)
+        }
     }
 
     fun onSupplyHolderChanged(value: String) {
@@ -108,6 +143,7 @@ class CurrentUserConditionsViewModel(
         viewModelScope.launch {
             persistCurrentUserConditionsUseCase(
                 CurrentUserConditionsModel(
+                    companyName = latestConditions.value?.companyName.orEmpty(),
                     powerTermPriceByPeriod = powerTermPriceByPeriod,
                     energyPriceByPeriod = energyPriceByPeriod,
                     extraServices = String.format(Locale.US, "%.2f", proposal.extraServices),
@@ -140,6 +176,7 @@ class CurrentUserConditionsViewModel(
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L
         val EMPTY_CONDITIONS = CurrentUserConditionsModel(
+            companyName = "",
             powerTermPriceByPeriod = emptyMap(),
             energyPriceByPeriod = emptyMap(),
             extraServices = "",
@@ -154,4 +191,6 @@ data class CurrentUserConditionsFormState(
     val powerTermRows: List<Pair<String, String>> = emptyList(),
     val energyConsumedRows: List<Pair<String, String>> = emptyList(),
     val extraServices: String = "",
+    /** The customer's current supplier, typed by the broker. */
+    val companyName: String = "",
 )

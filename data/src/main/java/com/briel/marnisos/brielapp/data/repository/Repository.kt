@@ -8,6 +8,8 @@ import com.briel.marnisos.brielapp.data.utils.ComparatorReportPdfMapper.toData
 import com.briel.marnisos.brielapp.data.utils.ConsumptionReportMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.utils.JobMapper.mapToDomain
 import com.briel.marnisos.brielapp.data.utils.UserConsumptionUtils.mapUserConsumptionResponseToDomain
+import com.briel.marnisos.brielapp.data.utils.CollectedPricesMapper.toData
+import com.briel.marnisos.brielapp.domain.models.CollectedPricesModel
 import com.briel.marnisos.brielapp.domain.models.ComparatorReportPdfModel
 import com.briel.marnisos.brielapp.domain.models.ConsumptionReportModel
 import com.briel.marnisos.brielapp.domain.models.CurrentUserConditionsModel
@@ -28,6 +30,8 @@ interface Repository {
     suspend fun getJobResult(jobId: String): Result<ConsumptionReportModel>
     suspend fun refreshConsumptionReport(jobId: String): Result<ConsumptionReportModel>
     suspend fun generateComparatorReportPdf(reportModel: ComparatorReportPdfModel): Result<ByteArray>
+
+    suspend fun submitCollectedPrices(collectedPrices: CollectedPricesModel): Result<Unit>
 
     suspend fun persistLastCompletedJobId(jobId: String)
     suspend fun getLastCompletedJobId(): String?
@@ -102,6 +106,12 @@ private class RepositoryImpl(
         return priceTableApi.refreshConsumptionReport(jobId).map { response ->
             response.mapToDomain()
         }
+    }
+
+    override suspend fun submitCollectedPrices(
+        collectedPrices: CollectedPricesModel
+    ): Result<Unit> {
+        return priceTableApi.submitCollectedPrices(collectedPrices.toData())
     }
 
     override suspend fun generateComparatorReportPdf(reportModel: ComparatorReportPdfModel): Result<ByteArray> {

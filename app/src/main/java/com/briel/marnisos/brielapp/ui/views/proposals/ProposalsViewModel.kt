@@ -9,6 +9,9 @@ import com.briel.marnisos.brielapp.domain.models.ComparatorReportPeriodValueMode
 import com.briel.marnisos.brielapp.domain.models.ComparatorReportProposalModel
 import com.briel.marnisos.brielapp.domain.models.ComparatorSummaryModel
 import com.briel.marnisos.brielapp.domain.models.ConsumptionSessionModel
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsEvent
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsFailureReason
+import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
 import com.briel.marnisos.brielapp.domain.monitoring.CrashErrorCategory
 import com.briel.marnisos.brielapp.domain.monitoring.CrashReporter
 import com.briel.marnisos.brielapp.domain.repository.ConsumptionSessionRepository
@@ -38,6 +41,7 @@ class ProposalsViewModel(
     private val generateComparatorReportPdfUseCase: GenerateComparatorReportPdfUseCase,
     private val comparatorPdfFileStore: ComparatorPdfFileStore,
     private val crashReporter: CrashReporter,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
 
     private val _isGeneratingPdf = MutableStateFlow(value = false)
@@ -47,6 +51,8 @@ class ProposalsViewModel(
 
     private val _pdfExportFailure = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val pdfExportFailure: SharedFlow<Unit> = _pdfExportFailure
+
+    private var lastTrackedProposalsJobId: String? = null
 
     val uiState: StateFlow<ProposalsUiState> = combine(
         consumptionSessionRepository.session,
@@ -79,8 +85,20 @@ class ProposalsViewModel(
                 )
             }.collect { (jobId, summary) ->
                 hideUncompetitiveProposals(jobId, summary)
+                trackProposalsGeneratedOnce(jobId, summary)
             }
         }
+    }
+
+    /**
+     * Guarded by the job id: this flow re-emits on every fixed-amount keystroke, and
+     * without the guard a single study would report dozens of generation events.
+     */
+    private fun trackProposalsGeneratedOnce(jobId: String?, summary: ComparatorSummaryModel) {
+        if (jobId == null || summary.proposals.isEmpty() || jobId == lastTrackedProposalsJobId) return
+
+        lastTrackedProposalsJobId = jobId
+        analyticsTracker.track(AnalyticsEvent.ProposalsGenerated(proposalCount = summary.proposals.size))
     }
 
     private fun hideUncompetitiveProposals(jobId: String?, summary: ComparatorSummaryModel) {
@@ -106,6 +124,9 @@ class ProposalsViewModel(
 
             val reportModel = buildComparatorReportModel()
             if (reportModel == null || reportModel.proposals.isEmpty()) {
+                analyticsTracker.track(
+                    AnalyticsEvent.ProposalPdfExportFailed(AnalyticsFailureReason.INVALID_INPUT)
+                )
                 _pdfExportFailure.tryEmit(Unit)
                 _isGeneratingPdf.value = false
                 return@launch
@@ -114,7 +135,14 @@ class ProposalsViewModel(
             generateComparatorReportPdfUseCase(reportModel)
                 .onSuccess { pdfBytes ->
                     comparatorPdfFileStore.store(pdfBytes)
-                        .onSuccess { file -> _generatedPdfFile.tryEmit(file) }
+                        .onSuccess { file ->
+                            analyticsTracker.track(
+                                AnalyticsEvent.ProposalPdfExported(
+                                    proposalCount = reportModel.proposals.size,
+                                )
+                            )
+                            _generatedPdfFile.tryEmit(file)
+                        }
                         .onFailure { error -> reportPdfFailure(error, "store_generated_pdf") }
                 }
                 .onFailure { error -> reportPdfFailure(error, "generate_comparator_pdf") }
@@ -128,6 +156,9 @@ class ProposalsViewModel(
             throwable = error,
             category = CrashErrorCategory.PDF_EXPORT,
             operation = operation,
+        )
+        analyticsTracker.track(
+            AnalyticsEvent.ProposalPdfExportFailed(AnalyticsFailureReason.UNKNOWN)
         )
         _pdfExportFailure.tryEmit(Unit)
     }

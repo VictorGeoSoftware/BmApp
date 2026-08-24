@@ -40,5 +40,17 @@ interface ConsumptionSessionRepository {
      */
     fun hideProposalsOnce(signature: String, proposalTitles: Set<String>)
 
+    /**
+     * Marks [jobId] as having had its collected prices submitted, returning `true` only
+     * the first time it is called for that id.
+     *
+     * The guard lives here rather than in a ViewModel because the broker can leave and
+     * re-enter the current-conditions screen to fix a mistyped price: that destroys the
+     * screen's ViewModel, so a ViewModel-local guard would forget and submit the same
+     * customer twice. The collected-prices table is append-only, so a duplicate cannot
+     * be corrected afterwards.
+     */
+    fun markCollectedPricesSubmitted(jobId: String): Boolean
+
     fun clear()
 }

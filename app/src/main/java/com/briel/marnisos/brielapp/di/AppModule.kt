@@ -31,6 +31,7 @@ val appModule = module {
     viewModel {
         FetchConsumptionViewModel(
             consumptionStudyRepository = get(),
+            analyticsTracker = get(),
         )
     }
 
@@ -39,6 +40,9 @@ val appModule = module {
             consumptionSessionRepository = get(),
             observeCurrentUserConditionsUseCase = get(),
             persistCurrentUserConditionsUseCase = get(),
+            shouldCollectPricesUseCase = get(),
+            buildCollectedPricesUseCase = get(),
+            submitCollectedPricesUseCase = get(),
             observeFeeFirstGateUseCase = get(),
         )
     }
@@ -52,12 +56,14 @@ val appModule = module {
             generateComparatorReportPdfUseCase = get(),
             comparatorPdfFileStore = get(),
             crashReporter = get(),
+            analyticsTracker = get(),
         )
     }
 
     viewModel {
         ConfigurationViewModel(
             consumptionSessionRepository = get(),
+            analyticsTracker = get(),
         )
     }
 
@@ -74,6 +80,7 @@ val appModule = module {
             clearLastCompletedJobIdUseCase = get(),
             logoutUseCase = get(),
             crashReporter = get(),
+            analyticsTracker = get(),
         )
     }
 }

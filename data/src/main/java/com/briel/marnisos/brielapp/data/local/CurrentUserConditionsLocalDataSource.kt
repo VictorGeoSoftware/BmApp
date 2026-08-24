@@ -19,6 +19,7 @@ class CurrentUserConditionsLocalDataSource(
             putString(KEY_POWER_TERM_PRICE_BY_PERIOD, serializeMap(currentUserConditions.powerTermPriceByPeriod))
             putString(KEY_ENERGY_PRICE_BY_PERIOD, serializeMap(currentUserConditions.energyPriceByPeriod))
             putString(KEY_EXTRA_SERVICES, currentUserConditions.extraServices)
+            putString(KEY_COMPANY_NAME, currentUserConditions.companyName)
         }
 
         currentConditionsFlow.value = currentUserConditions
@@ -29,6 +30,7 @@ class CurrentUserConditionsLocalDataSource(
             remove(KEY_POWER_TERM_PRICE_BY_PERIOD)
             remove(KEY_ENERGY_PRICE_BY_PERIOD)
             remove(KEY_EXTRA_SERVICES)
+            remove(KEY_COMPANY_NAME)
         }
 
         currentConditionsFlow.value = null
@@ -38,12 +40,16 @@ class CurrentUserConditionsLocalDataSource(
         val powerMap = deserializeMap(sharedPreferences.getString(KEY_POWER_TERM_PRICE_BY_PERIOD, null))
         val energyMap = deserializeMap(sharedPreferences.getString(KEY_ENERGY_PRICE_BY_PERIOD, null))
         val extraServices = sharedPreferences.getString(KEY_EXTRA_SERVICES, "").orEmpty()
+        val companyName = sharedPreferences.getString(KEY_COMPANY_NAME, "").orEmpty()
 
-        if (powerMap.isEmpty() && energyMap.isEmpty() && extraServices.isBlank()) {
+        if (powerMap.isEmpty() && energyMap.isEmpty() && extraServices.isBlank() &&
+            companyName.isBlank()
+        ) {
             return null
         }
 
         return CurrentUserConditionsModel(
+            companyName = companyName,
             powerTermPriceByPeriod = powerMap,
             energyPriceByPeriod = energyMap,
             extraServices = extraServices,
@@ -79,6 +85,7 @@ class CurrentUserConditionsLocalDataSource(
         private const val KEY_POWER_TERM_PRICE_BY_PERIOD = "power_term_price_by_period"
         private const val KEY_ENERGY_PRICE_BY_PERIOD = "energy_price_by_period"
         private const val KEY_EXTRA_SERVICES = "extra_services"
+        private const val KEY_COMPANY_NAME = "company_name"
         private const val ENTRY_SEPARATOR = "|"
         private const val KEY_VALUE_SEPARATOR = "="
     }

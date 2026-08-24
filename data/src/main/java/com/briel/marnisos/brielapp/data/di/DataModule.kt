@@ -24,6 +24,7 @@ import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUse
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.CalculateComparatorSummaryUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SelectUncompetitiveProposalsUseCase
+import com.briel.marnisos.brielapp.domain.usecases.BuildCollectedPricesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.EvaluateFeeFirstGateUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveFeeFirstGateUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
@@ -35,6 +36,8 @@ import com.briel.marnisos.brielapp.domain.usecases.GetLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetPriceTablesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetUserConsumptionUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ShouldCollectPricesUseCase
+import com.briel.marnisos.brielapp.domain.usecases.SubmitCollectedPricesUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithGoogleUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LogoutUseCase
@@ -112,6 +115,11 @@ val dataModule = module {
     factory<ClearCurrentUserConditionsUseCase> { ClearCurrentUserConditionsUseCase.Factory.create(get()) }
     factory<ObserveCurrentUserConditionsUseCase> { ObserveCurrentUserConditionsUseCase.Factory.create(get()) }
     factory<PersistCurrentUserConditionsUseCase> { PersistCurrentUserConditionsUseCase.Factory.create(get()) }
+
+    // Collected prices
+    factory<ShouldCollectPricesUseCase> { ShouldCollectPricesUseCase.Factory.createDomainUseCase() }
+    factory<BuildCollectedPricesUseCase> { BuildCollectedPricesUseCase.Factory.createDomainUseCase() }
+    factory<SubmitCollectedPricesUseCase> { SubmitCollectedPricesUseCase.Factory.create(get()) }
 
     // Fee-first gate
     factory<EvaluateFeeFirstGateUseCase> { EvaluateFeeFirstGateUseCase.Factory.createDomainUseCase() }
