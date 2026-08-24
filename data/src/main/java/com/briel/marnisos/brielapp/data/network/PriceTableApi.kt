@@ -37,8 +37,15 @@ class PriceTableApi(
      */
     suspend fun getPriceTableResults(): Result<PriceTableResultsResponse> {
         return try {
-            val response = client.get("$baseUrl/price-table-results")
-                .body<PriceTableResultsResponse>()
+            // Sent unauthenticated until now, which left the endpoint open on
+            // the backend. The backend enforces this behind a flag so older
+            // installs keep working until this release is widely adopted.
+            val idToken = currentFirebaseIdTokenOrNull()
+                ?: return Result.failure(IllegalStateException("No authenticated user token available"))
+
+            val response = client.get("$baseUrl/price-table-results") {
+                headers.append(HttpHeaders.Authorization, "Bearer $idToken")
+            }.body<PriceTableResultsResponse>()
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
