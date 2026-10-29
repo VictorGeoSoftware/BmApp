@@ -13,6 +13,9 @@ interface ReportAccessRepository {
     /** Re-checks the backend, at most once per minute per user (the first check is immediate). */
     suspend fun refresh()
 
+    /** Hides immediately, then re-checks the backend ignoring the throttle (backend denial). */
+    suspend fun forceRefresh()
+
     /** Resets to hidden and discards any in-flight result (logout / account switch). */
     fun clear()
 }

@@ -31,6 +31,8 @@ internal fun TopActionBar(
     onGeneratePdfClick: () -> Unit,
     onOpenDrawer: () -> Unit,
     showComprehensiveReportButton: Boolean = false,
+    isGeneratingComprehensiveReport: Boolean = false,
+    onComprehensiveReportClick: () -> Unit = {},
 ) {
     Row(
         modifier = Modifier
@@ -59,7 +61,10 @@ internal fun TopActionBar(
                 )
             }
             if (showComprehensiveReportButton) {
-                ComprehensiveReportButton()
+                ComprehensiveReportButton(
+                    isGenerating = isGeneratingComprehensiveReport,
+                    onClick = onComprehensiveReportClick,
+                )
             }
         }
     }

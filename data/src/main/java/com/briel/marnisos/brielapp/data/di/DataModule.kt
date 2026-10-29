@@ -8,6 +8,7 @@ import com.briel.marnisos.brielapp.data.network.AuthApi
 import com.briel.marnisos.brielapp.data.network.KtorClientProvider
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
 import com.briel.marnisos.brielapp.data.network.UserAccessApi
+import com.briel.marnisos.brielapp.data.network.PremiumReportApi
 import com.briel.marnisos.brielapp.data.repository.AuthRepositoryImpl
 import com.briel.marnisos.brielapp.data.repository.ConsumptionSessionRepositoryImpl
 import com.briel.marnisos.brielapp.data.repository.ConsumptionStudyRepositoryImpl
@@ -24,6 +25,8 @@ import com.briel.marnisos.brielapp.domain.repository.ConsumptionStudyRepository
 import com.briel.marnisos.brielapp.domain.repository.PriceUpdatesNotifier
 import com.briel.marnisos.brielapp.domain.repository.ReportAccessRepository
 import com.briel.marnisos.brielapp.domain.usecases.ClearReportAccessUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ForceRefreshReportAccessUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GeneratePremiumReportPdfUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveReportAccessUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshReportAccessUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
@@ -78,6 +81,7 @@ val dataModule = module {
     single { PriceTableApi(get()) }
     single { AuthApi(get()) }
     single { UserAccessApi(get()) }
+    single { PremiumReportApi(get()) }
 
     // Firebase
     single { FirebaseAuth.getInstance() }
@@ -160,6 +164,10 @@ val dataModule = module {
     factory<ObserveReportAccessUseCase> { ObserveReportAccessUseCase.Factory.create(get()) }
     factory<RefreshReportAccessUseCase> { RefreshReportAccessUseCase.Factory.create(get()) }
     factory<ClearReportAccessUseCase> { ClearReportAccessUseCase.Factory.create(get()) }
+    factory<ForceRefreshReportAccessUseCase> { ForceRefreshReportAccessUseCase.Factory.create(get()) }
+    factory<GeneratePremiumReportPdfUseCase> {
+        GeneratePremiumReportPdfUseCase.Factory.create(authRepository = get(), premiumReportApi = get())
+    }
 }
 
 const val APPLICATION_SCOPE = "applicationScope"

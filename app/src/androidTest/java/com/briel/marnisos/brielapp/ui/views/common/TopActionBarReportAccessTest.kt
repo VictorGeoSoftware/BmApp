@@ -7,7 +7,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -32,6 +31,7 @@ class TopActionBarReportAccessTest {
     private val full get() = rule.activity.getString(R.string.proposals_comprehensive_report)
     private val create get() = rule.activity.getString(R.string.proposals_create_report)
     private var printClicks = 0
+    private var fullClicks = 0
 
     private fun show(print: Boolean, comprehensive: Boolean) {
         rule.setContent {
@@ -43,6 +43,7 @@ class TopActionBarReportAccessTest {
                         onGeneratePdfClick = { printClicks++ },
                         onOpenDrawer = {},
                         showComprehensiveReportButton = comprehensive,
+                        onComprehensiveReportClick = { fullClicks++ },
                     )
                 }
             }
@@ -50,10 +51,10 @@ class TopActionBarReportAccessTest {
     }
 
     @Test
-    fun t1_premium_shows_disabled_full_report_right_of_create_report_at_360dp() {
+    fun t1_premium_shows_enabled_full_report_right_of_create_report_at_360dp() {
         show(print = true, comprehensive = true)
         val createNode = rule.onNodeWithText(create).assertIsDisplayed().assertIsEnabled()
-        val fullNode = rule.onNodeWithText(full).assertIsDisplayed().assertIsNotEnabled()
+        val fullNode = rule.onNodeWithText(full).assertIsDisplayed().assertIsEnabled()
         val createBounds = createNode.fetchSemanticsNode().boundsInRoot
         val fullBounds = fullNode.fetchSemanticsNode().boundsInRoot
         assertTrue("to the right without overlap", fullBounds.left >= createBounds.right)
@@ -71,10 +72,11 @@ class TopActionBarReportAccessTest {
     }
 
     @Test
-    fun t15_tapping_disabled_action_does_nothing() {
+    fun t15_tapping_full_report_requests_it_and_not_the_basic_report() {
+        // report-android-export enabled the action (it was disabled in report-android-capability).
         show(print = true, comprehensive = true)
         rule.onNodeWithText(full).performClick()
-        rule.onNodeWithText(full).assertIsNotEnabled()
+        assertEquals(1, fullClicks)
         assertEquals(0, printClicks)
     }
 
