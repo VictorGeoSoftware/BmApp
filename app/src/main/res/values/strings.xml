@@ -84,5 +84,17 @@
     <string name="current_user_conditions_copy_prices_action">Copy prices from a proposal</string>
     <string name="proposals_create_report">Create report</string>
     <string name="proposals_comprehensive_report">Full report</string>
+    <string name="premium_report_required">The full report requires the Premium plan.</string>
+    <string name="premium_report_study_expired">The study is unavailable or has expired. Look up the supply again.</string>
+    <string name="premium_report_study_not_ready">The study has not finished yet. Try again in a few minutes.</string>
+    <string name="premium_report_holder_missing">Enter the supply holder in Current conditions to create the full report.</string>
+    <string name="premium_report_address_missing">Enter the supply address in Current conditions to create the full report.</string>
+    <string name="premium_report_conditions_missing">Complete the current conditions before creating the full report.</string>
+    <string name="premium_report_data_mismatch">The comparison data does not match the study. Review the proposals and try again.</string>
+    <string name="premium_report_generation_failed">The full report could not be generated. Try again.</string>
+    <string name="premium_report_unavailable">The full report is not available yet.</string>
+    <string name="premium_report_retry">Retry</string>
+    <string name="premium_report_share_chooser">Share PDF</string>
+    <string name="premium_report_access_revoked">Your access to the app has been revoked. Contact your administrator.</string>
     <string name="top_bar_open_drawer_content_description">Open menu</string>
 </resources>

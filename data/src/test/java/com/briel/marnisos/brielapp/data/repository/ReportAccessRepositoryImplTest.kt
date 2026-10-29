@@ -180,4 +180,40 @@ class ReportAccessRepositoryImplTest {
         assertFalse(allowed)
         assertEquals(2, calls)
     }
+
+    @Test
+    fun `forceRefresh hides immediately and bypasses the throttle (A7 A8)`() = runTest {
+        coEvery { api.fetchAccess(any()) } returns Result.success(premium)
+        repository.refresh()
+        assertTrue(allowed)
+        val gate = CompletableDeferred<Result<String>>()
+        coEvery { api.fetchAccess(any()) } coAnswers { gate.await() }
+        now += 1_000
+        val pending = async { repository.forceRefresh() }
+        yield()
+        assertFalse(allowed, "hidden before the backend answers")
+        gate.complete(Result.success(basic))
+        pending.await()
+        assertFalse(allowed)
+        coVerify(exactly = 2) { api.fetchAccess(any()) }
+        coVerify(exactly = 0) { authRepository.logout() }
+        io.mockk.verify(exactly = 0) { authRepository.signOutLocally() }
+    }
+
+    @Test
+    fun `forceRefresh re-shows when the backend still grants the capability`() = runTest {
+        coEvery { api.fetchAccess(any()) } returns Result.success(premium)
+        repository.refresh()
+        repository.forceRefresh()
+        assertTrue(allowed)
+        coVerify(exactly = 2) { api.fetchAccess(any()) }
+    }
+
+    @Test
+    fun `forceRefresh without a user stays hidden and makes no request`() = runTest {
+        currentUid = null
+        repository.forceRefresh()
+        assertFalse(allowed)
+        coVerify(exactly = 0) { api.fetchAccess(any()) }
+    }
 }

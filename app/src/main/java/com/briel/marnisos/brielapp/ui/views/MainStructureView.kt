@@ -1,6 +1,7 @@
 package com.briel.marnisos.brielapp.ui.views
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +11,15 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -31,6 +35,7 @@ import com.briel.marnisos.brielapp.ui.navigation.BmAppNavHost
 import com.briel.marnisos.brielapp.ui.navigation.BmAppRoute
 import com.briel.marnisos.brielapp.ui.navigation.analyticsScreenName
 import com.briel.marnisos.brielapp.ui.navigation.canReach
+import com.briel.marnisos.brielapp.ui.views.common.ComprehensiveReportSnackbarEffect
 import com.briel.marnisos.brielapp.ui.views.common.TopActionBar
 import com.briel.marnisos.brielapp.ui.views.proposals.ProposalsViewModel
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfShareManager
@@ -61,6 +66,7 @@ fun MainView(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val pdfShareManager = remember { ComparatorPdfShareManager() }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = remember(currentBackStackEntry) {
@@ -99,6 +105,25 @@ fun MainView(
             pdfShareManager.sharePdf(context, generatedFile)
         }
     }
+
+    LaunchedEffect(proposalsViewModel, context, pdfShareManager) {
+        proposalsViewModel.comprehensiveReportFile.collectLatest { file ->
+            pdfShareManager.sharePdf(
+                context = context,
+                pdfFile = file,
+                subject = context.getString(R.string.proposals_comprehensive_report),
+                chooserTitle = context.getString(R.string.premium_report_share_chooser),
+            )
+        }
+    }
+
+    // Comprehensive-report outcomes: a snackbar, with Retry only where the truth table allows.
+    ComprehensiveReportSnackbarEffect(
+        message = proposalsState.comprehensiveReportMessage,
+        snackbarHostState = snackbarHostState,
+        onRetry = proposalsViewModel::retryComprehensiveReport,
+        onDismiss = proposalsViewModel::dismissComprehensiveReportMessage,
+    )
 
     LaunchedEffect(proposalsViewModel, context) {
         proposalsViewModel.pdfExportFailure.collectLatest {
@@ -151,15 +176,25 @@ fun MainView(
                 onOpenDrawer = { scope.launch { drawerState.open() } },
                 showComprehensiveReportButton = currentRoute == BmAppRoute.Proposals &&
                     proposalsState.showsComprehensiveReportAction,
+                isGeneratingComprehensiveReport = proposalsState.isGeneratingComprehensiveReport,
+                onComprehensiveReportClick = proposalsViewModel::requestComprehensiveReport,
             )
 
-            BmAppNavHost(
-                navController = navController,
-                stage = shellState.stage,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-            )
+            ) {
+                BmAppNavHost(
+                    navController = navController,
+                    stage = shellState.stage,
+                    modifier = Modifier.fillMaxSize(),
+                )
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
         }
     }
 }

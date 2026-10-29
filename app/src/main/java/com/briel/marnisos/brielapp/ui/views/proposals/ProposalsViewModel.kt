@@ -9,6 +9,8 @@ import com.briel.marnisos.brielapp.domain.models.ComparatorReportPeriodValueMode
 import com.briel.marnisos.brielapp.domain.models.ComparatorReportProposalModel
 import com.briel.marnisos.brielapp.domain.models.ComparatorSummaryModel
 import com.briel.marnisos.brielapp.domain.models.ConsumptionSessionModel
+import com.briel.marnisos.brielapp.domain.models.PremiumReportException
+import com.briel.marnisos.brielapp.domain.models.PremiumReportFailure
 import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsEvent
 import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsFailureReason
 import com.briel.marnisos.brielapp.domain.monitoring.AnalyticsTracker
@@ -16,7 +18,9 @@ import com.briel.marnisos.brielapp.domain.monitoring.CrashErrorCategory
 import com.briel.marnisos.brielapp.domain.monitoring.CrashReporter
 import com.briel.marnisos.brielapp.domain.repository.ConsumptionSessionRepository
 import com.briel.marnisos.brielapp.domain.usecases.CalculateComparatorSummaryUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ForceRefreshReportAccessUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUseCase
+import com.briel.marnisos.brielapp.domain.usecases.GeneratePremiumReportPdfUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveReportAccessUseCase
 import com.briel.marnisos.brielapp.domain.usecases.RefreshReportAccessUseCase
@@ -29,8 +33,12 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 import java.io.File
 import java.util.Locale
 import kotlin.math.round
@@ -46,6 +54,8 @@ class ProposalsViewModel(
     private val analyticsTracker: AnalyticsTracker,
     private val observeReportAccessUseCase: ObserveReportAccessUseCase,
     private val refreshReportAccessUseCase: RefreshReportAccessUseCase,
+    private val generatePremiumReportPdfUseCase: GeneratePremiumReportPdfUseCase,
+    private val forceRefreshReportAccessUseCase: ForceRefreshReportAccessUseCase,
 ) : ViewModel() {
 
     private val _isGeneratingPdf = MutableStateFlow(value = false)
@@ -57,6 +67,16 @@ class ProposalsViewModel(
     val pdfExportFailure: SharedFlow<Unit> = _pdfExportFailure
 
     private var lastTrackedProposalsJobId: String? = null
+
+    private val _isGeneratingComprehensiveReport = MutableStateFlow(value = false)
+    private val _comprehensiveReportMessage = MutableStateFlow<ComprehensiveReportMessage?>(null)
+
+    /** Stored comprehensive PDF to hand to the share sheet (sharing happens in the UI). */
+    private val _comprehensiveReportFile = MutableSharedFlow<File>(extraBufferCapacity = 1)
+    val comprehensiveReportFile: SharedFlow<File> = _comprehensiveReportFile
+
+    /** The last failed request, kept only while its message offers Retry. */
+    private var retryableComprehensiveRequest: ComprehensiveReportRequest? = null
 
     val uiState: StateFlow<ProposalsUiState> = combine(
         combine(
@@ -70,8 +90,14 @@ class ProposalsViewModel(
         buildUiState(session, summary, visibilityByTitle, fixedAmountByTitle, isGeneratingPdf)
         },
         observeReportAccessUseCase(),
-    ) { state, access ->
-        state.copy(canRequestComprehensiveReport = access.canRequestComprehensiveReport)
+        _isGeneratingComprehensiveReport,
+        _comprehensiveReportMessage,
+    ) { state, access, isGeneratingComprehensiveReport, comprehensiveReportMessage ->
+        state.copy(
+            canRequestComprehensiveReport = access.canRequestComprehensiveReport,
+            isGeneratingComprehensiveReport = isGeneratingComprehensiveReport,
+            comprehensiveReportMessage = comprehensiveReportMessage,
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
@@ -96,6 +122,17 @@ class ProposalsViewModel(
                 hideUncompetitiveProposals(jobId, summary)
                 trackProposalsGeneratedOnce(jobId, summary)
             }
+        }
+        // A different study invalidates any comprehensive-report message and pending Retry.
+        viewModelScope.launch {
+            consumptionSessionRepository.session
+                .map { session -> session?.jobId }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect {
+                    retryableComprehensiveRequest = null
+                    _comprehensiveReportMessage.value = null
+                }
         }
     }
 
@@ -164,6 +201,93 @@ class ProposalsViewModel(
             _isGeneratingPdf.value = false
         }
     }
+
+    /** "Informe completo": truth table A1–A18 of docs/specs/report-android-export.md. */
+    fun requestComprehensiveReport() {
+        if (_isGeneratingComprehensiveReport.value) return
+        val session = consumptionSessionRepository.session.value ?: return
+
+        val identityFailure = when {
+            session.supplyHolder.isMissingIdentity() -> PremiumReportFailure.HOLDER_MISSING
+            session.supplyAddress.isMissingIdentity() -> PremiumReportFailure.ADDRESS_MISSING
+            else -> null
+        }
+        if (identityFailure != null) {
+            retryableComprehensiveRequest = null
+            _comprehensiveReportMessage.value = identityFailure.toComprehensiveReportMessage()
+            return
+        }
+
+        val comparison = buildComparatorReportModel() ?: return
+        if (comparison.proposals.isEmpty()) return
+
+        sendComprehensiveReport(
+            ComprehensiveReportRequest(jobId = session.jobId, comparison = comparison, forceTokenRefresh = false)
+        )
+    }
+
+    /** Re-sends exactly the request that failed, when its message offered Retry. */
+    fun retryComprehensiveReport() {
+        if (_isGeneratingComprehensiveReport.value) return
+        if (_comprehensiveReportMessage.value?.canRetry != true) return
+        val request = retryableComprehensiveRequest ?: return
+        sendComprehensiveReport(request)
+    }
+
+    fun dismissComprehensiveReportMessage() {
+        retryableComprehensiveRequest = null
+        _comprehensiveReportMessage.value = null
+    }
+
+    private fun sendComprehensiveReport(request: ComprehensiveReportRequest) {
+        _isGeneratingComprehensiveReport.value = true
+        _comprehensiveReportMessage.value = null
+        retryableComprehensiveRequest = null
+
+        viewModelScope.launch {
+            try {
+                val result = generatePremiumReportPdfUseCase(
+                    request.jobId,
+                    request.comparison,
+                    request.forceTokenRefresh,
+                )
+                // The broker moved to another study meanwhile: drop the stale outcome.
+                if (consumptionSessionRepository.session.value?.jobId != request.jobId) return@launch
+
+                result
+                    .onSuccess { pdfBytes ->
+                        comparatorPdfFileStore.store(pdfBytes, COMPREHENSIVE_FILE_PREFIX)
+                            .onSuccess { file -> _comprehensiveReportFile.tryEmit(file) }
+                            .onFailure { onComprehensiveReportFailure(PremiumReportFailure.GENERATION_FAILED, request) }
+                    }
+                    .onFailure { error ->
+                        if (error is CancellationException) throw error
+                        val failure = (error as? PremiumReportException)?.failure
+                            ?: PremiumReportFailure.GENERATION_FAILED
+                        onComprehensiveReportFailure(failure, request)
+                    }
+            } finally {
+                _isGeneratingComprehensiveReport.value = false
+            }
+        }
+    }
+
+    private fun onComprehensiveReportFailure(failure: PremiumReportFailure, request: ComprehensiveReportRequest) {
+        val message = failure.toComprehensiveReportMessage()
+        retryableComprehensiveRequest = if (message.canRetry) {
+            // A 401 retries with a freshly fetched token.
+            request.copy(forceTokenRefresh = failure == PremiumReportFailure.UNAUTHENTICATED)
+        } else {
+            null
+        }
+        _comprehensiveReportMessage.value = message
+        if (failure == PremiumReportFailure.PREMIUM_REQUIRED || failure == PremiumReportFailure.ACCESS_REVOKED) {
+            // Backend denial: hide the action at once and re-check, never sign out.
+            viewModelScope.launch { forceRefreshReportAccessUseCase() }
+        }
+    }
+
+    private fun String.isMissingIdentity(): Boolean = isBlank() || trim() == PLACEHOLDER
 
     private fun reportPdfFailure(error: Throwable, operation: String) {
         crashReporter.recordNonFatal(
@@ -283,5 +407,6 @@ class ProposalsViewModel(
         const val PLACEHOLDER = "--"
         const val DEFAULT_AMOUNT = "0.00"
         const val CUSTOMER_COLUMN_TITLE = "CONDICIONES ACTUALES"
+        const val COMPREHENSIVE_FILE_PREFIX = "informe_completo"
     }
 }

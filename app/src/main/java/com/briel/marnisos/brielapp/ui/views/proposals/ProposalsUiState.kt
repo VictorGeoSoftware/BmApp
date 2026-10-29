@@ -22,6 +22,10 @@ data class ProposalsUiState(
     val isGeneratingPdf: Boolean = false,
     /** Backend capability only (in memory, per user); never inferred from tier or admin. */
     val canRequestComprehensiveReport: Boolean = false,
+    /** Premium request in flight; independent of the Basic [isGeneratingPdf]. */
+    val isGeneratingComprehensiveReport: Boolean = false,
+    /** Pending snackbar of the comprehensive report, if any. */
+    val comprehensiveReportMessage: ComprehensiveReportMessage? = null,
 ) {
     val hasProposals: Boolean get() = visibleProposals.isNotEmpty()
 

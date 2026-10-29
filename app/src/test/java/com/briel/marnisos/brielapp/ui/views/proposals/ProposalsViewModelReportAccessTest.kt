@@ -58,6 +58,8 @@ class ProposalsViewModelReportAccessTest {
             analyticsTracker = mockk(relaxed = true),
             observeReportAccessUseCase = ObserveReportAccessUseCase { access },
             refreshReportAccessUseCase = refresh,
+            generatePremiumReportPdfUseCase = mockk(relaxed = true),
+            forceRefreshReportAccessUseCase = mockk(relaxed = true),
         )
     }
 

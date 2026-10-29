@@ -28,7 +28,11 @@ class ReportAccessRepositoryImpl(
     private var lastCheckedAt: Long? = null
     private var requestCounter = 0L
 
-    override suspend fun refresh() {
+    override suspend fun refresh() = check(force = false)
+
+    override suspend fun forceRefresh() = check(force = true)
+
+    private suspend fun check(force: Boolean) {
         val uid = authRepository.getCurrentUser()?.uid
         if (uid == null) {
             clear()
@@ -40,9 +44,10 @@ class ReportAccessRepositoryImpl(
                 resetLocked()
                 currentUid = uid
             }
+            if (force) _access.value = ReportAccessModel()
             val now = clock()
             val last = lastCheckedAt
-            if (last != null && now - last < THROTTLE_MILLIS) return
+            if (!force && last != null && now - last < THROTTLE_MILLIS) return
             lastCheckedAt = now
             ++requestCounter
         }

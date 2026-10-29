@@ -59,6 +59,8 @@ val appModule = module {
             analyticsTracker = get(),
             observeReportAccessUseCase = get(),
             refreshReportAccessUseCase = get(),
+            generatePremiumReportPdfUseCase = get(),
+            forceRefreshReportAccessUseCase = get(),
         )
     }
 
