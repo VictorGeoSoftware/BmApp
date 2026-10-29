@@ -7,10 +7,12 @@ import com.briel.marnisos.brielapp.data.local.LastCompletedJobIdLocalDataSource
 import com.briel.marnisos.brielapp.data.network.AuthApi
 import com.briel.marnisos.brielapp.data.network.KtorClientProvider
 import com.briel.marnisos.brielapp.data.network.PriceTableApi
+import com.briel.marnisos.brielapp.data.network.UserAccessApi
 import com.briel.marnisos.brielapp.data.repository.AuthRepositoryImpl
 import com.briel.marnisos.brielapp.data.repository.ConsumptionSessionRepositoryImpl
 import com.briel.marnisos.brielapp.data.repository.ConsumptionStudyRepositoryImpl
 import com.briel.marnisos.brielapp.data.repository.PriceUpdatesNotifierImpl
+import com.briel.marnisos.brielapp.data.repository.ReportAccessRepositoryImpl
 import com.briel.marnisos.brielapp.data.repository.Repository
 import com.briel.marnisos.brielapp.data.repository.buildRepository
 import com.briel.marnisos.brielapp.data.usecases.create
@@ -20,6 +22,10 @@ import com.briel.marnisos.brielapp.domain.repository.AuthRepository
 import com.briel.marnisos.brielapp.domain.repository.ConsumptionSessionRepository
 import com.briel.marnisos.brielapp.domain.repository.ConsumptionStudyRepository
 import com.briel.marnisos.brielapp.domain.repository.PriceUpdatesNotifier
+import com.briel.marnisos.brielapp.domain.repository.ReportAccessRepository
+import com.briel.marnisos.brielapp.domain.usecases.ClearReportAccessUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ObserveReportAccessUseCase
+import com.briel.marnisos.brielapp.domain.usecases.RefreshReportAccessUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.CalculateComparatorSummaryUseCase
@@ -71,6 +77,7 @@ val dataModule = module {
     // Provide API implementation
     single { PriceTableApi(get()) }
     single { AuthApi(get()) }
+    single { UserAccessApi(get()) }
 
     // Firebase
     single { FirebaseAuth.getInstance() }
@@ -85,6 +92,9 @@ val dataModule = module {
     single<AuthRepository> { AuthRepositoryImpl(firebaseAuth = get(), authApi = get()) }
     single<ConsumptionSessionRepository> { ConsumptionSessionRepositoryImpl() }
     single<PriceUpdatesNotifier> { PriceUpdatesNotifierImpl() }
+    single<ReportAccessRepository> {
+        ReportAccessRepositoryImpl(authRepository = get(), userAccessApi = get())
+    }
     single<ConsumptionStudyRepository> {
         ConsumptionStudyRepositoryImpl(
             repository = get(),
@@ -143,8 +153,13 @@ val dataModule = module {
     factory<GetFirebaseIdTokenUseCase> { GetFirebaseIdTokenUseCase.Factory.create(get()) }
     factory<GetDeviceIdUseCase> { GetDeviceIdUseCase.Factory.create(get()) }
     factory<SyncAuthenticatedUserDataUseCase> { SyncAuthenticatedUserDataUseCase.Factory.create(get()) }
-    factory<LogoutUseCase> { LogoutUseCase.Factory.create(get()) }
-    factory<SignOutLocallyUseCase> { SignOutLocallyUseCase.Factory.create(get()) }
+    factory<LogoutUseCase> { LogoutUseCase.Factory.create(get(), get()) }
+    factory<SignOutLocallyUseCase> { SignOutLocallyUseCase.Factory.create(get(), get()) }
+
+    // Comprehensive-report access (capability from /me/access)
+    factory<ObserveReportAccessUseCase> { ObserveReportAccessUseCase.Factory.create(get()) }
+    factory<RefreshReportAccessUseCase> { RefreshReportAccessUseCase.Factory.create(get()) }
+    factory<ClearReportAccessUseCase> { ClearReportAccessUseCase.Factory.create(get()) }
 }
 
 const val APPLICATION_SCOPE = "applicationScope"
