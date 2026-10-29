@@ -57,6 +57,8 @@ val appModule = module {
             comparatorPdfFileStore = get(),
             crashReporter = get(),
             analyticsTracker = get(),
+            observeReportAccessUseCase = get(),
+            refreshReportAccessUseCase = get(),
         )
     }
 

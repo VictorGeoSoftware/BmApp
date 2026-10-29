@@ -30,6 +30,7 @@ internal fun TopActionBar(
     showPrintButton: Boolean,
     onGeneratePdfClick: () -> Unit,
     onOpenDrawer: () -> Unit,
+    showComprehensiveReportButton: Boolean = false,
 ) {
     Row(
         modifier = Modifier
@@ -57,6 +58,9 @@ internal fun TopActionBar(
                     onGeneratePdfClick = onGeneratePdfClick,
                 )
             }
+            if (showComprehensiveReportButton) {
+                ComprehensiveReportButton()
+            }
         }
     }
 }
@@ -70,6 +74,20 @@ private fun TopActionBarProposalsPreview() {
             showPrintButton = true,
             onGeneratePdfClick = {},
             onOpenDrawer = {},
+        )
+    }
+}
+
+@Preview(name = "Top bar - proposals, Premium", showBackground = true, widthDp = 360)
+@Composable
+private fun TopActionBarPremiumPreview() {
+    BrielAppTheme(darkTheme = false) {
+        TopActionBar(
+            isGeneratingPdf = false,
+            showPrintButton = true,
+            onGeneratePdfClick = {},
+            onOpenDrawer = {},
+            showComprehensiveReportButton = true,
         )
     }
 }

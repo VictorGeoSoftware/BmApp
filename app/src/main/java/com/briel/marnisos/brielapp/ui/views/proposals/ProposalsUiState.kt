@@ -20,6 +20,12 @@ data class ProposalsUiState(
     val bestProposalTitle: String? = null,
     val bestProposalAnnualSaving: String? = null,
     val isGeneratingPdf: Boolean = false,
+    /** Backend capability only (in memory, per user); never inferred from tier or admin. */
+    val canRequestComprehensiveReport: Boolean = false,
 ) {
     val hasProposals: Boolean get() = visibleProposals.isNotEmpty()
+
+    /** Same visibility condition as "Crear informe", plus the capability. */
+    val showsComprehensiveReportAction: Boolean
+        get() = hasProposals && canRequestComprehensiveReport
 }

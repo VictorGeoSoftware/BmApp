@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
@@ -82,6 +83,17 @@ fun MainView(
         analyticsTracker.trackScreen(currentRoute.analyticsScreenName)
     }
 
+    // Comprehensive-report access: on first composition, on entering Proposals and on
+    // every return to the foreground. The repository throttles to once a minute per user.
+    LaunchedEffect(proposalsViewModel) { proposalsViewModel.onAccessCheckTrigger() }
+    LaunchedEffect(proposalsViewModel, currentRoute == BmAppRoute.Proposals) {
+        if (currentRoute == BmAppRoute.Proposals) proposalsViewModel.onAccessCheckTrigger()
+    }
+    LifecycleStartEffect(proposalsViewModel) {
+        proposalsViewModel.onAccessCheckTrigger()
+        onStopOrDispose { }
+    }
+
     LaunchedEffect(proposalsViewModel, context, pdfShareManager) {
         proposalsViewModel.generatedPdfFile.collectLatest { generatedFile ->
             pdfShareManager.sharePdf(context, generatedFile)
@@ -137,6 +149,8 @@ fun MainView(
                 showPrintButton = currentRoute == BmAppRoute.Proposals && proposalsState.hasProposals,
                 onGeneratePdfClick = proposalsViewModel::exportVisibleProposalsAsPdf,
                 onOpenDrawer = { scope.launch { drawerState.open() } },
+                showComprehensiveReportButton = currentRoute == BmAppRoute.Proposals &&
+                    proposalsState.showsComprehensiveReportAction,
             )
 
             BmAppNavHost(

@@ -18,6 +18,8 @@ import com.briel.marnisos.brielapp.domain.repository.ConsumptionSessionRepositor
 import com.briel.marnisos.brielapp.domain.usecases.CalculateComparatorSummaryUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GenerateComparatorReportPdfUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ObserveCurrentUserConditionsUseCase
+import com.briel.marnisos.brielapp.domain.usecases.ObserveReportAccessUseCase
+import com.briel.marnisos.brielapp.domain.usecases.RefreshReportAccessUseCase
 import com.briel.marnisos.brielapp.domain.usecases.SelectUncompetitiveProposalsUseCase
 import com.briel.marnisos.brielapp.ui.views.comparator.customerconditions.CustomerConditionsUiState
 import com.briel.marnisos.brielapp.ui.views.pricetable.export.ComparatorPdfFileStore
@@ -42,6 +44,8 @@ class ProposalsViewModel(
     private val comparatorPdfFileStore: ComparatorPdfFileStore,
     private val crashReporter: CrashReporter,
     private val analyticsTracker: AnalyticsTracker,
+    private val observeReportAccessUseCase: ObserveReportAccessUseCase,
+    private val refreshReportAccessUseCase: RefreshReportAccessUseCase,
 ) : ViewModel() {
 
     private val _isGeneratingPdf = MutableStateFlow(value = false)
@@ -55,6 +59,7 @@ class ProposalsViewModel(
     private var lastTrackedProposalsJobId: String? = null
 
     val uiState: StateFlow<ProposalsUiState> = combine(
+        combine(
         consumptionSessionRepository.session,
         observeCurrentUserConditionsUseCase(),
         consumptionSessionRepository.proposalVisibilityByTitle,
@@ -63,6 +68,10 @@ class ProposalsViewModel(
     ) { session, conditions, visibilityByTitle, fixedAmountByTitle, isGeneratingPdf ->
         val summary = calculateComparatorSummaryUseCase(session, conditions, fixedAmountByTitle)
         buildUiState(session, summary, visibilityByTitle, fixedAmountByTitle, isGeneratingPdf)
+        },
+        observeReportAccessUseCase(),
+    ) { state, access ->
+        state.copy(canRequestComprehensiveReport = access.canRequestComprehensiveReport)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
@@ -108,6 +117,11 @@ class ProposalsViewModel(
             signature = "$jobId@${summary.customerTotalAnnualPrice}",
             proposalTitles = selectUncompetitiveProposalsUseCase(summary),
         )
+    }
+
+    /** Shell trigger (first composition, entering Proposals, ON_START); throttled in the repository. */
+    fun onAccessCheckTrigger() {
+        viewModelScope.launch { refreshReportAccessUseCase() }
     }
 
     fun onProposalFixedAmountChanged(proposalTitle: String, fixedAmountInput: String) {
