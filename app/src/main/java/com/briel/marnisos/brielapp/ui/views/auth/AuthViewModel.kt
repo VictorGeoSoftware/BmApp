@@ -11,7 +11,6 @@ import com.briel.marnisos.brielapp.domain.error.AccessDeniedException
 import com.briel.marnisos.brielapp.domain.usecases.ClearCurrentUserConditionsUseCase
 import com.briel.marnisos.brielapp.domain.usecases.ClearLastCompletedJobIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetCurrentAuthUserUseCase
-import com.briel.marnisos.brielapp.domain.usecases.GetDeviceIdUseCase
 import com.briel.marnisos.brielapp.domain.usecases.GetFirebaseIdTokenUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithEmailUseCase
 import com.briel.marnisos.brielapp.domain.usecases.LoginWithGoogleUseCase
@@ -29,7 +28,6 @@ class AuthViewModel(
     private val loginWithGoogleUseCase: LoginWithGoogleUseCase,
     private val getCurrentAuthUserUseCase: GetCurrentAuthUserUseCase,
     private val getFirebaseIdTokenUseCase: GetFirebaseIdTokenUseCase,
-    private val getDeviceIdUseCase: GetDeviceIdUseCase,
     private val syncAuthenticatedUserDataUseCase: SyncAuthenticatedUserDataUseCase,
     private val setUserOfflineUseCase: SetUserOfflineUseCase,
     private val clearCurrentUserConditionsUseCase: ClearCurrentUserConditionsUseCase,
@@ -103,8 +101,7 @@ class AuthViewModel(
                 return@launch
             }
 
-            val userWithDevice = user.copy(phoneUuid = getDeviceIdUseCase())
-            syncAuthenticatedUserDataUseCase(idToken = token, userData = userWithDevice)
+            syncAuthenticatedUserDataUseCase(idToken = token, userData = user)
                 .onSuccess {
                     analyticsTracker.track(AnalyticsEvent.LoginSucceeded)
                     _uiState.update { current ->
@@ -157,8 +154,7 @@ class AuthViewModel(
                 return@launch
             }
 
-            val userWithDevice = user.copy(phoneUuid = getDeviceIdUseCase())
-            syncAuthenticatedUserDataUseCase(idToken = token, userData = userWithDevice)
+            syncAuthenticatedUserDataUseCase(idToken = token, userData = user)
                 .onSuccess {
                     analyticsTracker.track(AnalyticsEvent.LoginSucceeded)
                     _uiState.update { current ->
