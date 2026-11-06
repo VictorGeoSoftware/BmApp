@@ -5,6 +5,5 @@ data class AuthUserModel(
     val email: String?,
     val displayName: String?,
     val photoUrl: String?,
-    val providerIds: List<String>,
-    val phoneUuid: String? = null
+    val providerIds: List<String>
 )

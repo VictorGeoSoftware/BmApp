@@ -8,6 +8,5 @@ data class UserDataPayloadDto(
     val email: String?,
     val displayName: String?,
     val photoURL: String?,
-    val providerIds: List<String>,
-    val phoneUuid: String? = null
+    val providerIds: List<String>
 )
