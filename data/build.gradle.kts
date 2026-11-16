@@ -27,11 +27,11 @@ android {
         }
         create("dev") {
             dimension = "environment"
-            buildConfigField("String", "API_BASE_URL", "\"http://217.154.181.175:9081/api/v1\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.qa.poweredbyadvisors.com/api/v1\"")
         }
         create("prod") {
             dimension = "environment"
-            buildConfigField("String", "API_BASE_URL", "\"http://217.154.181.175:8081/api/v1\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.poweredbyadvisors.com/api/v1\"")
         }
     }
 

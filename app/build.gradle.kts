@@ -69,14 +69,18 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".local"
             versionNameSuffix = "-local"
+            // Plain HTTP only to the adb-reversed local backend.
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
         }
         create("dev") {
             dimension = "environment"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
         }
         create("prod") {
             dimension = "environment"
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
         }
     }
 
